@@ -14,16 +14,16 @@ div {
 
 /* heading */
 h1 {
+    font-family: 'Futura', Arial, sans-serif;
     font-size: 24px;
     margin-bottom: 20px;
-    font-family: 'Futura', sans-serif;
 }
 
 /* labels */
 .label {
+    font-family: 'Futura', Arial, sans-serif;
     font-size: 14px;
     margin-bottom: 5px;
-    font-family: 'Futura', sans-serif;
 }
 
 /* input fields */
@@ -34,14 +34,14 @@ input {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 14px;
-    font-family: 'Futura', sans-serif;
+    font-family: 'Futura', Arial, sans-serif;
 }
 
 /* phone number input */
 .phone-label {
+    font-family: 'Futura', Arial, sans-serif;
     font-size: 14px;
     margin-bottom: 5px;
-    font-family: 'Futura', sans-serif;
 }
 
 .phone-input {
@@ -50,7 +50,7 @@ input {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 14px;
-    font-family: 'Futura', sans-serif;
+    font-family: 'Futura', Arial, sans-serif;
 }
 
 /* checkbox */
@@ -60,31 +60,32 @@ input[type="checkbox"] {
 
 /* account status: public or private */
 div label {
+    font-family: 'Futura', Arial, sans-serif;
     font-size: 14px;
     margin-bottom: 5px;
     display: block;
-    font-family: 'Futura', sans-serif;
 }
 
 div span {
+    font-family: 'Futura', Arial, sans-serif;
     font-size: 14px;
     margin-bottom: 15px;
     display: block;
-    font-family: 'Futura', sans-serif;
 }
 
 /* Style for the Save button */
 button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #db151c;
-    color: #fff;
+    background-color: #2a342a3d;
+    color: black;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-family: 'Futura', sans-serif;
+    font-family: 'Futura', Arial, sans-serif;
 }
 
 button:hover {
-    background-color: #e60f0f;
+    background-color: #1f62d6;
+    color: white;
 }
