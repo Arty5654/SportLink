@@ -1,0 +1,111 @@
+h1 {
+    font-family: 'Futura', Arial, sans-serif;
+}
+
+/* form styles */
+form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 100%;
+    align-content: center;
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+.fields {
+
+    display: flex;
+    justify-content: center;
+
+    padding-top: 10px;
+    min-height: 2em;
+    width: 100%;
+
+
+}
+
+/* Style for labels */
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-family: 'Futura', Arial, sans-serif;
+}
+
+input {
+
+    display: flex;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 90%;
+    align-content: center;
+
+}
+
+
+
+/* button styles */
+button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 70px;
+
+    background-color: #2a342a3d;
+    color: black;
+
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+
+    cursor: pointer;
+    font-family: 'Futura', Arial, sans-serif;
+}
+
+button:hover {
+    background-color: #1f62d6;
+    color: white;
+}
+
+/* error styles */
+.error {
+    color: red;
+}
+
+/* miscellaneous text styles */
+
+.title {
+    font-size: 3em;
+    text-align: center;
+    margin-bottom: 7.5%;
+}
+
+.p1 {
+    color: #00AFFF;
+}
+
+.p2 {
+    color: #00CC66;
+}
+
+.pageType {
+    font-size: 1.55em;
+    text-align: center;
+}
+
+
+/* media queries for responsiveness */
+
+
+
+
+
+
+
+

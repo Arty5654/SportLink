@@ -28,9 +28,9 @@ export default function SignIn() {
     const [error, setError] = useState('');
 
     const handleInput = (e) => {
-        const { field, val } = e.target;
+        const { name, val } = e.target;
 
-        setAccData((prev) => ( { ...prev, [field]: val } ));
+        setAccData((prev) => ( { ...prev, [name]: val } ));
     }
 
     
@@ -41,49 +41,59 @@ export default function SignIn() {
     return (
 
         <div>
-            <h1>Create Account</h1>
 
-            <form onSubmit={handleSubmit}>
+            <h1 className="title" >
+                <span className="p1">Sport</span>
+                <span className="p2">Link</span>
+            </h1>
 
 
-            <div>
-                <label className='email'>Email:</label>
-                <input            
-                type="email"
-                id="email"
-                name="email"
-                value={accData.email}
-                onChange={handleInput}
-                required 
-                />
+            <h1 className="pageType">Create Account</h1>
+
+
+            <div className='fields'>
+                <form onSubmit={handleSubmit}>
+            
+                <div>
+                    <label className='email'>Email:</label>
+                    <input            
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={accData.email}
+                    onChange={handleInput}
+                    required 
+                    />
+                </div>
+
+                <div>
+                    <label className='password'>Password:</label>
+                    <input            
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={accData.password}
+                    onChange={handleInput}
+                    required 
+                    />
+                </div>
+
+                <div>
+                    <label className='password'>Verify Password:</label>
+                    <input            
+                    type="password"
+                    id="verifyPassword"
+                    name="verifyPassword"
+                    value={accData.verifyPassword}
+                    onChange={handleInput}
+                    required 
+                    />
+                </div>
+
+                <button clasName="subbutton" type="submit">Create Account</button>
+                </form>
             </div>
-
-            <div>
-                <label className='password'>Password:</label>
-                <input            
-                type="password"
-                id="password"
-                name="password"
-                value={accData.password}
-                onChange={handleInput}
-                required 
-                />
-            </div>
-
-            <div>
-                <label className='password'>Verify Password:</label>
-                <input            
-                type="password"
-                id="verifyPassword"
-                name="verifyPassword"
-                value={accData.verifyPassword}
-                onChange={handleInput}
-                required 
-                />
-            </div>
-
-            </form>
-
+      
         </div>
 
     );
