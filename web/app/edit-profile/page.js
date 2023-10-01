@@ -64,7 +64,7 @@ export default function EditProfile() {
       type="tel"
       id="phoneNumber"
       name="phoneNumber"
-      value={profileData.phoneNumber}
+      value={profileData.handlePhoneNumberChange}
       onChange={handlePhoneNumberChange}
       maxLength={10}
       required
