@@ -10,8 +10,8 @@ const Nav = () => {
 
       <p>Events</p>
     </div>
-    <div className="flex gap-2">
-      <p>SportLink</p>
+    <div className="flex gap text-3xl">
+      <p className="text-green-500">Sport</p><p className="text-blue-500">Link</p>
     </div>
     <div className="flex gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
