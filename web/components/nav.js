@@ -10,7 +10,7 @@ const Nav = () => {
 
       <p>Events</p>
     </div>
-    <div className="flex gap text-3xl">
+    <div className="flex gap text-3xl font-semibold">
       <p className="text-green-500">Sport</p><p className="text-blue-500">Link</p>
     </div>
     <div className="flex gap-2">
