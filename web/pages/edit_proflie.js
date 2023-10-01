@@ -16,6 +16,7 @@ export default function EditProfile() {
     const [profileData, setProfileData] = useState( {
         phoneNumber: '',
         displayPhoneNumber: false,
+        isAccountPublic: true,
     });
 
     const handlePhoneNumberChange = (e) => {
@@ -39,16 +40,22 @@ export default function EditProfile() {
         }));
     }
 
+    //account status: public/private
+    const toggleAccountStatus = () => {
+        setProfileData((prev) => ({
+            ...prev,
+            isAccountPublic: !prev.isAccountPublic,
+        }));
+    };
+
 
     const handleSaveProfile = () => {
         //TODO: update user info in backend
-        //test
     }
 
     return (
         <div>
             <h1>Edit Profile</h1>
-
             <div>
                 <label className='phone'>Phone Number:</label>
                 <input
@@ -61,7 +68,6 @@ export default function EditProfile() {
                     required
                 />
             </div>
-
             <div>
                 <label>
                     Display Phone Number to Friends:
@@ -74,7 +80,11 @@ export default function EditProfile() {
                     />
                 </label>
             </div>
-
+            <div>
+                <label>Account Status:</label>
+                <span>{profileData.isAccountPublic ? 'Public' : 'Private'}</span>
+                <button onClick={toggleAccountStatus}>Toggle Account Status</button>
+            </div>
             <button onClick={handleSaveProfile}>Save Profile</button>
         </div>
     );
