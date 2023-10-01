@@ -3,6 +3,25 @@ info:
   title: 'Event and Team API'
   version: '1.0'
 paths:
+  /join_event:
+    get:
+      operationId: server.join_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                user_list:
+                  type: string
+                location:
+                  type: string
+      responses:
+        '201':
+          description: Request nearby teams
   /get_teams:
     get:
       operationId: server.get_teams
@@ -16,7 +35,7 @@ paths:
         '201':
           description: Request nearby teams
   /join_team:
-    get:
+    post:
       operationId: server.join_team
       requestBody:
         required: true
@@ -72,7 +91,7 @@ paths:
 
   /new_team:
     post:
-      operationId: server.create__team
+      operationId: server.create_team
       requestBody:
         required: true
         content:
@@ -94,3 +113,5 @@ paths:
       responses:
         '201':
           description: Successfully created or joined a team
+
+

@@ -29,7 +29,23 @@ def get_events(location):
 
     return jsonify(events)
 
+def join_event(body):
+    event_name = body.get('event_name')
+    user_list = body.get('user_list')
+    location = body.get('location')
 
+    event_ids = r.lrange(f'location:{location}:events', 0, -1)
+
+    for event_id in event_ids:
+        event_data = r.hgetall(f'event:{event_id.decode()}')
+        if event_data.get(b'event_name') == event_name.encode():
+            # If the event is found, add the user to the 'users' field of the event hash
+            current_users = event_data.get(b'users').decode().split(',')
+            current_users.append(user_list)
+            r.hset(f'event:{event_id.decode()}', 'users', ','.join(current_users))
+            return "User joined event successfully!", 200
+
+    return "Event not found!", 404
 
 def create_team(team):
     team_id = r.incr('team_id')  # Generating a new team id
@@ -84,7 +100,7 @@ def join_team(body):
 
 
 app = connexion.App(__name__, specification_dir='.')
-app.add_api('openapi.yaml')
+app.add_api('swagger.yaml')
 
 if __name__ == '__main__':
     app.run(port=8080)
