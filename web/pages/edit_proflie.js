@@ -42,6 +42,7 @@ export default function EditProfile() {
 
     const handleSaveProfile = () => {
         //TODO: update user info in backend
+        //test
     }
 
     return (
