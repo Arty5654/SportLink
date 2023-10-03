@@ -10,6 +10,7 @@ This will serve as the sign up and log in page for SportLink
 
 import React,{ useState } from 'react';
 import SignUpForm from './SignUpForm';
+import LogInForm from './LogInForm';
 
 export default function SignIn() {
 
@@ -23,7 +24,7 @@ export default function SignIn() {
 
         <div>
 
-            <h1 className="text-6xl text-center mb-12" >
+            <h1 className="text-6xl text-center mb-12 font-bold" >
                 <span className="text-blue-500">Sport</span>
                 <span className="text-green-500">Link</span>
             </h1>
@@ -48,7 +49,7 @@ export default function SignIn() {
 
 
             <div className='flex justify-center p-t-2.5 min-h-[2em] w-full'>
-                {login ? /* LogInForm (TODO) */ <div></div> : <SignUpForm />}
+                {login ? <LogInForm /> : <SignUpForm />}
             </div>
       
         </div>
