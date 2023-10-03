@@ -21,6 +21,11 @@ export default function SignUpForm() {
         verifyPassword: '',
     });
 
+    // types of error: general, email, password
+    const [error, setError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -31,6 +36,48 @@ export default function SignUpForm() {
         3. store email, password in a user object and send to the DB
         4. clear all fields, navigate to (profile) page 
         */
+
+        checkPassword(accData.password);
+
+    }
+
+    // use a regex to verify the complexity of a password
+    const checkPassword = (password) => {
+
+        // length check
+        if (password.length < 8) {
+            setPasswordError("Password must be at least 8 characters!");
+            return false;
+        }
+
+        /*use regexes to look in the string for each type of character */
+
+        var regex = /[a-z]/;
+
+        if (!regex.test(password)) {
+            setPasswordError("Password must contain a lowercase letter!");
+            return false;
+        }
+
+        regex = /[A-Z]/;
+        if (!regex.test(password)) {
+            setPasswordError("Password must contain an uppercase letter!");
+            return false;
+        }
+
+        regex = /\d/;
+        if (!regex.test(password)) {
+            setPasswordError("Password must contain a digit!");
+            return false;
+        }
+
+        if (password !== accData.verifyPassword) {
+            setPasswordError("Passwords do not match!");
+            return false;
+        }
+
+        setPasswordError('');
+        return true;
 
     }
 
@@ -45,7 +92,7 @@ export default function SignUpForm() {
         });
     }
 
-    const [error, setError] = useState('');
+
 
     const [readyToSubmit, setReadyToSubmit] = useState(false);
 
@@ -79,6 +126,7 @@ export default function SignUpForm() {
                     className="w-full bg-gray-100 rounded p-2 border border-gray-300 focus:outline-blue-500"
                     required 
                 />
+                {passwordError && <p className="text-red-500">{passwordError}</p>}
             </div>
 
             <div className="mb-2.5">
@@ -92,6 +140,7 @@ export default function SignUpForm() {
                     className="w-full bg-gray-100 rounded p-2 border border-gray-300 focus:outline-blue-500"
                     required 
                 />
+                
             </div>
 
             <div className="mb-16 mt-8">
