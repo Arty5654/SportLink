@@ -19,6 +19,9 @@ export default function SignUpForm() {
         email: '',
         password: '',
         verifyPassword: '',
+
+        // set username to first part of email
+        username: '',
     });
 
     // types of error: general, email, password
@@ -37,8 +40,40 @@ export default function SignUpForm() {
         4. clear all fields, navigate to (profile) page 
         */
 
-        checkPassword(accData.password);
+        if (error) {
+            return;
+        }
 
+        // TODO query db
+
+        // validate email, sets errors within the function
+        if (!checkEmail(accData.email)) {
+            return;
+        }
+
+        // compare email against db
+
+        // this handles password/verifyPassword
+        // also will display errors if they are present in those fields
+        if (!checkPassword(accData.password)) {          
+            return;
+        }
+
+        //store new email and password in a user object in the db
+
+    }
+
+    const checkEmail = (email) => {
+
+        /* regex for email validation cited from w3resource.com form validation page */
+        const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+        if (!regex.test(email)) {
+            setEmailError("Please use a valid email!");
+            return false;
+        }
+
+        return true;
     }
 
     // use a regex to verify the complexity of a password
@@ -99,7 +134,7 @@ export default function SignUpForm() {
 
     return (
 
-        <form onSubmit={handleSubmit} className="bg-white p-5 rounded shadow-lg max-w-lg w-full mx-auto">
+        <form onSubmit={handleSubmit} className="bg-white p-5 rounded shadow-lg shadow-black max-w-lg w-full mx-auto">
             
             <div className="mb-2.5">
                 <label for="email" className='block mb-1.5 text-gray-800 text-left'>Email:</label>
@@ -112,6 +147,7 @@ export default function SignUpForm() {
                     className="w-full bg-gray-100 rounded p-2 border border-gray-300 focus:outline-blue-500"
                     required 
                 />
+                {emailError && <p className="text-red-500">{emailError}</p>}
             </div>
 
             <div className="mb-2.5">
