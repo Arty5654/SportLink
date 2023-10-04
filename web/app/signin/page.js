@@ -16,8 +16,6 @@ export default function SignIn() {
 
     const [login, setLogin] = useState(false);
     
-    // creating only for making an account first, 
-    //then updating functionality for logging in 
 
     // jsx code to return
     return (
