@@ -11,6 +11,7 @@ Abstracted for more readibility on the code of Sign In page
 import React from 'react';
 import  { useState } from 'react';
 import User from '../User';
+import axios from 'axios';
 
 
 export default function SignUpForm() {
@@ -24,13 +25,18 @@ export default function SignUpForm() {
         username: '',
     });
 
+    
+
     // types of error: general, email, password
     const [error, setError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    const handleSubmit = (e) => {
+
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        
 
         /* 
         Things to do when submission received:
@@ -59,7 +65,36 @@ export default function SignUpForm() {
             return;
         }
 
-        //store new email and password in a user object in the db
+        // generate username with first portion of email if unique
+        // TODO query db for uses, then send back a unique username if same username found
+        // do this on backend
+        const username = accData.email.split('@')[0]; 
+        
+
+        // set the user object in sessionStorage so it persists for the user
+        const newUser = new User(accData.email, accData.password, username);
+
+        // store user in database with unique username, then return final username as sign of success
+        try {
+            //const r = await axios.post('/register', newUser);
+
+            // the response will contain the new user with email, username, password as an object
+            //const user = new User(r.data);
+            //sessionStorage.setItem('user', JSON.stringify(user));
+
+
+            // navigate to new page assuming user has been created
+            window.location.href = '/profile';
+
+        } catch (error) {
+            setError("Error with account creation! Please retry")
+            return;
+        }
+
+
+
+
+
 
     }
 
