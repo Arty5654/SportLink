@@ -39,24 +39,13 @@ export default function LogInForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        /* 
-        Things to do when submission received:
-        1. check if all fields are valid
-        2. if invalid, display errors and cancel submit
-        3. query db for the email, and if it exists then the corresponding password
-        4. grab the correct user object from the db
-        5. clear all fields, navigate to home page 
-        */
 
         if (!checkEmail(accData.email)) {
             return;
         }
 
-
-        // send request to backend
         /* backend will then check for the correct email, password match,
-            and if valid send back the correct user object */
-
+        and if valid send back the correct user object */
 
         try {
             /*
@@ -68,12 +57,13 @@ export default function LogInForm() {
 
             //TODO save returned data in session storage
 
+
+            // redirect to profile on success
             window.location.href = '/profile';
 
-
-
         } catch (error) {
-
+            setError("Error in Logging in. Please retry");
+            return;
         }
         
 

@@ -36,38 +36,22 @@ export default function SignUpForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-
-        /* 
-        Things to do when submission received:
-        1. check if all fields are valid
-        2. if invalid, display errors and cancel submit
-        3. store email, password in a user object and send to the DB
-        4. clear all fields, navigate to (profile) page 
-        */
 
         if (error) {
             return;
         }
-
-        // TODO query db
 
         // validate email, sets errors within the function
         if (!checkEmail(accData.email)) {
             return;
         }
 
-        // compare email against db
-
         // this handles password/verifyPassword
-        // also will display errors if they are present in those fields
         if (!checkPassword(accData.password)) {          
             return;
         }
 
-        // generate username with first portion of email if unique
-        // TODO query db for uses, then send back a unique username if same username found
-        // do this on backend
+        // generate username with first portion of email
         const username = accData.email.split('@')[0]; 
         
 

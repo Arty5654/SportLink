@@ -15,7 +15,6 @@ import LogInForm from './LogInForm';
 export default function SignIn() {
 
     const [login, setLogin] = useState(false);
-    
 
     // jsx code to return
     return (
