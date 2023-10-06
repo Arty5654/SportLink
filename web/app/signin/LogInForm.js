@@ -36,7 +36,7 @@ export default function LogInForm() {
         return true;
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         /* 
@@ -53,10 +53,32 @@ export default function LogInForm() {
         }
 
 
-        //TODO Database Query
+        // send request to backend
+        /* backend will then check for the correct email, password match,
+            and if valid send back the correct user object */
+
+
+        try {
+            /*
+            const r = await axios.post('/login', {
+                email: email,
+                password: password,
+            }); 
+            */
+
+            //TODO save returned data in session storage
+
+            window.location.href = '/profile';
+
+
+
+        } catch (error) {
+
+        }
+        
 
         // if database query returns null, no email found
-        if (!dbData.dbEmail) {
+ /*       if (!dbData.dbEmail) {
             setError("No account with this email exists!");
             return;
         }
@@ -64,7 +86,9 @@ export default function LogInForm() {
         if (accData.password !== dbData.dbPassword) {
             setError("Incorrect Password!");
             return;
-        }
+        } */
+
+        // navigate to homepage on login
 
 
     }
