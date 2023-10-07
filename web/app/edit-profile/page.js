@@ -19,19 +19,22 @@ export default function EditProfile() {
         phoneNumber: '',
         displayPhoneNumber: false,
         isAccountPublic: true,
+        currentUsername: '',
+        newUsername: '',
     });
 
     const handlePhoneNumberChange = (e) => {
-        const phoneNumber = e.target.value;
+        //remove non numbers
+        let phoneNumber = e.target.value.replace(/\D/g, '');
+        //dashes every 3
+        phoneNumber = phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
 
-        //check if its 10 digits
-        if (/^\d{10}$/.test(phoneNumber)) {
-            setProfileData(prev => ({
-                ...prev,
-                phoneNumber
-            }));
-        }
-    }
+        setProfileData((prev) => ({
+          ...prev,
+          phoneNumber,
+
+        }));
+      };
 
     const handleDisplayPhoneNumberChange = (e) => {
         const displayPhoneNumber = e.target.checked;
@@ -50,23 +53,37 @@ export default function EditProfile() {
         }));
     };
 
+    const handleUsernameChange = (e) => {
+      setProfileData({
+        ...profileData,
+        newUsername: e.target.value,
+      });
+    };
 
     const handleSaveProfile = () => {
+        if (profileData.newUsername.toLowerCase() == profileData.currentUsername.toLowerCase()) {
+          alert("This is your current username");
+          return;
+        }
         //TODO: update user info in backend
+    }
+
+    const handlePasswordChange = () => {
+      //TODO: send an email to change password
     }
 
     return (
     <div className="w-full text-left max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-lg bg-white">
-        <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
+        <h1 className="text-2xl font-semibold mb-4 text-green-500">Edit Profile</h1>
         <div className="mb-4">
         <label className="text-blue-500 block">Phone Number:</label>
     <input
       type="tel"
       id="phoneNumber"
       name="phoneNumber"
-      value={profileData.handlePhoneNumberChange}
+      value={profileData.phoneNumber}
       onChange={handlePhoneNumberChange}
-      maxLength={10}
+      maxLength={12}
       required
       className="w-full p-2 border rounded"
     />
@@ -93,6 +110,17 @@ export default function EditProfile() {
     >
       Toggle Account Status
     </button>
+    </div>
+    <div className="mb-4">
+      <label className="text-blue-500 block">Change Username:</label>
+      <input
+        type="text"
+        id="newUsername"
+        name="newUsername"
+        value={profileData.newUsername}
+        onChange={handleUsernameChange}
+        className="w-full p-2 border rounded"
+      />
   </div>
   <button
     onClick={handleSaveProfile}
