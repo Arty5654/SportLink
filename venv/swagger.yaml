@@ -3,6 +3,7 @@ info:
   title: 'Event and Team API'
   version: '1.0'
 paths:
+
   /join_event:
     get:
       operationId: server.join_event
