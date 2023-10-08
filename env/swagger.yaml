@@ -1,0 +1,116 @@
+openapi: '3.0.2'
+info:
+  title: 'Event and Team API'
+  version: '1.0'
+paths:
+
+  /join_event:
+    get:
+      operationId: server.join_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                user_list:
+                  type: string
+                location:
+                  type: string
+      responses:
+        '201':
+          description: Request nearby teams
+  /get_teams:
+    get:
+      operationId: server.get_teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '201':
+          description: Request nearby teams
+  /join_team:
+    post:
+      operationId: server.join_team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                team:
+                  type: string
+                user_id:
+                  type: string
+                location:
+                  type: string
+      responses:
+        '201':
+          description: Request nearby teams
+  /get_events:
+    get:
+      operationId: server.get_events
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '201':
+          description: Request Nearby Events
+
+  /new_event:
+    post:
+      operationId: server.create_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items: string
+                sport:
+                  type: string
+                max_users:
+                  type: integer
+                location:
+                  type: string
+      responses:
+        '201':
+          description: Event created successfully
+
+  /new_team:
+    post:
+      operationId: server.create_team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  items: string
+                team_name:
+                  type: string
+                location:
+                  type: string
+                sport:
+                  type: string
+                max_users:
+                  type: integer
+      responses:
+        '201':
+          description: Successfully created or joined a team
