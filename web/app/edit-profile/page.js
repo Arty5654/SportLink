@@ -134,9 +134,12 @@ export default function EditProfile() {
         className="w-full p-2 border rounded"
       />
   </div>
-  <div className="mb-4">
+  <div className="flex flex-row justify-between mb-4">
     <button onClick={handleInstagram} className="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-700">
     Connect with Instagram
+    </button>
+    <button onClick={handlePasswordChange} className="ml-2 py-1 px-4 rounded bg-blue-500 text-white hover:bg-blue-700">
+    Change Password
     </button>
   </div>
   <button
