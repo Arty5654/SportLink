@@ -1,11 +1,15 @@
 import connexion
-import redis
+#import redis
 from flask import Flask, jsonify, request
+import random
 
 # Connect to redis instance
-r = redis.Redis(host='localhost', port=6379, db=0)
+#r = redis.Redis(host='localhost', port=6379, db=0)
+
+
 # Create Server
 app = Flask(__name__)
+
 def create_event(event):
     event_id = r.incr('event_id')
     location = event['location']
@@ -96,6 +100,21 @@ def join_team(body):
 
 
     return "Server Error", 404
+
+
+def create_user(user):
+
+    email = user['email']
+    password = user['password'] #TODO encrypt password (bcrypt??)
+    username = user['username']
+
+    # check if username is unique, if no, update it with 3 or 4 random digits
+    # code to update: tempUname = username + str(random.randint(100, 9999))
+
+    # insert new user into the db
+
+    # return complete username for frontend use and success
+    return {'username': username}, 201
 
 
 app = connexion.App(__name__, specification_dir='.')

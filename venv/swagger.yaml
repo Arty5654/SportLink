@@ -1,8 +1,31 @@
 openapi: '3.0.2'
 info:
-  title: 'Event and Team API'
+  title: 'Sportlink API'
   version: '1.0'
+
+
 paths:
+
+  # account creation endpoint
+  /create_account:
+    post:
+      operationId: server.create_account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                email:
+                  type: string
+                password: 
+                  type: string
+                username:
+                  type: string
+    responses:
+      '201':
+        description: User created successfully
 
   /join_event:
     get:

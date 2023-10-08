@@ -31,6 +31,7 @@ export default function SignUpForm() {
     const [error, setError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [username, setUsername] = useState('');
 
 
 
@@ -52,7 +53,7 @@ export default function SignUpForm() {
         }
 
         // generate username with first portion of email
-        const username = accData.email.split('@')[0]; 
+        setUsername(accData.email.split('@')[0]); 
         
 
         // set the user object in sessionStorage so it persists for the user
@@ -60,27 +61,29 @@ export default function SignUpForm() {
 
         // store user in database with unique username, then return final username as sign of success
         try {
-            //const r = await axios.post('/register', newUser);
+            const r = await axios.post('http://localhost:5000/create_account', newUser);
 
-            // the response will contain the new user with email, username, password as an object
-            //const user = new User(r.data);
-            //sessionStorage.setItem('user', JSON.stringify(user));
+            //update username if changed by backend
 
+            if (r.status == 201) {
+                console.log("request successfully responded")
+                setUsername(r.data.username);
 
-            // navigate to new page assuming user has been created
-            window.location.href = '/profile';
+                // the response will contain the new user with email, username, password as an object
+                const user = new User(accData.email, accData.password, username);
+                sessionStorage.setItem('user', JSON.stringify(user));
+
+                // navigate to new page assuming user has been created
+                window.location.href = '/profile';
+
+            } 
 
         } catch (error) {
-            setError("Error with account creation! Please retry")
+            setError("Account creation error. Please retry")
             return;
         }
 
-
-
-
-
-
-    }
+    };
 
     const checkEmail = (email) => {
 
@@ -93,7 +96,7 @@ export default function SignUpForm() {
         }
 
         return true;
-    }
+    };
 
     // use a regex to verify the complexity of a password
     const checkPassword = (password) => {
@@ -133,7 +136,7 @@ export default function SignUpForm() {
         setPasswordError('');
         return true;
 
-    }
+    };
 
     const handleInput = (e) => {
         const { name, value } = e.target;
@@ -144,7 +147,7 @@ export default function SignUpForm() {
             setReadyToSubmit(newData.email && newData.password && newData.verifyPassword);
             return newData;
         });
-    }
+    };
 
 
 
@@ -156,7 +159,7 @@ export default function SignUpForm() {
         <form onSubmit={handleSubmit} className="bg-white p-5 rounded shadow-lg shadow-black max-w-lg w-full mx-auto">
             
             <div className="mb-2.5">
-                <label for="email" className='block mb-1.5 text-gray-800 text-left'>Email:</label>
+                <label className='block mb-1.5 text-gray-800 text-left'>Email:</label>
                 <input            
                     type="email"
                     id="email"
@@ -170,7 +173,7 @@ export default function SignUpForm() {
             </div>
 
             <div className="mb-2.5">
-                <label for="password" className='block text-gray-800 text-left'>Password:</label>
+                <label className='block text-gray-800 text-left'>Password:</label>
                 <p className="text-sm text-gray-400 text-left">(8+ Characters, must have uppercase, lowercase, and a number)</p>
                 <input            
                     type="password"
@@ -185,7 +188,7 @@ export default function SignUpForm() {
             </div>
 
             <div className="mb-2.5">
-                <label for="verifyPassword" className='block mb-1.5 text-gray-800 text-left'>Verify Password:</label>
+                <label className='block mb-1.5 text-gray-800 text-left'>Verify Password:</label>
                 <input            
                     type="password"
                     id="verifyPassword"
