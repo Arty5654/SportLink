@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "axios": "^1.5.1",
+    "bcrypt": "^5.1.1",
     "build": "^0.1.4",
+    "mongodb": "^6.1.0",
+    "mongoose": "^7.6.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
