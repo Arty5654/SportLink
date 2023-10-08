@@ -60,6 +60,18 @@ export default function EditProfile() {
       });
     };
 
+    const handleInstagram = () => {
+      const appId = '677121907689569';
+      const redirectURI = encodeURIComponent('https://SportLink.com/');
+      const scope = 'user_profile,user_media';
+      const responseType = 'code';
+
+      //insta auth url
+      const instaAuthURL = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectURI}&scope=${scope}&response_type=${responseType}`;
+      //redirect user to insta auth url
+      window.location.href = instaAuthURL;
+    }
+
     const handleSaveProfile = () => {
         if (profileData.newUsername.toLowerCase() == profileData.currentUsername.toLowerCase()) {
           alert("This is your current username");
@@ -121,6 +133,11 @@ export default function EditProfile() {
         onChange={handleUsernameChange}
         className="w-full p-2 border rounded"
       />
+  </div>
+  <div className="mb-4">
+    <button onClick={handleInstagram} className="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-700">
+    Connect with Instagram
+    </button>
   </div>
   <button
     onClick={handleSaveProfile}
