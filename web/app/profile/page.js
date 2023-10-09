@@ -1,21 +1,16 @@
 import React from "react";
+import Sidebar from "@components/profileSidebar";
 
 const ProfilePage = () => {
   return (
     <div className="w-full flex">
       {/* ITEM: SideBar */}
-      <div className="w-1/4 text-left">
-        <div className="flex flex-col gap-4">
-          <p>My Info</p>
-          <p>Edit Profile</p>
-          <p>Notification Settings</p>
-          <p>Password & Security</p>
-          <p>Settings</p>
-        </div>
+      <div className="w-1/4">
+        <Sidebar />
       </div>
 
       {/* ITEM: Main Info*/}
-      <div className="w-3/4 text-left pl-16 border-l border-gray-300">
+      <div className="w-3/4 text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
         {/* ITEM: General Info*/}
         <div className="pb-8">
           <h1 className="font-base text-3xl">Profile Name</h1>
