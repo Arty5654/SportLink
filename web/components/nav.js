@@ -1,7 +1,17 @@
-import React from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const Nav = () => {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    setUser(JSON.parse(sessionStorage.getItem("user")));
+    console.log(user);
+  }, []);
+
   return (
     <nav className="w-full bg-white text-black h-12 border-b border-grey-500 flex items-center justify-between py-8 mb-24">
       <div className="flex gap-2">
