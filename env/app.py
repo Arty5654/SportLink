@@ -1,10 +1,10 @@
 from flask import Flask, jsonify, request
+from flask_mail import Mail, Message
 from pymongo import MongoClient
 import connexion
 import random
 import bcrypt
-
-#app = Flask(__name__)
+from flask_cors import CORS
 
 
 MONGO_URI="mongodb+srv://group21:turkstra@sportlinkcluster.tjcbtxj.mongodb.net/?retryWrites=true&w=majority"
@@ -13,7 +13,10 @@ MONGO_URI="mongodb+srv://group21:turkstra@sportlinkcluster.tjcbtxj.mongodb.net/?
 client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
-from flask_cors import CORS
+
+#sendgrid api key and templates
+sg_api_key = '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'
+sg_account_creation = 'd-d891d8025d3f4274a58238ba46c26294'
 
 
 def create_account():
@@ -43,13 +46,34 @@ def create_account():
     }
     users.insert_one(userData)
 
+
+    # send confirmation email
+    msg = Message('Account Created', recipients=[email])
+    msg.html = '<p>Welcome to SportLink! Your account has successfully been created.\n\nLove,\nAlex, Ani, Arty, Allen, Yash</p>'
+    mail.send(msg)
+
     # return complete username for frontend use and success
     return jsonify({'username': username}), 201
+
+
+
+
 
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
+
+flask_app = app.app
+
+#email sending information
+flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
+flask_app.config['MAIL_PORT'] = 587
+flask_app.config['MAIL_USE_TLS'] = True
+flask_app.config['MAIL_USERNAME'] = 'apikey'
+flask_app.config['MAIL_PASSWORD'] = sg_api_key
+flask_app.config['MAIL_DEFAULT_SENDER'] = 'sportlinkemail@gmail.com'
+mail = Mail(flask_app)
 
 
 if __name__ == '__main__':
