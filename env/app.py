@@ -59,9 +59,10 @@ def create_account():
 
 def update_user_profile():
     user = request.json
-    phone_number = user.get('phoneNumber')
+    email = user['email']
+    phone_number = user['phoneNumber']
     # udpate the user's phone number in the data base
-    users.update_one({"user", user}, {"$set": {"phoneNumber": phone_number}})
+    users.update_one({"email", email}, {"$set": {"phoneNumber": phone_number}})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
 

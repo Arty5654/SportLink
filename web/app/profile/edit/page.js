@@ -119,7 +119,7 @@ export default function EditProfile() {
     //TODO: update user info in backend
     const currentUser = JSON.parse(sessionStorage.getItem('user'));
     const updatedUserData = {
-      user: currentUser,
+      email: currentUser.email,
       phoneNumber: profileData.phoneNumber,
     };
 

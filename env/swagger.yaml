@@ -42,15 +42,8 @@ paths:
             schema:
               type: object
               properties:
-                user:
-                  type: object
-                  properties:
-                    email:
-                      type: string
-                    password:
-                      type: string
-                    username:
-                      type: string
+                email:
+                  type: string
                 phoneNumber:
                   type: string
       responses:
