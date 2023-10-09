@@ -117,13 +117,13 @@ export default function EditProfile() {
     }
     */
     //TODO: update user info in backend
-    const currentUserUserEmail = 'email'; //SOMEHOW GET USERS EMAIL
+    const currentUser = JSON.parse(sessionStorage.getItem('user'));
     const updatedUserData = {
-      email: currentUserUserEmail,
+      user: currentUser,
       phoneNumber: profileData.phoneNumber,
     };
 
-    axios.post('http://localhost:5000/profile/edit', updatedUserData)
+    axios.post('http://localhost:5000/update_profile', updatedUserData)
       .then(response => {
         console.log('Profile updated successfully:', response.data);
       })
@@ -296,7 +296,7 @@ export default function EditProfile() {
             <div className="pb-6 flex justify-center">
               <button
               onClick={handleSaveProfile}
-              className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-black-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+              className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-white outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 bg-blue-500 resize-none"
               >
                 Save Profile
               </button>
