@@ -19,7 +19,24 @@ export default function EditProfile() {
     isAccountPublic: true,
     currentUsername: "",
     newUsername: "",
+    state: "",
+    country: "",
+    zipCode: "",
+    address: "",
+    first: "",
+    last: "",
   });
+
+  const countires = ["", "Prefer not to answer", "United States of America"];
+  const states = [
+    "", "Prefer not to answer", "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+    "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+    "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina",
+    "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+    "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+  ];
+  
 
   const handlePhoneNumberChange = (e) => {
     //remove non numbers
@@ -33,28 +50,42 @@ export default function EditProfile() {
     }));
   };
 
-  const handleDisplayPhoneNumberChange = (e) => {
-    const displayPhoneNumber = e.target.checked;
-
-    setProfileData((prev) => ({
-      ...prev,
-      displayPhoneNumber,
-    }));
-  };
-
-  //account status: public/private
-  const toggleAccountStatus = () => {
-    setProfileData((prev) => ({
-      ...prev,
-      isAccountPublic: !prev.isAccountPublic,
-    }));
-  };
-
   const handleUsernameChange = (e) => {
     setProfileData({
       ...profileData,
       newUsername: e.target.value,
     });
+  };
+
+  const handleStateChange = (e) => {
+    setProfileData({
+      ...profileData,
+      state: e.target.value,
+    });
+  };
+
+  const handleCountryChange = (e) => {
+    setProfileData({
+      ...profileData,
+      country: e.target.value,
+    });
+  };
+
+  const handleAddressChange = (e) => {
+    setProfileData({
+      ...profileData,
+      address: e.target.value,
+    });
+  };
+
+  const handleZipCode = (e) => {
+    //remove non numbers
+    let zipCode = e.target.value.replace(/\D/g, "");
+    
+    setProfileData((prev) => ({
+      ...prev,
+      phoneNumber,
+    }));
   };
 
   const handleInstagram = () => {
@@ -123,7 +154,14 @@ export default function EditProfile() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Username</p>
-                  <textarea className="w-full rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <input
+                  type="text"
+                  id="newUsername"
+                  name="newUsername"
+                  value={profileData.newUsername}
+                  onChange={handleUsernameChange}
+                  className="w-full rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  />
                 </div>
               </div>
             </div>
@@ -143,8 +181,20 @@ export default function EditProfile() {
 
             {/* ITEM: Phone Number  */}
             <div className="pb-6">
-              <p className="font-semibold text-sm">Phone Number</p>
-              <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+              <label htmlFor="phoneNumber" className="font-semibold text-sm">
+                Phone Number
+              </label>
+              <br />
+              <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={profileData.phoneNumber}
+              onChange={handlePhoneNumberChange}
+              maxLength={12}
+              required
+              className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+              />
             </div>
 
             {/* ITEM: Address */}
@@ -152,7 +202,17 @@ export default function EditProfile() {
               <div className="flex gap-8 pb-6">
                 <div>
                   <p className="font-semibold text-sm">Country</p>
-                  <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <select
+                    value={profileData.country}
+                    onChange={handleCountryChange}
+                    className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  >
+                    {countires.map((country, index) => (
+                      <option key={index} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <p className="font-semibold text-sm">State</p>
@@ -174,6 +234,14 @@ export default function EditProfile() {
                   <textarea className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
                 </div>
               </div>
+            </div>
+            <div className="pb-6 flex justify-center">
+              <button
+              onClick={handleSaveProfile}
+              className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-black-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+              >
+                Save Profile
+              </button>
             </div>
           </form>
         </div>
