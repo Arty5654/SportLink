@@ -57,6 +57,14 @@ def create_account():
     # return complete username for frontend use and success
     return jsonify({'username': username}), 201
 
+def update_user_profile():
+    user = request.json
+    phone_number = user.get('phoneNumber')
+    # udpate the user's phone number in the data base
+    users.update_one({"user", user}, {"$set": {"phoneNumber": phone_number}})
+    return jsonify({'message': 'Profile updated successfully'}), 200
+
+
 
 
 

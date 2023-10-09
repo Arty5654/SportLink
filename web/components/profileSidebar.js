@@ -26,7 +26,15 @@ const profileSidebar = ({ active }) => {
           </p>
         </Link>
         <p>Notification Settings</p>
-        <p>Privacy</p>
+        <Link href="/profile/privacy">
+          <p
+            className={`cursor-pointer ${
+              active === "privacy" ? "border-l-4 border-blue-500 pl-1" : ""
+            } ` }
+            >
+              Privacy
+              </p>
+        </Link>
         <p>Password & Security</p>
         <p>Settings</p>
       </div>
