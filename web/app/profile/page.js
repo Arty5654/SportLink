@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import Sidebar from "@components/profileSidebar";
 
 const ProfilePage = () => {
@@ -6,7 +8,7 @@ const ProfilePage = () => {
     <div className="w-full flex">
       {/* ITEM: SideBar */}
       <div className="w-1/4">
-        <Sidebar />
+        <Sidebar active="info" />
       </div>
 
       {/* ITEM: Main Info*/}

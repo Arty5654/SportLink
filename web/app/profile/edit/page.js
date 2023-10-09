@@ -84,7 +84,7 @@ export default function EditProfile() {
   return (
     <div className="w-full flex pb-64">
       <div className="w-1/4">
-        <Sidebar />
+        <Sidebar active="edit" />
       </div>
       <div className="w-3/4 text-left ">
         {/* ITEM: Account */}
