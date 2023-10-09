@@ -23,13 +23,14 @@ sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
 
 def create_account():
     user = request.json
-    email = user['email']
 
+    email = user['email']
     if users.find_one({"email": email}):
         return jsonify({'message': 'Email already has an account'}), 401
 
     password = user['password'].encode('utf-8')
-    username = user['username']
+    username = email.split('@')[0]
+    tempUsername = username
 
     #encrypt password
     salt = bcrypt.gensalt()
@@ -38,7 +39,7 @@ def create_account():
     #generate a unique username for the user
     #user['username] so the digits don't keep adding to end on multiple iterations
     while users.find_one({'username': username}):
-        username = user['username'] + str(random.randint(100, 9999))
+        username = tempUsername + str(random.randint(100, 9999))
 
     # insert new user into the db
     userData = {
@@ -47,7 +48,6 @@ def create_account():
         'username': username
     }
     users.insert_one(userData)
-
 
     # send confirmation email
     msg = Message('Account Created', recipients=[email])
@@ -69,12 +69,15 @@ app.add_api('swagger.yaml')
 flask_app = app.app
 
 #email sending information
+key = os.getenv("SG_API_KEY")
+sender = os.getenv("MAIL_SENDER")
+
 flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 flask_app.config['MAIL_PORT'] = 587
 flask_app.config['MAIL_USE_TLS'] = True
 flask_app.config['MAIL_USERNAME'] = 'apikey'
-flask_app.config['MAIL_PASSWORD'] = os.getenv('SG_API_KEY')
-flask_app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_SENDER')
+flask_app.config['MAIL_PASSWORD'] = key
+flask_app.config['MAIL_DEFAULT_SENDER'] = sender
 mail = Mail(flask_app)
 
 

@@ -54,13 +54,10 @@ export default function SignUpForm() {
         }
 
         console.log("here");
-
-        // generate username with first portion of email
-        setUsername(accData.email.split('@')[0]); 
         
 
         // set the user object in sessionStorage so it persists for the user
-        const newUser = new User(accData.email, accData.password, username);
+        const newUser = new User(accData.email, accData.password);
 
         // store user in database with unique username, then return final username as sign of success
         try {
