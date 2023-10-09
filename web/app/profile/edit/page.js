@@ -25,6 +25,7 @@ export default function EditProfile() {
     address: "",
     first: "",
     last: "",
+    city: "",
   });
 
   const countires = ["", "Prefer not to answer", "United States of America"];
@@ -78,13 +79,20 @@ export default function EditProfile() {
     });
   };
 
+  const handleCityChange = (e) => {
+    setProfileData({
+      ...profileData,
+      city: e.target.value,
+    });
+  };
+
   const handleZipCode = (e) => {
     //remove non numbers
     let zipCode = e.target.value.replace(/\D/g, "");
     
     setProfileData((prev) => ({
       ...prev,
-      phoneNumber,
+      zipCode,
     }));
   };
 
@@ -216,22 +224,56 @@ export default function EditProfile() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">State</p>
-                  <textarea className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <select
+                    value={profileData.state}
+                    onChange={handleStateChange}
+                    className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  >
+                    {states.map((state, index) => (
+                      <option key={index} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="flex flex-col pb-6">
                 <p className="font-semibold text-sm">Address</p>
-                <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none mb-1" />
-                <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                <input
+                 type="text"
+                 id="address"
+                 name="address"
+                 value={profileData.address}
+                 onChange={handleAddressChange}
+                 className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none mb-1"
+                 />
               </div>
               <div className="flex gap-8">
                 <div>
                   <p className="font-semibold text-sm">City</p>
-                  <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={profileData.city}
+                    onChange={handleCityChange}
+                    className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                    />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Zipcode</p>
-                  <textarea className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <label htmlFor="zipCode" className="font-semibold text-sm">
+                    Zip Code
+                  </label>
+                  <br />
+                  <input
+                    type="zip"
+                    id="zipCode"
+                    name="ZipCode"
+                    value={profileData.zipCode}
+                    onChange={handleZipCode}
+                    maxLength={5}
+                    className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                    />
                 </div>
               </div>
             </div>
@@ -251,74 +293,5 @@ export default function EditProfile() {
 }
 
 {
-  /* <div className="w-full text-left max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-lg bg-white">
-<h1 className="text-2xl font-semibold mb-4 text-green-500">Edit Profile</h1>
-<div className="mb-4">
-  <label className="text-blue-500 block">Phone Number:</label>
-  <input
-    type="tel"
-    id="phoneNumber"
-    name="phoneNumber"
-    value={profileData.phoneNumber}
-    onChange={handlePhoneNumberChange}
-    maxLength={12}
-    required
-    className="w-full p-2 border rounded"
-  />
-</div>
-<div className="mb-4">
-  <label className="block">
-    Display Phone Number to Friends:
-    <input
-      type="checkbox"
-      id="displayPhoneNumber"
-      name="displayPhoneNumber"
-      checked={profileData.displayPhoneNumber}
-      onChange={handleDisplayPhoneNumberChange}
-      className="ml-2"
-    />
-  </label>
-</div>
-<div className="mb-4">
-  <label className="block">Account Status:</label>
-  <span>{profileData.isAccountPublic ? "Public" : "Private"}</span>
-  <button
-    onClick={toggleAccountStatus}
-    className="ml-2 py-1 px-4 rounded bg-blue-500 text-white hover:bg-blue-700"
-  >
-    Toggle Account Status
-  </button>
-</div>
-<div className="mb-4">
-  <label className="text-blue-500 block">Change Username:</label>
-  <input
-    type="text"
-    id="newUsername"
-    name="newUsername"
-    value={profileData.newUsername}
-    onChange={handleUsernameChange}
-    className="w-full p-2 border rounded"
-  />
-</div>
-<div className="flex flex-row justify-between mb-4">
-  <button
-    onClick={handleInstagram}
-    className="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-700"
-  >
-    Connect with Instagram
-  </button>
-  <button
-    onClick={handlePasswordChange}
-    className="ml-2 py-1 px-4 rounded bg-blue-500 text-white hover:bg-blue-700"
-  >
-    Change Password
-  </button>
-</div>
-<button
-  onClick={handleSaveProfile}
-  className="block w-full py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
->
-  Save Profile
-</button>
-</div> */
+  
 }
