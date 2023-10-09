@@ -34,3 +34,27 @@ paths:
                     type: string
         '401':
           description: Email already has an account!
+  /update_profile:
+    post:
+      operationId: app.update_user_profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                phoneNumber:
+                  type: string
+      responses:
+        '200':
+        description: Profile updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
