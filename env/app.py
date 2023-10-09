@@ -38,7 +38,7 @@ def create_account():
 
     #generate a unique username for the user
     #user['username] so the digits don't keep adding to end on multiple iterations
-    while users.find_one({username: username}):
+    while users.find_one({'username': username}):
         username = user['username'] + str(random.randint(100, 9999))
 
     # insert new user into the db
