@@ -1,16 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
+import { UserContext } from "@app/UserContext";
 
 const Nav = () => {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
-    setUser(JSON.parse(sessionStorage.getItem("user")));
-    console.log(user);
-  }, []);
+
+    const userUpdate = () => {
+      setUser(JSON.parse(sessionStorage.getItem('user')));
+      console.log("updated");
+    }
+
+    window.addEventListener('sessionStorage', userUpdate);
+
+  }, [user, setUser]);
 
   return (
     <nav className="w-full bg-white text-black h-12 border-b border-grey-500 flex items-center justify-between py-8 mb-24">

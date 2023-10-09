@@ -9,9 +9,10 @@ Abstracted for more readibility on the code of Sign In page
 
 "use client"
 import React from 'react';
-import  { useState } from 'react';
+import  { useState, useContext } from 'react';
 import User from '../User';
 import axios from 'axios';
+import { UserContext } from "@app/UserContext";
 
 
 export default function SignUpForm() {
@@ -33,6 +34,7 @@ export default function SignUpForm() {
     const [passwordError, setPasswordError] = useState('');
     const [username, setUsername] = useState('');
     const [status, setStatus] = useState('');
+    const { user, setUser } = useContext(UserContext);
 
 
 
@@ -52,8 +54,6 @@ export default function SignUpForm() {
         if (!checkPassword(accData.password)) {          
             return;
         }
-
-        console.log("here");
         
 
         // set the user object in sessionStorage so it persists for the user
@@ -70,8 +70,10 @@ export default function SignUpForm() {
                 setUsername(r.data.username);
 
                 // the response will contain the new user with email, username, password as an object
-                const user = new User(accData.email, accData.password, username);
-                sessionStorage.setItem('user', JSON.stringify(user));
+                const newUser = new User(accData.email, accData.password, username);
+                sessionStorage.setItem('user', JSON.stringify(newUser));
+
+                setUser(JSON.parse(sessionStorage.getItem('user')));
 
                 // navigate to new page assuming user has been created
                 window.location.href = '/profile';
