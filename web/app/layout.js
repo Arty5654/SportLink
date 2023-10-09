@@ -11,9 +11,9 @@ const RootLayout = ({ children }) => {
   return (
     <html lang="en">
       <body>
-        <div className="main">
+        <div className="app">
           <Nav />
-          <main className="app">{children}</main>
+          <main className="w-full">{children}</main>
         </div>
       </body>
     </html>
