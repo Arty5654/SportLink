@@ -7,6 +7,7 @@ This will serve as the location where users can edit their profile settings
 
 "use client";
 
+import axios from 'axios';
 import { useState } from "react";
 import Sidebar from "@components/profileSidebar";
 import "@styles/global.css";
@@ -109,11 +110,26 @@ export default function EditProfile() {
   };
 
   const handleSaveProfile = () => {
+    /*
     if (profileData.newUsername.toLowerCase() == profileData.currentUsername.toLowerCase()) {
       alert("This is your current username");
       return;
     }
+    */
     //TODO: update user info in backend
+    const currentUserUserEmail = 'email'; //SOMEHOW GET USERS EMAIL
+    const updatedUserData = {
+      email: currentUserUserEmail,
+      phoneNumber: profileData.phoneNumber,
+    };
+
+    axios.post('http://localhost:5000/profile/edit', updatedUserData)
+      .then(response => {
+        console.log('Profile updated successfully:', response.data);
+      })
+      .catch(error => {
+        console.error('Error updating profile', error);
+      });
   };
 
   const handlePasswordChange = () => {
