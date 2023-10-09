@@ -32,6 +32,7 @@ export default function SignUpForm() {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [username, setUsername] = useState('');
+    const [status, setStatus] = useState('');
 
 
 
@@ -52,6 +53,8 @@ export default function SignUpForm() {
             return;
         }
 
+        console.log("here");
+
         // generate username with first portion of email
         setUsername(accData.email.split('@')[0]); 
         
@@ -61,12 +64,12 @@ export default function SignUpForm() {
 
         // store user in database with unique username, then return final username as sign of success
         try {
+
+            console.log("post request sent");
             const r = await axios.post('http://localhost:5000/create_account', newUser);
 
-            //update username if changed by backend
-
             if (r.status == 201) {
-                console.log("request successfully responded")
+                console.log("request successfully responded");
                 setUsername(r.data.username);
 
                 // the response will contain the new user with email, username, password as an object
@@ -76,10 +79,17 @@ export default function SignUpForm() {
                 // navigate to new page assuming user has been created
                 window.location.href = '/profile';
 
-            } 
+            }
 
         } catch (error) {
-            setError("Account creation error. Please retry")
+
+            console.log("error caught");
+
+            if (error.response && error.response.status == 401) {
+                setEmailError("Email already registered!");
+            } else {
+                setError("Error creating account!");
+            }           
             return;
         }
 
