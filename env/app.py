@@ -17,8 +17,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 
-#sendgrid api key and templates
-sg_api_key = os.getenv('SG_API_KEY')
+#sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
 
 
@@ -74,8 +73,8 @@ flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 flask_app.config['MAIL_PORT'] = 587
 flask_app.config['MAIL_USE_TLS'] = True
 flask_app.config['MAIL_USERNAME'] = 'apikey'
-flask_app.config['MAIL_PASSWORD'] = sg_api_key
-flask_app.config['MAIL_DEFAULT_SENDER'] = 'sportlinkemail@gmail.com'
+flask_app.config['MAIL_PASSWORD'] = os.getenv('SG_API_KEY')
+flask_app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_SENDER')
 mail = Mail(flask_app)
 
 
