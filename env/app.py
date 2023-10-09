@@ -5,18 +5,21 @@ import connexion
 import random
 import bcrypt
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
 
-
-MONGO_URI="mongodb+srv://group21:turkstra@sportlinkcluster.tjcbtxj.mongodb.net/?retryWrites=true&w=majority"
+load_dotenv()
 
 # Connect to MongoDB
+MONGO_URI = os.getenv('MONGO_URI')
 client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 
 #sendgrid api key and templates
-sg_api_key = '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'
-sg_account_creation = 'd-d891d8025d3f4274a58238ba46c26294'
+sg_api_key = os.getenv('SG_API_KEY')
+sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
+
 
 
 def create_account():
