@@ -10,27 +10,27 @@ import os
 
 load_dotenv()
 
+
 # Connect to MongoDB
 MONGO_URI = os.getenv('MONGO_URI')
 client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 
-#sendgrid api key and templates
-sg_api_key = os.getenv('SG_API_KEY')
+#sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
-
 
 
 def create_account():
     user = request.json
-    email = user['email']
 
+    email = user['email']
     if users.find_one({"email": email}):
         return jsonify({'message': 'Email already has an account'}), 401
 
     password = user['password'].encode('utf-8')
-    username = user['username']
+    username = email.split('@')[0]
+    tempUsername = username
 
     #encrypt password
     salt = bcrypt.gensalt()
@@ -38,8 +38,8 @@ def create_account():
 
     #generate a unique username for the user
     #user['username] so the digits don't keep adding to end on multiple iterations
-    while users.find_one({username: username}):
-        username = user['username'] + str(random.randint(100, 9999))
+    while users.find_one({'username': username}):
+        username = tempUsername + str(random.randint(100, 9999))
 
     # insert new user into the db
     userData = {
@@ -48,7 +48,6 @@ def create_account():
         'username': username
     }
     users.insert_one(userData)
-
 
     # send confirmation email
     msg = Message('Account Created', recipients=[email])
@@ -70,6 +69,7 @@ def update_user_profile():
 
 
 
+
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
@@ -77,12 +77,15 @@ app.add_api('swagger.yaml')
 flask_app = app.app
 
 #email sending information
+key = os.getenv("SG_API_KEY")
+sender = os.getenv("MAIL_SENDER")
+
 flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 flask_app.config['MAIL_PORT'] = 587
 flask_app.config['MAIL_USE_TLS'] = True
 flask_app.config['MAIL_USERNAME'] = 'apikey'
-flask_app.config['MAIL_PASSWORD'] = sg_api_key
-flask_app.config['MAIL_DEFAULT_SENDER'] = 'sportlinkemail@gmail.com'
+flask_app.config['MAIL_PASSWORD'] = key
+flask_app.config['MAIL_DEFAULT_SENDER'] = sender
 mail = Mail(flask_app)
 
 
