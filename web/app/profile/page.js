@@ -3,19 +3,20 @@
 import { useState, useEffect, useContext } from "react";
 import Sidebar from "@components/profileSidebar";
 import { UserContext } from "@app/UserContext";
+import User from "@app/User";
 
 const ProfilePage = () => {
 
   const { user, setUser }  = useContext(UserContext);
 
   useEffect(() => {
-    //setUser(JSON.parse(sessionStorage.getItem('user')));
-
-    const user1 = JSON.parse(sessionStorage.getItem('user'))
-    setUser({email: user1.email, password: user1.password, username: user1.username});
-
-    console.log(user);
+    const user1 = JSON.parse(sessionStorage.getItem('user'));
+    setUser(user1);
   }, []);
+
+  useEffect(() => { // prints user object
+    console.log('Updated user state:', user);
+  }, [user]);
 
 
 
@@ -31,7 +32,7 @@ const ProfilePage = () => {
         {/* ITEM: General Info*/}
         <div className="pb-8">
           <h1 className="font-base text-3xl">Profile Name</h1>
-          <p className="text-gray-500 pb-8">username</p>
+          <p className="text-gray-500 pb-8">{user && user.username}</p>
           <div className="flex text-gray-200">
             <p className="text-black">User Rating: </p>
             {[...Array(5)].map((star, i) => {
