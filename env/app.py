@@ -57,6 +57,46 @@ def create_account():
     # return complete username for frontend use and success
     return jsonify({'username': username}), 201
 
+def login():
+    req_user = request.json
+
+    #request data
+    req_email = req_user['email']
+    req_password = req_user['password'].encode('utf-8')
+
+    user = users.find_one({'email': req_email})
+
+    # check if user exists in db
+    if user:
+        # re-encode it to bytes
+        password = user['password'].encode('utf-8')
+        if bcrypt.checkpw(req_password, password):
+
+            # add all fields which the frontend needs here
+            email = user['email']
+            username = user['username']
+
+            # return each field to the user
+            return jsonify({'email': email, 
+                            'username': username,
+                            }), 200
+        else:
+            return jsonify({'error': 'Invalid Password'}), 401
+
+    else:
+        return jsonify({'error': 'No email for this account!'}), 401
+
+    
+
+def update_user_profile():
+    user = request.json
+    email = user['email']
+    phone_number = user['phoneNumber']
+    # udpate the user's phone number in the data base
+    users.update_one({"email", email}, {"$set": {"phoneNumber": phone_number}})
+    return jsonify({'message': 'Profile updated successfully'}), 200
+
+
 
 
 

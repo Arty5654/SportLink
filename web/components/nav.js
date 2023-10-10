@@ -1,7 +1,19 @@
-import React from "react";
+"use client";
+
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
+import { UserContext } from "@app/UserContext";
 
 const Nav = () => {
+
+  const { user, setUser } = useContext(UserContext);
+
+  useEffect(() => {
+    const user1 = JSON.parse(sessionStorage.getItem('user'));
+    setUser(user1);
+  }, []);
+
+
   return (
     <nav className="w-full bg-white text-black h-12 border-b border-grey-500 flex items-center justify-between py-8 mb-24">
       <div className="flex gap-2">

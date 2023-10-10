@@ -9,9 +9,11 @@ Abstracted for more readibility on the code of Sign In page
 
 "use client"
 import React from 'react';
-import  { useState } from 'react';
+import  { useState, useContext } from 'react';
 import User from '../User';
 import axios from 'axios';
+import { UserContext } from "@app/UserContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 
 export default function SignUpForm() {
@@ -32,7 +34,7 @@ export default function SignUpForm() {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [username, setUsername] = useState('');
-    const [status, setStatus] = useState('');
+    const { user, setUser } = useContext(UserContext);
 
 
 
@@ -52,12 +54,10 @@ export default function SignUpForm() {
         if (!checkPassword(accData.password)) {          
             return;
         }
-
-        console.log("here");
         
 
         // set the user object in sessionStorage so it persists for the user
-        const newUser = new User(accData.email, accData.password);
+        const newUser = { email: accData.email, password: accData.password };
 
         // store user in database with unique username, then return final username as sign of success
         try {
@@ -70,8 +70,10 @@ export default function SignUpForm() {
                 setUsername(r.data.username);
 
                 // the response will contain the new user with email, username, password as an object
-                const user = new User(accData.email, accData.password, username);
-                sessionStorage.setItem('user', JSON.stringify(user));
+                const newUser = new User(accData.email, r.data.username);
+                sessionStorage.setItem('user', JSON.stringify(newUser));
+
+                setUser(JSON.parse(sessionStorage.getItem('user')));
 
                 // navigate to new page assuming user has been created
                 window.location.href = '/profile';

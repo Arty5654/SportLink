@@ -5,7 +5,7 @@ This is the log in form component of the login/signup page
 */
 
 "use client"
-import React from 'react';
+import React, { useEffect } from 'react';
 import  { useState } from 'react';
 import User from '../User';
 import axios from 'axios';
@@ -17,12 +17,6 @@ export default function LogInForm() {
         email: '',
         password: '',
     });
-
-    // data from database (fetched password to compare) shown here
-    const dbData = {
-        dbEmail: '',
-        dbPassword: '',
-    };
 
     const checkEmail = (email) => {
 
@@ -49,39 +43,35 @@ export default function LogInForm() {
         and if valid send back the correct user object */
 
         try {
-            /*
-            const r = await axios.post('/login', {
-                email: email,
-                password: password,
-            }); 
-            */
 
-            //TODO save returned data in session storage
+            console.log("sending request");
+
+            const reqUser = { email: accData.email, password: accData.password };       
+            const r = await axios.post('http://localhost:5000/login', reqUser);
+
+            if (r.status == 200) {
 
 
-            // redirect to profile on success
-            window.location.href = '/profile';
+                console.log("201 baby");
+                const newUser = new User(r.data.email, r.data.username);
+                sessionStorage.setItem('user', JSON.stringify(newUser));
+
+                console.log(JSON.parse(sessionStorage.getItem('user')));
+
+                //setUser(JSON.parse(sessionStorage.getItem('user')));
+
+                // navigate to new page assuming user has been created
+                console.log("right before");
+                window.location.href = '/profile';
+            }
 
         } catch (error) {
-            setError("Error in Logging in. Please retry");
+
+            if (error.response && error.response.status == 401) {
+                setError(error.response.data.error);
+            }
             return;
         }
-        
-
-        // if database query returns null, no email found
- /*       if (!dbData.dbEmail) {
-            setError("No account with this email exists!");
-            return;
-        }
-        // if passwords dont match, dont let user through
-        if (accData.password !== dbData.dbPassword) {
-            setError("Incorrect Password!");
-            return;
-        } */
-
-        // navigate to homepage on login
-
-
     }
 
     const handleInput = (e) => {
@@ -131,7 +121,7 @@ export default function LogInForm() {
             </div>
 
             <div className="mb-6 mt-8">
-                {error && <div className="text-red-500 mb-4">{error}</div>}
+                {error && <div className="text-center text-red-500 mb-4">{error}</div>}
             </div>
 
             <button 

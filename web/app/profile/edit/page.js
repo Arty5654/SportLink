@@ -7,6 +7,7 @@ This will serve as the location where users can edit their profile settings
 
 "use client";
 
+import axios from 'axios';
 import { useState } from "react";
 import Sidebar from "@components/profileSidebar";
 import "@styles/global.css";
@@ -19,7 +20,25 @@ export default function EditProfile() {
     isAccountPublic: true,
     currentUsername: "",
     newUsername: "",
+    state: "",
+    country: "",
+    zipCode: "",
+    address: "",
+    first: "",
+    last: "",
+    city: "",
   });
+
+  const countires = ["", "Prefer not to answer", "United States of America"];
+  const states = [
+    "", "Prefer not to answer", "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
+    "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+    "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+    "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina",
+    "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+    "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+  ];
+  
 
   const handlePhoneNumberChange = (e) => {
     //remove non numbers
@@ -33,28 +52,49 @@ export default function EditProfile() {
     }));
   };
 
-  const handleDisplayPhoneNumberChange = (e) => {
-    const displayPhoneNumber = e.target.checked;
-
-    setProfileData((prev) => ({
-      ...prev,
-      displayPhoneNumber,
-    }));
-  };
-
-  //account status: public/private
-  const toggleAccountStatus = () => {
-    setProfileData((prev) => ({
-      ...prev,
-      isAccountPublic: !prev.isAccountPublic,
-    }));
-  };
-
   const handleUsernameChange = (e) => {
     setProfileData({
       ...profileData,
       newUsername: e.target.value,
     });
+  };
+
+  const handleStateChange = (e) => {
+    setProfileData({
+      ...profileData,
+      state: e.target.value,
+    });
+  };
+
+  const handleCountryChange = (e) => {
+    setProfileData({
+      ...profileData,
+      country: e.target.value,
+    });
+  };
+
+  const handleAddressChange = (e) => {
+    setProfileData({
+      ...profileData,
+      address: e.target.value,
+    });
+  };
+
+  const handleCityChange = (e) => {
+    setProfileData({
+      ...profileData,
+      city: e.target.value,
+    });
+  };
+
+  const handleZipCode = (e) => {
+    //remove non numbers
+    let zipCode = e.target.value.replace(/\D/g, "");
+    
+    setProfileData((prev) => ({
+      ...prev,
+      zipCode,
+    }));
   };
 
   const handleInstagram = () => {
@@ -70,11 +110,26 @@ export default function EditProfile() {
   };
 
   const handleSaveProfile = () => {
+    /*
     if (profileData.newUsername.toLowerCase() == profileData.currentUsername.toLowerCase()) {
       alert("This is your current username");
       return;
     }
+    */
     //TODO: update user info in backend
+    const currentUser = JSON.parse(sessionStorage.getItem('user'));
+    const updatedUserData = {
+      email: currentUser.email,
+      phoneNumber: profileData.phoneNumber,
+    };
+
+    axios.post('http://localhost:5000/update_profile', updatedUserData)
+      .then(response => {
+        console.log('Profile updated successfully:', response.data);
+      })
+      .catch(error => {
+        console.error('Error updating profile', error);
+      });
   };
 
   const handlePasswordChange = () => {
@@ -123,7 +178,14 @@ export default function EditProfile() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Username</p>
-                  <textarea className="w-full rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <input
+                  type="text"
+                  id="newUsername"
+                  name="newUsername"
+                  value={profileData.newUsername}
+                  onChange={handleUsernameChange}
+                  className="w-full rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  />
                 </div>
               </div>
             </div>
@@ -143,8 +205,20 @@ export default function EditProfile() {
 
             {/* ITEM: Phone Number  */}
             <div className="pb-6">
-              <p className="font-semibold text-sm">Phone Number</p>
-              <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+              <label htmlFor="phoneNumber" className="font-semibold text-sm">
+                Phone Number
+              </label>
+              <br />
+              <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={profileData.phoneNumber}
+              onChange={handlePhoneNumberChange}
+              maxLength={12}
+              required
+              className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+              />
             </div>
 
             {/* ITEM: Address */}
@@ -152,28 +226,80 @@ export default function EditProfile() {
               <div className="flex gap-8 pb-6">
                 <div>
                   <p className="font-semibold text-sm">Country</p>
-                  <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <select
+                    value={profileData.country}
+                    onChange={handleCountryChange}
+                    className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  >
+                    {countires.map((country, index) => (
+                      <option key={index} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <p className="font-semibold text-sm">State</p>
-                  <textarea className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <select
+                    value={profileData.state}
+                    onChange={handleStateChange}
+                    className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  >
+                    {states.map((state, index) => (
+                      <option key={index} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="flex flex-col pb-6">
                 <p className="font-semibold text-sm">Address</p>
-                <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none mb-1" />
-                <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                <input
+                 type="text"
+                 id="address"
+                 name="address"
+                 value={profileData.address}
+                 onChange={handleAddressChange}
+                 className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none mb-1"
+                 />
               </div>
               <div className="flex gap-8">
                 <div>
                   <p className="font-semibold text-sm">City</p>
-                  <textarea className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={profileData.city}
+                    onChange={handleCityChange}
+                    className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                    />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Zipcode</p>
-                  <textarea className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none" />
+                  <label htmlFor="zipCode" className="font-semibold text-sm">
+                    Zip Code
+                  </label>
+                  <br />
+                  <input
+                    type="zip"
+                    id="zipCode"
+                    name="ZipCode"
+                    value={profileData.zipCode}
+                    onChange={handleZipCode}
+                    maxLength={5}
+                    className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                    />
                 </div>
               </div>
+            </div>
+            <div className="pb-6 flex justify-center">
+              <button
+              onClick={handleSaveProfile}
+              className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-white outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 bg-blue-500 resize-none"
+              >
+                Save Profile
+              </button>
             </div>
           </form>
         </div>
@@ -183,74 +309,5 @@ export default function EditProfile() {
 }
 
 {
-  /* <div className="w-full text-left max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-lg bg-white">
-<h1 className="text-2xl font-semibold mb-4 text-green-500">Edit Profile</h1>
-<div className="mb-4">
-  <label className="text-blue-500 block">Phone Number:</label>
-  <input
-    type="tel"
-    id="phoneNumber"
-    name="phoneNumber"
-    value={profileData.phoneNumber}
-    onChange={handlePhoneNumberChange}
-    maxLength={12}
-    required
-    className="w-full p-2 border rounded"
-  />
-</div>
-<div className="mb-4">
-  <label className="block">
-    Display Phone Number to Friends:
-    <input
-      type="checkbox"
-      id="displayPhoneNumber"
-      name="displayPhoneNumber"
-      checked={profileData.displayPhoneNumber}
-      onChange={handleDisplayPhoneNumberChange}
-      className="ml-2"
-    />
-  </label>
-</div>
-<div className="mb-4">
-  <label className="block">Account Status:</label>
-  <span>{profileData.isAccountPublic ? "Public" : "Private"}</span>
-  <button
-    onClick={toggleAccountStatus}
-    className="ml-2 py-1 px-4 rounded bg-blue-500 text-white hover:bg-blue-700"
-  >
-    Toggle Account Status
-  </button>
-</div>
-<div className="mb-4">
-  <label className="text-blue-500 block">Change Username:</label>
-  <input
-    type="text"
-    id="newUsername"
-    name="newUsername"
-    value={profileData.newUsername}
-    onChange={handleUsernameChange}
-    className="w-full p-2 border rounded"
-  />
-</div>
-<div className="flex flex-row justify-between mb-4">
-  <button
-    onClick={handleInstagram}
-    className="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-700"
-  >
-    Connect with Instagram
-  </button>
-  <button
-    onClick={handlePasswordChange}
-    className="ml-2 py-1 px-4 rounded bg-blue-500 text-white hover:bg-blue-700"
-  >
-    Change Password
-  </button>
-</div>
-<button
-  onClick={handleSaveProfile}
-  className="block w-full py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
->
-  Save Profile
-</button>
-</div> */
+  
 }
