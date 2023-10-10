@@ -13,6 +13,7 @@ import  { useState, useContext } from 'react';
 import User from '../User';
 import axios from 'axios';
 import { UserContext } from "@app/UserContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 
 export default function SignUpForm() {
@@ -56,7 +57,7 @@ export default function SignUpForm() {
         
 
         // set the user object in sessionStorage so it persists for the user
-        const newUser = new User(accData.email, accData.password);
+        const newUser = { email: accData.email, password: accData.password };
 
         // store user in database with unique username, then return final username as sign of success
         try {
@@ -69,11 +70,11 @@ export default function SignUpForm() {
                 setUsername(r.data.username);
 
                 // the response will contain the new user with email, username, password as an object
-                const newUser = new User(accData.email, accData.password, r.data.username);
+                const newUser = new User(accData.email, r.data.username);
                 sessionStorage.setItem('user', JSON.stringify(newUser));
 
                 setUser(JSON.parse(sessionStorage.getItem('user')));
-                //console.log(r.data.username);
+
                 // navigate to new page assuming user has been created
                 window.location.href = '/profile';
 

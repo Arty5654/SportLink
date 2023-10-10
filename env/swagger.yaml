@@ -32,6 +32,45 @@ paths:
                     type: string
         '401':
           description: Email already has an account!
+
+
+#login endpoint
+  /login:
+      post:
+        operationId: app.login
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  password:
+                    type: string
+        responses:
+          '200':
+            description: User logged in
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    username:
+                      type: string           
+          '401':
+            description: Incorrect email or password!
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error: 
+                      type: string
+
   /update_profile:
     post:
       operationId: app.update_user_profile

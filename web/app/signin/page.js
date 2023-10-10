@@ -9,12 +9,24 @@ This will serve as the sign up and log in page for SportLink
 "use client"
 
 import React,{ useState } from 'react';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import SignUpForm from './SignUpForm';
 import LogInForm from './LogInForm';
 
 export default function SignIn() {
 
     const [login, setLogin] = useState(false);
+    const [googleError, setGoogleError] = useState('');
+
+
+    const handleGoogleSignin = (response) => {
+
+
+    }
+
+    const handleGoogleError = () => {
+        setGoogleError("Error in signing in with google! Please retry.")
+    }
 
     // jsx code to return
     return (
@@ -40,6 +52,10 @@ export default function SignIn() {
                 </button>
             </div>
 
+            <div>
+               {googleError && <p>{googleError}</p> }
+            </div>
+
             <h1 className="text-3xl text-center">
                 {login ? 'Log In' : 'Create Account'}
             </h1>
@@ -47,6 +63,16 @@ export default function SignIn() {
 
             <div className='flex justify-center p-t-2.5 min-h-[2em] w-full'>
                 {login ? <LogInForm /> : <SignUpForm />}
+            </div>
+
+            <div className='flex justify-center p-t-2.5 mt-16 min-h-[2em] w-full'>
+                <GoogleOAuthProvider clientId='40919981410-uf408qgn3pcglq9pakp2vrepb7j9otuk.apps.googleusercontent.com'>
+                    <GoogleLogin 
+                        clientId='40919981410-uf408qgn3pcglq9pakp2vrepb7j9otuk.apps.googleusercontent.com'
+                        onSuccess={handleGoogleSignin}
+                        onError={handleGoogleError}
+                    />
+                </GoogleOAuthProvider>
             </div>
       
         </div>
