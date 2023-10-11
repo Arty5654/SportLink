@@ -33,6 +33,53 @@ paths:
         '401':
           description: Email already has an account!
 
+  /google_signin:
+    post:
+      operationId: app.google_signin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                googleId:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Google User Account Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+        '200':
+          description: Google User Login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  phoneNumber:
+                    type: string
+        '401':
+          description: Incorrect email or password!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+
 
 #login endpoint
   /login:
@@ -69,7 +116,7 @@ paths:
                   type: object
                   properties:
                     error: 
-                      type: string
+                      type: string          
 
   /update_profile:
     post:
