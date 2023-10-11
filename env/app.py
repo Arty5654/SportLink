@@ -86,7 +86,60 @@ def login():
     else:
         return jsonify({'error': 'No email for this account!'}), 401
 
+
+def google_signin():
+    req_user = request.json
+
+    email = req_user['email']
+    googleId = req_user['googleId']
+    name = req_user['name']
     
+    user = users.find_one({'email': email})
+
+    # check if they have a googleId as password,
+    # or an actual password. if password, mark invalid
+
+    if user:
+
+        userPass = user['password']
+
+        if userPass == googleId:
+            #login to their google account TODO KEEP ADDING FIELDS
+            email = user['email']
+            username = user['username']
+
+
+            # return each field to the user
+
+            #EVERY GOOGLE USER GETS MY PHONE NUMBER RN AS A TEST
+            phoneNum = "3018922267"
+            return jsonify({'username': username, 'phoneNumber': phoneNum }), 200
+
+        # they created an account with their email (not google)
+        else:
+            return jsonify({'message': 'Email already has an account'}), 401
+
+    # create new user
+    else:
+
+        username = email.split('@')[0]
+        tempUsername = username
+
+        #generate a unique username for the user
+        while users.find_one({'username': username}):
+            username = tempUsername + str(random.randint(10, 9999))
+
+        # insert new user into the db
+        userData = {
+            'email': email,
+            'password': googleId, #store google id as their password
+            'username': username,
+            'name': name
+        }
+        
+        users.insert_one(userData)
+        return jsonify({'username': username}), 201
+       
 
 def update_user_profile():
     user = request.json
