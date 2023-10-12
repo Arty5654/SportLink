@@ -50,6 +50,8 @@ def create_account():
         'email': email,
         'password': hashWord.decode('utf-8'), #store hashed pass as a string
         'username': username,
+        'friends_list': [],
+        'username': username,
         'friends_list': []
     }
     users.insert_one(userData)
