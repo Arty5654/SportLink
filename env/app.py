@@ -80,7 +80,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -121,7 +121,7 @@ def google_signin():
                 'username': username
             }
 
-            optional_fields = ['phoneNumber']
+            optional_fields = ['phoneNumber', 'friends']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:

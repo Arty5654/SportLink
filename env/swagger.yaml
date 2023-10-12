@@ -72,6 +72,10 @@ paths:
                     type: string
                   phoneNumber:
                     type: string
+                  friends:  
+                    type: array
+                    items:
+                      type: string
                 required:
                   - username
         '401':
@@ -118,6 +122,10 @@ paths:
                       type: string
                     phoneNumber:
                       type: string
+                    friends:
+                      type: array
+                      items:
+                        type: string
                   required:
                     - email
                     - username       

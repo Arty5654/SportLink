@@ -74,6 +74,10 @@ export default function SignIn() {
                     user.phone = resp.phoneNumber;
                 }
 
+                if (resp.friends) {
+                    user.friends = resp.friends;
+                }
+
                 sessionStorage.setItem('user', JSON.stringify(user));
 
                 console.log(user);

@@ -72,7 +72,11 @@ export default function LogInForm() {
  
                 if (resp.phoneNumber) {
                     user.phone = resp.phoneNumber;
-                }    
+                }
+
+                if (resp.friends) {
+                    user.friends = resp.friends;
+                }
                 
                 console.log("thru danger");
                 
