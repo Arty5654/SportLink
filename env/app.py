@@ -1,3 +1,4 @@
+import json
 from flask import Flask, jsonify, request
 from flask_mail import Mail, Message
 from pymongo import MongoClient
@@ -7,6 +8,7 @@ import bcrypt
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+import logging
 
 load_dotenv()
 
@@ -45,7 +47,8 @@ def create_account():
     userData = {
         'email': email,
         'password': hashWord.decode('utf-8'), #store hashed pass as a string
-        'username': username
+        'username': username,
+        'friends_list': []
     }
     users.insert_one(userData)
 
@@ -149,11 +152,15 @@ def update_user_profile():
     users.update_one({"email": email}, {"$set": {"phoneNumber": phone_number}})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
-
-
-
-
-
+def retrieve_friends():
+    user = request.json
+    logging.info(json.dumps(user))
+    id = user['user_id']
+    curr_user = users.find_one({'_id': id})
+    logging.info(json.dumps(curr_user))
+    friends_list = curr_user['friends_list']
+    logging.info(json.dumps(friends_list))
+    return jsonify({'friends_list': friends_list}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
