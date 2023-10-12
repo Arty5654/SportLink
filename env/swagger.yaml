@@ -33,6 +33,61 @@ paths:
         '401':
           description: Email already has an account!
 
+  /google_signin:
+    post:
+      operationId: app.google_signin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                googleId:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+      responses:
+        '201':
+          description: Google User Account Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+        '200':
+          description: Google User Login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  phoneNumber:
+                    type: string
+                  friends:  
+                    type: array
+                    items:
+                      type: string
+                required:
+                  - username
+        '401':
+          description: Incorrect email or password!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+
 
 #login endpoint
   /login:
@@ -60,7 +115,20 @@ paths:
                     email:
                       type: string
                     username:
-                      type: string           
+                      type: string  
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    phoneNumber:
+                      type: string
+                    friends:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - email
+                    - username       
           '401':
             description: Incorrect email or password!
             content:
@@ -69,7 +137,7 @@ paths:
                   type: object
                   properties:
                     error: 
-                      type: string
+                      type: string          
 
   /update_profile:
     post:
