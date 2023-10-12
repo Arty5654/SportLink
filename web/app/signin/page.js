@@ -70,7 +70,7 @@ export default function SignIn() {
                 console.log(newUser);
 
                 // navigate to new page assuming user has been created
-                //window.location.href = '/profile';
+                window.location.href = '/profile';
 
             }
 
@@ -88,8 +88,12 @@ export default function SignIn() {
 
     }
 
+    const handlePasswordReset = () => {
+        window.location.href = '/signin/password-reset';
+    }
+
     const handleGoogleError = () => {
-        setGoogleError("Error in signing in with google! Please retry.")
+        setGoogleError("Error in signing in with google! Please retry.");
     }
 
     // jsx code to return
@@ -103,7 +107,7 @@ export default function SignIn() {
             </h1>
 
 
-            <div className="flex justify-center space-x-4 mb-12">
+            <div className="flex justify-center space-x-4 mb-6">
 
                 <button onClick={() => setLogin(false)} className={`py-2 px-5 rounded hover:bg-blue-700 hover:text-white
                 ${login ? 'text-black bg-gray-200' : 'text-white bg-green-500'}`}>
@@ -120,13 +124,21 @@ export default function SignIn() {
                {googleError && <p className="text-red-500 text-center mb-6">{googleError}</p> }
             </div>
 
+            <div  className="flex justify-center space-x-4 mb-4">
+                {login ? <button className='bg-gray-200 py-2 px-5 rounded hover:bg-blue-700 hover:text-white' 
+                                  onClick={handlePasswordReset}>
+                                    Reset Password
+                         </button> : 
+                    <></>}
+            </div>
+
             <h1 className="text-3xl text-center">
-                {login ? 'Log In' : 'Create Account'}
+                {login ? 'Log In' : 'Create Account'}                
             </h1>
 
 
             <div className='flex justify-center p-t-2.5 min-h-[2em] w-full'>
-                {login ? <LogInForm /> : <SignUpForm />}
+                {login ? <LogInForm /> : <SignUpForm />  }
             </div>
 
             <div className='flex justify-center p-t-2.5 mt-12 min-h-[2em] w-full'>
