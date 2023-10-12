@@ -20,6 +20,11 @@ paths:
                   type: string
                 password:
                   type: string
+                friends_list:
+                  type: array
+                  default: []
+                  items:
+                    type: string
       responses:
         '201':
           description: User created successfully
@@ -269,3 +274,32 @@ paths:
           description: User created successfully
         '401':
           description: Email already has an account!
+# friends endpoint
+  /retrieve_friends:
+    get:
+      summary: Retrieve Friends
+      description: Retrieve a list of friends for a specific user.
+      operationId: app.retrieve_friends
+      parameters:
+        - name: user_id
+          in: query
+          description: The user id for which to retrieve friends.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  friends:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error  

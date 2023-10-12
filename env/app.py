@@ -49,7 +49,8 @@ def create_account():
     userData = {
         'email': email,
         'password': hashWord.decode('utf-8'), #store hashed pass as a string
-        'username': username
+        'username': username,
+        'friends_list': []
     }
     users.insert_one(userData)
 
@@ -273,8 +274,15 @@ def gamesUpdate():
 
         
 
-
-
+def retrieve_friends():
+    user = request.json
+    logging.info(json.dumps(user))
+    id = user['user_id']
+    curr_user = users.find_one({'_id': id})
+    logging.info(json.dumps(curr_user))
+    friends_list = curr_user['friends_list']
+    logging.info(json.dumps(friends_list))
+    return jsonify({'friends_list': friends_list}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
