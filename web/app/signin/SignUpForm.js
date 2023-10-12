@@ -25,7 +25,7 @@ export default function SignUpForm() {
 
         // set username to first part of email
         username: '',
-        friends_list: [],
+        friends: [],
     });
 
     

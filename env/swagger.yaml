@@ -20,12 +20,7 @@ paths:
                   type: string
                 password:
                   type: string
-                friends_list:
-                  type: array
-                  default: []
-                  items:
-                    type: string
-                friends_list:
+                friends:
                   type: array
                   default: []
                   items:
