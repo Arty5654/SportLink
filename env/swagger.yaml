@@ -25,11 +25,6 @@ paths:
                   default: []
                   items:
                     type: string
-                friends_list:
-                  type: array
-                  default: []
-                  items:
-                    type: string
       responses:
         '201':
           description: User created successfully
