@@ -73,13 +73,21 @@ def login():
         if bcrypt.checkpw(req_password, password):
 
             # add all fields which the frontend needs here
-            email = user['email']
-            username = user['username']
+
+
+            userData = {
+                'email': user['email'],
+                'username': user['username']
+            }
+
+            optional_fields = ['firstName', 'lastName', 'phoneNumber']
+            # THESE DO NOT EXIST IN EVERY PROFILE
+            for field in optional_fields:
+                if field in user:
+                    userData[field] = user[field]
 
             # return each field to the user
-            return jsonify({'email': email, 
-                            'username': username,
-                            }), 200
+            return jsonify(userData), 200
         else:
             return jsonify({'error': 'Invalid Password'}), 401
 
@@ -92,7 +100,8 @@ def google_signin():
 
     email = req_user['email']
     googleId = req_user['googleId']
-    name = req_user['name']
+    firstName = req_user['firstName']
+    lastName = req_user['lastName']
     
     user = users.find_one({'email': email})
 
@@ -104,16 +113,22 @@ def google_signin():
         userPass = user['password']
 
         if userPass == googleId:
-            #login to their google account TODO KEEP ADDING FIELDS
+            #login to their google account
             email = user['email']
             username = user['username']
 
+            userData = {
+                'username': username
+            }
 
-            # return each field to the user
+            optional_fields = ['phoneNumber']
+            # THESE DO NOT EXIST IN EVERY PROFILE
+            for field in optional_fields:
+                if field in user:
+                    print(user[field])
+                    userData[field] = user[field]
 
-            #EVERY GOOGLE USER GETS MY PHONE NUMBER RN AS A TEST
-            phoneNum = "3018922267"
-            return jsonify({'username': username, 'phoneNumber': phoneNum }), 200
+            return jsonify(userData), 200
 
         # they created an account with their email (not google)
         else:
@@ -134,7 +149,8 @@ def google_signin():
             'email': email,
             'password': googleId, #store google id as their password
             'username': username,
-            'name': name
+            'firstName': firstName,
+            'lastName': lastName
         }
         
         users.insert_one(userData)

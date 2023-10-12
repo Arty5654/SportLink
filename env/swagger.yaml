@@ -47,7 +47,9 @@ paths:
                   type: string
                 googleId:
                   type: string
-                name:
+                firstName:
+                  type: string
+                lastName:
                   type: string
       responses:
         '201':
@@ -70,6 +72,8 @@ paths:
                     type: string
                   phoneNumber:
                     type: string
+                required:
+                  - username
         '401':
           description: Incorrect email or password!
           content:
@@ -107,7 +111,16 @@ paths:
                     email:
                       type: string
                     username:
-                      type: string           
+                      type: string  
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    phoneNumber:
+                      type: string
+                  required:
+                    - email
+                    - username       
           '401':
             description: Incorrect email or password!
             content:

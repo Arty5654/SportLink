@@ -3,14 +3,15 @@ class User {
 
 
     // initializes user with just email and password from signu[]
-    constructor(email, username, name, phone, age, location) {
+    constructor(email, username, firstName, lastName, phone, age, location, gender) {
         this.email = email;
         this.username = username;
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName
         this.phone = phone;
         this.location = location;
         this.age = age;
-
+        this.gender = gender;
     }
 
     // adds new field to a user - username, age etc.

@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useContext } from "react";
 import Sidebar from "@components/profileSidebar";
-import { UserContext } from "@app/UserContext";
 import User from "@app/User";
 
 const ProfilePage = () => {
 
-  const { user, setUser }  = useContext(UserContext);
+  const [user, setUser]  = useState(new User);
 
   useEffect(() => {
     const user1 = JSON.parse(sessionStorage.getItem('user'));

@@ -33,8 +33,6 @@ export default function SignUpForm() {
     const [error, setError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
-    const [username, setUsername] = useState('');
-    const { user, setUser } = useContext(UserContext);
 
 
 
@@ -67,13 +65,10 @@ export default function SignUpForm() {
 
             if (r.status == 201) {
                 console.log("request successfully responded");
-                setUsername(r.data.username);
 
                 // the response will contain the new user with email, username, password as an object
-                const newUser = new User(accData.email, r.data.username);
-                sessionStorage.setItem('user', JSON.stringify(newUser));
-
-                setUser(JSON.parse(sessionStorage.getItem('user')));
+                const user = new User(accData.email, r.data.username);
+                sessionStorage.setItem('user', JSON.stringify(user));
 
                 // navigate to new page assuming user has been created
                 window.location.href = '/profile';
