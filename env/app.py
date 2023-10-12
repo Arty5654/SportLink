@@ -49,7 +49,10 @@ def create_account():
     userData = {
         'email': email,
         'password': hashWord.decode('utf-8'), #store hashed pass as a string
-        'username': username
+        'username': username,
+        'friends_list': [],
+        'username': username,
+        'friends_list': []
     }
     users.insert_one(userData)
 
@@ -226,8 +229,6 @@ def change_password():
     else:
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
 
-
-
 def update_user_profile():
     user = request.json
     email = user['email']
@@ -271,10 +272,23 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
-        
+def add_friend():
+    req = request.json
+    email = req['email']
+    friend = req['friend']
 
+    user = users.find_one({'email': email})
+    # friend = users.find_one({'username': friend})
 
+    if user and friend:
+        if friend in user['friends']:
+            return jsonify({'error': 'Friend already added!'}), 401
 
+        users.update_one({"email": email}, {"$push": {"friends": friend}})
+        return 200
+
+    else:
+        return jsonify({'error': 'Username invalid!'}), 401
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

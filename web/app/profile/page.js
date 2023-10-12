@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useContext } from "react";
+import Link from "next/link";
 import Sidebar from "@components/profileSidebar";
 import User from "@app/User";
 
@@ -55,9 +56,10 @@ const ProfilePage = () => {
           </div>
         </div>
         <div className="flex gap-8 pb-8 border-b border-gray-200">
-          <p className="border border-black bg-black text-white px-8 py-2 rounded-xl">
+          <Link href="/profile/friends"
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl">
             Friends
-          </p>
+          </Link>
           <p className="border border-black bg-black text-white px-8 py-2 rounded-xl">
             Messages
           </p>
