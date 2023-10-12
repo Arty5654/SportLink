@@ -51,17 +51,34 @@ export default function LogInForm() {
 
             if (r.status == 200) {
 
+                // mandatory fields
+                console.log("received response");
+                const resp = r.data;
+                console.log(resp);
+                
+                const user = new User(reqUser.email, resp.username); 
+                console.log("user set");
 
-                console.log("201 baby");
-                const newUser = new User(r.data.email, r.data.username);
-                sessionStorage.setItem('user', JSON.stringify(newUser));
 
-                console.log(JSON.parse(sessionStorage.getItem('user')));
+                // optional fields
+ 
+                if (resp.firstName) {
+                    user.firstName = resp.firstName;
+                }
+ 
+                if (resp.lastName) {
+                    user.lastName = resp.lastName;
+                }
+ 
+                if (resp.phoneNumber) {
+                    user.phone = resp.phoneNumber;
+                }    
+                
+                console.log("thru danger");
+                
+                sessionStorage.setItem('user', JSON.stringify(user));
 
-                //setUser(JSON.parse(sessionStorage.getItem('user')));
-
-                // navigate to new page assuming user has been created
-                console.log("right before");
+                // navigate to new page
                 window.location.href = '/profile';
             }
 

@@ -8,7 +8,7 @@ This will serve as the sign up and log in page for SportLink
 
 "use client"
 
-import React,{ useState, useEffect } from 'react';
+import React,{ useState, useEffect, useContext } from 'react';
 import { GoogleOAuthProvider, GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import SignUpForm from './SignUpForm';
 import LogInForm from './LogInForm';
@@ -20,7 +20,6 @@ export default function SignIn() {
 
     const [login, setLogin] = useState(false);
     const [googleError, setGoogleError] = useState('');
-    const [user, setUser] = useState();
 
     const handleSuccess = ( (response) => {
 
@@ -36,12 +35,13 @@ export default function SignIn() {
         }
     });
 
-    const handleGoogleSignin = async (user) => {
+    const handleGoogleSignin = async (newUser) => {
 
         const userData = {
-            email: user.email,
-            name: user.name,
-            googleId: user.sub
+            email: newUser.email,
+            firstName: newUser.given_name,
+            lastName: newUser.family_name,
+            googleId: newUser.sub
         };
 
         // store user in database with unique username, then return final username as sign of success
@@ -54,8 +54,8 @@ export default function SignIn() {
                 console.log("account created");
 
                 // if the user is creating an account, new user objec
-                const newUser = new User(userData.email, r.data.username, userData.name);              
-                sessionStorage.setItem('user', JSON.stringify(newUser));
+                const user = new User(userData.email, r.data.username, userData.firstName, userData.lastName);
+                sessionStorage.setItem('user', JSON.stringify(user));
 
                 // navigate to new page assuming user has been created
                 window.location.href = '/profile';
@@ -64,10 +64,19 @@ export default function SignIn() {
                 console.log("logged back in");
 
                 // logging into an account -> give them their data
-                const newUser = new User(userData.email, r.data.username, userData.name, r.data.phoneNumber);              
-                sessionStorage.setItem('user', JSON.stringify(newUser));
+                const resp = r.data;
 
-                console.log(newUser);
+                const user = new User(userData.email, resp.username, userData.firstName, userData.lastName); 
+                
+                // optional fields
+
+                if (resp.phoneNumber) {
+                    user.phone = resp.phoneNumber;
+                }
+
+                sessionStorage.setItem('user', JSON.stringify(user));
+
+                console.log(user);
 
                 // navigate to new page assuming user has been created
                 window.location.href = '/profile';
@@ -76,7 +85,7 @@ export default function SignIn() {
 
         } catch (error) {
 
-            console.log("error caught");
+            console.log(error);
 
             if (error.response && error.response.status == 401) {
                 setGoogleError("Email has already been registered with a non-google account!");
