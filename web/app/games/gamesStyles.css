@@ -1,0 +1,86 @@
+.team-page {
+    width: 300px;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  
+.wrap-all input {
+    width: 150px;             /* Adjust width */
+    height: 30px;             /* Adjust height */
+    padding: 4px 8px;         /* Adjust internal padding */
+    font-size: 14px;          /* Adjust font size */
+    /* Other styles as required... */
+}
+
+.create-btn {
+    background-color: #4CAF50; /* green color */
+    color: white;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.create-btn:hover {
+    background-color: #45a049; /* slightly darker green for hover */
+}
+
+.join-btn {
+    background-color: #007BFF; /* blue color */
+    color: white;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.join-btn:hover {
+    background-color: #0056b3; /* slightly darker blue for hover */
+}
+
+
+
+
+
+
+.header-container {
+    display: flex;
+    justify-content: space-between;  /* distribute items evenly */
+    width: 100%;
+    padding: 10px 20px;
+}
+.padding-containers {
+    padding: 10px 20px;
+
+}
+.wrap-all {
+    display: flex;               /* Make it a flex container */
+    flex-direction: column;      /* Stack children vertically */
+    align-items: center;         /* Center children horizontally */
+    justify-content: center;     /* Center children vertically */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);  
+    padding: 10px 20px;
+}
+
+
+.input-group {
+    display: flex;
+    align-items: left;  /* vertically aligns the items in the middle */
+    margin: 0 10px;  /* give some spacing between groups */
+}
+
+.input-group label {
+    margin-right: 10px;  /* spacing between label and input */
+}
+
+.input-group input {
+    width: auto; /* overrides previous full width */
+    flex: 1; /* takes up remaining space after the label */
+    margin: 0; /* overrides previous margin */
+}
+.button-group {
+    display: flex;
+    gap: 10px;  /* spacing between buttons */
+}
+
+.button-group button {
+    padding: 6px 12px;  /* adjust padding for header-sized buttons */
+}
