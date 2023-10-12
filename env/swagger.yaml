@@ -5,7 +5,7 @@ info:
 
 paths:
 
-# account creation endpoint
+# account creation endpoints
   /create_account:
     post:
       operationId: app.create_account
@@ -165,7 +165,7 @@ paths:
                     type: string
 
 
-/update_games:
+  /update_games:
     post:
       operationId: app.gamesUpdate
       requestBody:

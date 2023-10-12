@@ -199,6 +199,9 @@ def gamesUpdate():
             'skill': skill,
             'which': which
         }]})
+
+        return jsonify({"message": "Team successfully created"}), 200
+
         
 
 
