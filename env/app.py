@@ -1,12 +1,14 @@
-from flask import Flask, jsonify, request
-from flask_mail import Mail, Message
-from pymongo import MongoClient
-import connexion
-import random
-import bcrypt
-from flask_cors import CORS
-from dotenv import load_dotenv
-import os
+from flask import Flask, jsonify, request # pip install flask
+from flask_mail import Mail, Message # pip install flask_mail
+from pymongo import MongoClient #pip install pymogo
+import connexion # pip install connexion[swagger-ui]
+import random # no install
+import bcrypt # pip install bcrypt
+from flask_cors import CORS # pip install flas-cors
+from dotenv import load_dotenv # pip install python-dotenv
+import os # no install
+from datetime import datetime, timedelta #pip install datetime
+import string # no install
 
 load_dotenv()
 
@@ -82,7 +84,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -127,7 +129,6 @@ def google_signin():
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
-                    print(user[field])
                     userData[field] = user[field]
 
             return jsonify(userData), 200
@@ -157,7 +158,75 @@ def google_signin():
         
         users.insert_one(userData)
         return jsonify({'username': username}), 201
-       
+
+def get_token():
+    req = request.json     
+    email = req['email']
+
+
+    user = users.find_one({'email': email})
+
+    if user:
+
+        token = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+        expire = datetime.now() + timedelta(minutes=15)
+
+        users.update_one({"email": email}, {"$set": {"reset_code": token, "code_expiration": expire}})
+
+        msg = Message('Password reset code', recipients=[email])
+        msg.html = f'<p>Your password reset code (expires in 15 minutes) is: {token}</p>'
+        mail.send(msg)
+
+        return 200
+
+    else:
+        return jsonify({'error': 'No account with this email!'}), 401
+    
+def input_reset_token():
+    req = request.json
+    email = req['email']
+    reqToken = req['reqToken']
+
+    user = users.find_one({'email': email})
+    
+    if user and 'reset_code' in user and 'code_expiration' in user:
+        uToken = user['reset_code']
+        expire = user['code_expiration']
+
+        if datetime.now() > expire:
+            return jsonify({'error': 'Code expired!'}), 401
+        
+        if reqToken != uToken:
+            return jsonify({'error': 'Invalid code!'}), 401
+        
+        return 200
+
+    else:
+        return jsonify({'error': 'Email invalid or no code generated!'}), 401
+    
+def change_password():
+
+    req = request.json
+    email = req['email']
+    newPassword = req['password'].encode('utf-8')
+
+    user = users.find_one({'email': email})
+
+    if user:
+        salt = bcrypt.gensalt()
+        hashWord = bcrypt.hashpw(newPassword, salt)
+
+        users.update_one(
+                        {'email': email}, {"$set": {"password": hashWord.decode('utf-8')},
+                                           "$unset": {"reset_code": '', "code_exipiration": ''}})
+        
+        
+        return 200
+    
+    else:
+        return jsonify({'error': 'Email invalid or no code generated!'}), 401
+
+
 
 def update_user_profile():
     user = request.json
@@ -203,8 +272,6 @@ def gamesUpdate():
         return jsonify({"message": "Team successfully created"}), 200
 
         
-
-
 
 
 

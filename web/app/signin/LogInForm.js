@@ -78,8 +78,6 @@ export default function LogInForm() {
                     user.friends = resp.friends;
                 }
                 
-                console.log("thru danger");
-                
                 sessionStorage.setItem('user', JSON.stringify(user));
 
                 // navigate to new page

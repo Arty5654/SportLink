@@ -137,7 +137,86 @@ paths:
                   type: object
                   properties:
                     error: 
-                      type: string          
+                      type: string  
+
+  /get_token:
+    post:
+      operationId: app.get_token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Password Reset email sent!
+        '401':
+          description: Email does not exist!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+
+  /input_reset_token:
+    post:
+      operationId: app.input_reset_token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                reqToken:
+                  type: string
+      responses:
+        '200':
+          description: Password Token Verified!
+        '401':
+          description: Incorrect token!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
+
+  /change_user_password:
+    post:
+      operationId: app.change_password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Password Changed!
+        '401':
+          description: Error!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: 
+                    type: string
 
   /update_profile:
     post:
