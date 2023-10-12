@@ -16,6 +16,8 @@ MONGO_URI = os.getenv('MONGO_URI')
 client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
+teams = db["teams"]
+events = db["events"]
 
 #sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
@@ -165,6 +167,42 @@ def update_user_profile():
     users.update_one({"email": email}, {"$set": {"phoneNumber": phone_number}})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
+
+def gamesUpdate():
+    # Extracting data from request
+    maxPlayers = request.json['maxPlayers']
+    sport = request.json['sport']
+    location = request.json['location']
+    skill = request.json['skill']
+    which = request.json['which']
+
+    dbData = ''
+    if which == 0 or which == 2:
+        dbData = teams
+    else:
+        dbData = events
+
+    # Inserting into MongoDB
+    if location in teams:
+        # If location exists, append
+        teams.update_one({'_id': location}, {'$push': {'data': {
+            'maxPlayers': maxPlayers,
+            'sport': sport,
+            'skill': skill,
+            'which': which
+        }}})
+    else:
+        # If location doesn't exist, create a new entry
+        teams.insert_one({'_id': location, 'data': [{
+            'maxPlayers': maxPlayers,
+            'sport': sport,
+            'skill': skill,
+            'which': which
+        }]})
+
+        return jsonify({"message": "Team successfully created"}), 200
+
+        
 
 
 
