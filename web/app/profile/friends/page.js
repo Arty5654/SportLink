@@ -15,10 +15,12 @@ import { UserContext } from "@app/UserContext";
 import User from "@app/User";
 
 const ProfilePage = () => {
-  const { user, setUser } = useContext(UserContext);
+  const [user, setUser] = useState(new User());
   const [friends, setFriends] = useState([]);
   const [friendsToShow, setFriendsToShow] = useState(5);
   const friendsListRef = useRef(null);
+  const [isAddingFriends, setIsAddingFriends] = useState(false); // State to control the input box
+  const [newFriendName, setNewFriendName] = useState(""); // State to store the new friend's name
 
   useEffect(() => {
     const user1 = JSON.parse(sessionStorage.getItem("user"));
@@ -31,68 +33,11 @@ const ProfilePage = () => {
   }, [user]);
 
   useEffect(() => {
-    const currentUser = JSON.parse(sessionStorage.getItem('user'));
-    console.log("Current User:", currentUser);
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setFriends(currentUser.friends);
+  }, []);
 
-    // axios get request
-    
-
-    axios({
-      method: 'get', 
-      url: 'http://localhost:5000/retrieve_friends',
-      params: {
-        user_id: currentUser._id,
-      }
-    })
-    .then(response => {
-      console.log("Friends list retrieved successfully!");
-      console.log(response.data);
-      setFriends(response.data);
-    })
-    .catch(error => {
-      console.log(JSON.stringify(error));
-      if (error.response) {
-        console.error("Server Error:", error.response.data);
-      } else if (error.request) {
-        console.error("Request Error:", error.request);
-      } else {
-        console.error("Axios Error:", error.message);
-      }
-    });
-  }, []);  
-
-  // const friends = [
-  //   {
-  //     id: 1,
-  //     name: "John Doe",
-  //     username: "johndoe",
-  //     avatar: "https://randomuser.me/api/portraits/lego/1.jpg",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Jane Doe",
-  //     username: "janedoe",
-  //     avatar: "https://randomuser.me/api/portraits/lego/8.jpg",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Bob Smith",
-  //     username: "bobsmith",
-  //     avatar: "https://randomuser.me/api/portraits/lego/5.jpg",
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Jeff Wilson",
-  //     username: "jwilson",
-  //     avatar: "https://randomuser.me/api/portraits/lego/2.jpg",
-  //   },
-  //   {
-  //     id: 5,
-  //     name: "John Doe",
-  //     username: "johndoe",
-  //     avatar: "https://randomuser.me/api/portraits/lego/1.jpg",
-  //   },
-  // ];
+  console.log("Friends:", friends);
 
   // infinite scroll, loading 5 more friends at a time
   const handleScroll = () => {
@@ -101,8 +46,44 @@ const ProfilePage = () => {
       friendsList.scrollTop + friendsList.clientHeight ===
       friendsList.scrollHeight
     ) {
-      setFriendsToShow(friendsToShow + 5);
+      // Check if all friends have been shown
+      if (friendsToShow < friends.length) {
+        setFriendsToShow(friendsToShow + 5);
+      }
     }
+  };
+
+  const handleAddFriendClick = () => {
+    setIsAddingFriends(true);
+  }
+
+  const handleAddFriend = () => {
+    // Handle adding the new friend to your data
+    if (newFriendName) {
+      // Only add the friend if the name is not empty
+      // setFriends([...friends, newFriendName]); // Add the new friend to the friends list
+
+      // Update the friends list in the database
+      try {
+        console.log("post request sent");
+        console.log("Email: " + user.email + "\nFriend: " + newFriendName);
+        const r = axios.post("http://localhost:5000/add_friend", {
+          email: user.email,
+          friend: newFriendName,
+        }); // Send the new friend's name to the backend
+
+        if (r.status == 201) {
+          console.log("request successfully responded");
+          sessionStorage.setItem("user", JSON.stringify(currentUser));
+          setFriends(currentUser.friends);
+        }
+      } catch (error) {
+        console.log("Error adding friend");
+        console.log(error);
+      }
+    }
+    setIsAddingFriends(false); // Hide the input box
+    setNewFriendName(""); // Clear the input field
   };
 
   return (
@@ -110,9 +91,31 @@ const ProfilePage = () => {
       {/* ITEM: Main Info*/}
       <div className="w-3/4 mx-auto text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
         {/* ITEM: General Info*/}
-        <div className="pb-4">
+        <div className="pb-4 flex justify-between items-center">
+          {" "}
+          {/* Use flex to align "Your Friends" and "Add Friends" */}
           <h1 className="font-base text-3xl">Your Friends</h1>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg" onClick={handleAddFriendClick}>
+            Add Friends
+          </button>
         </div>
+
+        {isAddingFriends && (
+        <div className="my-4">
+          <input
+            type="text"
+            placeholder="Enter friend's name"
+            value={newFriendName}
+            onChange={(e) => setNewFriendName(e.target.value)}
+          />
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
+            onClick={handleAddFriend}
+          >
+            Add
+          </button>
+        </div>
+        )}
 
         {/* ITEM: Friends List Block*/}
         <div
@@ -136,13 +139,12 @@ const ProfilePage = () => {
               className="bg-white rounded-lg shadow-md mb-4 flex"
             >
               <img
-                src={friend.avatar}
-                alt={friend.name}
+                src={"https://randomuser.me/api/portraits/men/2.jpg"}
                 className="w-1/5 rounded-t-lg"
               />
               <div className="p-4 w-3/5">
-                <h2 className="text-lg font-medium">{friend.name}</h2>
-                <p className="text-gray-500">@{friend.username}</p>
+                <h2 className="text-lg font-medium">{friend}</h2>
+                <p className="text-gray-500">@{friend}</p>
               </div>
               <div className="w-2/5 flex flex-col justify-center items-center">
                 <button className="bg-black text-white px-4 py-2 rounded-lg mb-2 w-3/5">

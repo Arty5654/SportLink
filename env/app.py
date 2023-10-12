@@ -227,8 +227,6 @@ def change_password():
     else:
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
 
-
-
 def update_user_profile():
     user = request.json
     email = user['email']
@@ -272,17 +270,23 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
-        
+def add_friend():
+    req = request.json
+    email = req['email']
+    friend = req['friend']
 
-def retrieve_friends():
-    user = request.json
-    logging.info(json.dumps(user))
-    id = user['user_id']
-    curr_user = users.find_one({'_id': id})
-    logging.info(json.dumps(curr_user))
-    friends_list = curr_user['friends_list']
-    logging.info(json.dumps(friends_list))
-    return jsonify({'friends_list': friends_list}), 200
+    user = users.find_one({'email': email})
+    # friend = users.find_one({'username': friend})
+
+    if user and friend:
+        if friend in user['friends']:
+            return jsonify({'error': 'Friend already added!'}), 401
+
+        users.update_one({"email": email}, {"$push": {"friends": friend}})
+        return 200
+
+    else:
+        return jsonify({'error': 'Username invalid!'}), 401
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
