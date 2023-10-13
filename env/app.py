@@ -298,20 +298,36 @@ def gamesUpdate():
 def add_friend():
     req = request.json
     email = req['email']
-    friend = req['friend']
+    new_friend_email = req['friend_email']
 
     user = users.find_one({'email': email})
-    # friend = users.find_one({'username': friend})
+    new_friend = users.find_one({'email': new_friend_email})
 
-    if user and friend:
-        if friend in user['friends']:
+    if user and new_friend:
+        if new_friend in user['friends']:
             return jsonify({'error': 'Friend already added!'}), 401
 
-        users.update_one({"email": email}, {"$push": {"friends": friend}})
-        return 200
+        users.update_one({"email": email}, {"$push": {"friends": new_friend}})
+        return jsonify({"message": "Friend Added"}), 200
 
     else:
         return jsonify({'error': 'Username invalid!'}), 401
+    
+# def remove_friend():
+#     req = request.json
+#     email = req['email']
+#     friend_email = req['friend_email']
+
+#     user = users.find_one({'email': email})
+#     # friend to remove is in the current users friends list
+#     friend_obj = next((friend for friend in user['friends'] if friend['email'] == friend_email), None)
+
+#     if user and friend_obj:
+#         users.update_one({"email": email}, {"$pull": {"friends": friend_obj}})
+#         return jsonify({"message": "Friend Removed"}), 200
+
+#     else:
+#         return jsonify({'error': 'Username invalid!'}), 401
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

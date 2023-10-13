@@ -347,7 +347,7 @@ paths:
   #         '500':
   #           description: Internal Server Error
 
-  # add friend endpoint
+# add friend endpoint
   /add_friend:
     post:
       operationId: app.add_friend
@@ -360,7 +360,7 @@ paths:
               properties:
                 email:
                   type: string
-                friend:
+                friend_email:
                   type: string
       responses:
         "200":
@@ -381,3 +381,38 @@ paths:
                 properties:
                   error:
                     type: string
+
+  # # remove friend endpoint
+  # /remove_friend:
+  #   post:
+  #     operationId: app.remove_friend
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #               friend_email:
+  #                 type: string
+  #     responses:
+  #       "200":
+  #         description: Friend removed successfully
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 message:
+  #                   type: string
+  #       "401":
+  #         description: Friend not found!
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 error:
+  #                   type: string

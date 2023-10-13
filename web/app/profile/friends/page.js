@@ -37,17 +37,16 @@ const ProfilePage = () => {
     setFriends(currentUser.friends);
   }, []);
 
-  console.log("Friends:", friends);
-
   // infinite scroll, loading 5 more friends at a time
   const handleScroll = () => {
     const friendsList = friendsListRef.current;
-    if (
-      friendsList.scrollTop + friendsList.clientHeight ===
-      friendsList.scrollHeight
-    ) {
+    const scrollPosition = friendsList.scrollTop;
+    const visibleHeight = friendsList.clientHeight;
+
+    if (scrollPosition + visibleHeight >= friendsList.scrollHeight) {
       // Check if all friends have been shown
       if (friendsToShow < friends.length) {
+        console.log("Loading 5 more friends");
         setFriendsToShow(friendsToShow + 5);
       }
     }
@@ -60,23 +59,21 @@ const ProfilePage = () => {
   const handleAddFriend = () => {
     // Handle adding the new friend to your data
     if (newFriendName) {
-      // Only add the friend if the name is not empty
-      // setFriends([...friends, newFriendName]); // Add the new friend to the friends list
-
       // Update the friends list in the database
       try {
-        console.log("post request sent");
-        console.log("Email: " + user.email + "\nFriend: " + newFriendName);
+        console.log("sending post request to add " + newFriendName + " as a friend");
         const r = axios.post("http://localhost:5000/add_friend", {
           email: user.email,
-          friend: newFriendName,
-        }); // Send the new friend's name to the backend
-
-        if (r.status == 201) {
+          friend_email: newFriendName,
+        });
+        
+        r.then(() => {
           console.log("request successfully responded");
-          sessionStorage.setItem("user", JSON.stringify(currentUser));
-          setFriends(currentUser.friends);
-        }
+          const updatedFriends = [...friends, newFriendName];
+          const updatedUser = { ...user, friends: updatedFriends };
+          sessionStorage.setItem("user", JSON.stringify(updatedUser));
+          setFriends(updatedFriends); // Update the state variable
+        });
       } catch (error) {
         console.log("Error adding friend");
         console.log(error);
@@ -85,6 +82,29 @@ const ProfilePage = () => {
     setIsAddingFriends(false); // Hide the input box
     setNewFriendName(""); // Clear the input field
   };
+
+//   const handleRemoveFriend = (friend) => {
+//   // Handle removing the friend from your data
+//   // Update the friends list in the database
+//   try {
+//     console.log("sending post request to remove " + friend.email + " as a friend");
+//     const r = axios.post("http://localhost:5000/remove_friend", {
+//       email: user.email,
+//       friend_email: friend.email,
+//     });
+    
+//     r.then(() => {
+//       console.log("request successfully responded");
+//       const updatedFriends = friends.filter((f) => f.email !== friend.email);
+//       const updatedUser = { ...user, friends: updatedFriends };
+//       sessionStorage.setItem("user", JSON.stringify(updatedUser));
+//       setFriends(updatedFriends); // Update the state variable
+//     });
+//   } catch (error) {
+//     console.log("Error removing friend");
+//     console.log(error);
+//   }
+// };
 
   return (
     <div className="w-full flex">
@@ -104,7 +124,7 @@ const ProfilePage = () => {
         <div className="my-4">
           <input
             type="text"
-            placeholder="Enter friend's name"
+            placeholder="Enter friend's email"
             value={newFriendName}
             onChange={(e) => setNewFriendName(e.target.value)}
           />
@@ -135,7 +155,7 @@ const ProfilePage = () => {
 
           {friends.slice(0, friendsToShow).map((friend) => (
             <div
-              key={friend.id}
+              // key={friend.id}
               className="bg-white rounded-lg shadow-md mb-4 flex"
             >
               <img
@@ -150,7 +170,7 @@ const ProfilePage = () => {
                 <button className="bg-black text-white px-4 py-2 rounded-lg mb-2 w-3/5">
                   View Profile
                 </button>
-                <button className="bg-red-500 text-white px-4 py-2 rounded-lg w-3/5">
+                <button className="bg-red-500 text-white px-4 py-2 rounded-lg w-3/5" /*onClick={handleRemoveFriend}*/>
                   Remove Friend
                 </button>
               </div>
@@ -163,3 +183,4 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
