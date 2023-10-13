@@ -55,6 +55,19 @@ paths:
                   type: string
                 lastName:
                   type: string
+                displayAge:
+                  type: boolean
+                  description: "Toggle age visibility"
+                displayLocation:
+                  type: boolean
+                  description: "Toggle location visibility"
+                accountPrivacy:
+                  type: boolean
+                  description: "Toggle account privacy"
+                displayPhoneNumber:
+                  type: boolean
+                  description: "Toggle phone number visibility"
+                
       responses:
         "201":
           description: Google User Account Created
