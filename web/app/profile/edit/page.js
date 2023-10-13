@@ -215,33 +215,6 @@ export default function EditProfile() {
     window.location.href = instaAuthURL;
   };
 
-<<<<<<< HEAD
-  const handleSaveProfile = () => {
-    /*
-    if (profileData.newUsername.toLowerCase() == profileData.currentUsername.toLowerCase()) {
-      alert("This is your current username");
-      return;
-    }
-    */
-    //TODO: update user info in backend
-    const currentUser = JSON.parse(sessionStorage.getItem('user'));
-    const updatedUserData = {
-      email: currentUser.email,
-      phoneNumber: profileData.phoneNumber,
-      address: profileData.address,
-    };
-
-    axios.post('http://localhost:5000/update_profile', updatedUserData)
-      .then(response => {
-        console.log('Profile updated successfully:', response.data);
-      })
-      .catch(error => {
-        console.error('Error updating profile', error);
-      });
-  };
-
-=======
->>>>>>> origin
   const handlePasswordChange = () => {
     //TODO: send an email to change password
   };
@@ -329,22 +302,12 @@ export default function EditProfile() {
               <label className="font-semibold text-sm">Phone Number</label>
               <br />
               <input
-<<<<<<< HEAD
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={profileData.phoneNumber}
-              onChange={handlePhoneNumberChange}
-              maxLength={12}
-              className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
-=======
                 type="tel"
                 name="phoneNumber"
                 value={profileData.phoneNumber}
                 onChange={handlePhoneNumber}
                 required
                 className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
->>>>>>> origin
               />
             </div>
 
@@ -434,9 +397,4 @@ export default function EditProfile() {
 }
 
 {
-<<<<<<< HEAD
-  
 }
-=======
-}
->>>>>>> origin
