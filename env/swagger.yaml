@@ -55,6 +55,8 @@ paths:
                   type: string
                 lastName:
                   type: string
+                city:
+                  type: string
                 displayAge:
                   type: boolean
                   description: "Toggle age visibility"
@@ -67,7 +69,7 @@ paths:
                 displayPhoneNumber:
                   type: string
                   description: "Toggle phone number visibility"
-                
+
       responses:
         "201":
           description: Google User Account Created
@@ -86,8 +88,6 @@ paths:
                 type: object
                 properties:
                   username:
-                    type: string
-                  phoneNumber:
                     type: string
                   friends:
                     type: array
@@ -246,7 +246,23 @@ paths:
               properties:
                 email:
                   type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                username:
+                  type: string
                 phoneNumber:
+                  type: string
+                address:
+                  type: string
+                state:
+                  type: string
+                country:
+                  type: string
+                zipCode:
+                  type: string
+                city:
                   type: string
       responses:
         "200":

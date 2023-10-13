@@ -103,6 +103,8 @@ def login():
 def google_signin():
     req_user = request.json
 
+    print(req_user)
+
     email = req_user['email']
     googleId = req_user['googleId']
     firstName = req_user['firstName']
@@ -126,7 +128,7 @@ def google_signin():
                 'username': username
             }
 
-            optional_fields = ['phoneNumber', 'friends']
+            optional_fields = ['friends']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -154,7 +156,7 @@ def google_signin():
             'password': googleId, #store google id as their password
             'username': username,
             'firstName': firstName,
-            'lastName': lastName
+            'lastName': lastName,
         }
         
         users.insert_one(userData)
@@ -228,13 +230,40 @@ def change_password():
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
 
 def update_user_profile():
-    user = request.json
-    email = user['email']
-    phone_number = user['phoneNumber']
-    firstName = user['firstName']
+    user = request.get_json()
+    email = user.get('email')
+    phoneNumber = user.get('phoneNumber')
+    firstName = user.get('firstName')
+    lastName = user.get('lastName')
+    username = user.get('username')
+    address = user.get('address')
+    state = user.get('state')
+    country = user.get('country')
+    zipCode = user.get('zipcode')
+    city = user.get('city')
+
     # udpate the user's phone number in the data base
-    # users.update_one({"email": email}, {"$set": {"phoneNumber": phone_number}})
-    users.update_one({"email": email}, {"$set": {"firstName": firstName}})
+    update_query = {}
+    if firstName is not None:
+        update_query['firstName'] = firstName
+    if lastName is not None:
+        update_query['lastName'] = lastName
+    if username is not None:
+        update_query['username'] = username
+    if phoneNumber is not None:
+        update_query['phoneNumber'] = phoneNumber
+    if address is not None:
+        update_query['address'] = address 
+    if state is not None:
+        update_query['state'] = state
+    if country is not None:
+        update_query['country'] = country
+    if zipCode is not None:
+        update_query['zipCode'] = zipCode
+    if city is not None:
+        update_query['city'] = city
+    
+    users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
 def update_user_privacy():
