@@ -231,8 +231,10 @@ def update_user_profile():
     user = request.json
     email = user['email']
     phone_number = user['phoneNumber']
+    firstName = user['firstName']
     # udpate the user's phone number in the data base
-    users.update_one({"email": email}, {"$set": {"phoneNumber": phone_number}})
+    # users.update_one({"email": email}, {"$set": {"phoneNumber": phone_number}})
+    users.update_one({"email": email}, {"$set": {"firstName": firstName}})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
 
