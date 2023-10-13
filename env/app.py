@@ -237,6 +237,29 @@ def update_user_profile():
     users.update_one({"email": email}, {"$set": {"firstName": firstName}})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
+def update_user_privacy():
+    user = request.json
+    email = user.get('email')
+    display_age = user.get('displayAge')
+    display_location = user.get('displayLocation')
+    account_privacy = user.get('accountPrivacy')
+    display_phone_number = user.get('displayPhoneNumber')
+
+    # Update the user's privacy settings in the database
+    update_query = {}
+    if display_age is not None:
+        update_query['displayAge'] = display_age
+    if display_location is not None:
+        update_query['displayLocation'] = display_location
+    if account_privacy is not None:
+        update_query['accountPrivacy'] = account_privacy
+    if display_phone_number is not None:
+        update_query['displayPhoneNumber'] = display_phone_number
+
+    users.update_one({"email": email}, {"$set": update_query})
+    return jsonify({'message': 'Privacy settings updated successfully'}), 200
+
+
 
 def gamesUpdate():
     # Extracting data from request
