@@ -18,7 +18,7 @@ import "@styles/global.css";
 export default function EditProfile() {
   const [user, setUser] = useState(new User());
   const [profileImage, setProfileImage] = useState(ProfileImage);
-  const maxFileSize = 1024; // 5MB in bytes
+  const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
 
   //store profile data
   const [profileData, setProfileData] = useState({
