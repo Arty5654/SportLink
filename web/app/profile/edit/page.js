@@ -18,6 +18,7 @@ import "@styles/global.css";
 export default function EditProfile() {
   const [user, setUser] = useState(new User());
   const [profileImage, setProfileImage] = useState(ProfileImage);
+  const maxFileSize = 1024; // 5MB in bytes
 
   //store profile data
   const [profileData, setProfileData] = useState({
@@ -239,16 +240,20 @@ export default function EditProfile() {
   };
 
   const handleImageUpload = (event) => {
-    const file = event.target.files[0]; // Get the selected file
+    const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        // Set the selected image in the state
-        setProfileImage(e.target.result);
-      };
-
-      reader.readAsDataURL(file);
+      if (file.size > maxFileSize) {
+        alert(
+          "Selected file exceeds the maximum allowed size (5MB). Please choose a smaller file."
+        );
+        event.target.value = null; // Clear the input field
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setProfileImage(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
