@@ -1,11 +1,10 @@
-openapi: '3.0.2'
+openapi: "3.0.2"
 info:
-  title: 'Sportlink API'
-  version: '1.0'
+  title: "Sportlink API"
+  version: "1.0"
 
 paths:
-
-# account creation endpoint
+  # account creation endpoint
   /create_account:
     post:
       operationId: app.create_account
@@ -21,7 +20,7 @@ paths:
                 password:
                   type: string
       responses:
-        '201':
+        "201":
           description: User created successfully
           content:
             application/json:
@@ -30,7 +29,7 @@ paths:
                 properties:
                   username:
                     type: string
-        '401':
+        "401":
           description: Email already has an account!
 
   /google_signin:
@@ -52,7 +51,7 @@ paths:
                 lastName:
                   type: string
       responses:
-        '201':
+        "201":
           description: Google User Account Created
           content:
             application/json:
@@ -61,7 +60,7 @@ paths:
                 properties:
                   username:
                     type: string
-        '200':
+        "200":
           description: Google User Login
           content:
             application/json:
@@ -72,29 +71,40 @@ paths:
                     type: string
                   phoneNumber:
                     type: string
-                  friends:  
+                  friends:
                     type: array
                     items:
                       type: string
                 required:
                   - username
-        '401':
+        "401":
           description: Incorrect email or password!
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error: 
+                  error:
                     type: string
 
-
-#login endpoint
+  #login endpoint
   /login:
-      post:
-        operationId: app.login
-        requestBody:
-          required: true
+    post:
+      operationId: app.login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: User logged in
           content:
             application/json:
               schema:
@@ -102,42 +112,30 @@ paths:
                 properties:
                   email:
                     type: string
-                  password:
+                  username:
                     type: string
-        responses:
-          '200':
-            description: User logged in
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    email:
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  phoneNumber:
+                    type: string
+                  friends:
+                    type: array
+                    items:
                       type: string
-                    username:
-                      type: string  
-                    firstName:
-                      type: string
-                    lastName:
-                      type: string
-                    phoneNumber:
-                      type: string
-                    friends:
-                      type: array
-                      items:
-                        type: string
-                  required:
-                    - email
-                    - username       
-          '401':
-            description: Incorrect email or password!
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    error: 
-                      type: string          
+                required:
+                  - email
+                  - username
+        "401":
+          description: Incorrect email or password!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 
   /update_profile:
     post:
@@ -153,8 +151,12 @@ paths:
                   type: string
                 phoneNumber:
                   type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
       responses:
-        '200':
+        "200":
           description: Profile updated successfully
           content:
             application/json:
