@@ -55,6 +55,19 @@ paths:
                   type: string
                 lastName:
                   type: string
+                displayAge:
+                  type: boolean
+                  description: "Toggle age visibility"
+                displayLocation:
+                  type: boolean
+                  description: "Toggle location visibility"
+                accountPrivacy:
+                  type: boolean
+                  description: "Toggle account privacy"
+                displayPhoneNumber:
+                  type: string
+                  description: "Toggle phone number visibility"
+                
       responses:
         "201":
           description: Google User Account Created
@@ -246,38 +259,38 @@ paths:
                   message:
                     type: string
   /privacy:
-  post:
-    summary: "Update privacy settings"
-    operationId: app.update_user_privacy
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              displayAge:
-                type: boolean
-                description: "Toggle age visibility"
-              displayLocation:
-                type: boolean
-                description: "Toggle location visibility"
-              accountPrivacy:
-                type: boolean
-                description: "Toggle account privacy"
-              displayPhoneNumber:
-                type: boolean
-                description: "Toggle phone number visibility"
-    responses:
-      "200":
-        description: "Profile updated successfully"
+    post:
+      summary: "Update privacy settings"
+      operationId: app.update_user_privacy
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                message:
+                displayAge:
+                  type: boolean
+                  description: "Toggle age visibility"
+                displayLocation:
+                  type: boolean
+                  description: "Toggle location visibility"
+                accountPrivacy:
+                  type: boolean
+                  description: "Toggle account privacy"
+                displayPhoneNumber:
                   type: string
+                  description: "Toggle phone number visibility"
+      responses:
+        "200":
+          description: "Profile updated successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
   #   /update_games:
   #     post:
