@@ -4,6 +4,31 @@ info:
   version: "1.0"
 
 paths:
+    /update_games:
+    post:
+      operationId: app.gamesUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                skill:
+                  type: integer
+                maxPlayers:
+                  type: integer
+                sport:
+                  type: string
+                gameID:
+                  type: integer
+                location:
+                  type: string
+
+
+      responses:
+        '200':
+          description: "Success!"
   # account creation endpoints
   /create_account:
     post:

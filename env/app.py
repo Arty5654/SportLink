@@ -292,34 +292,96 @@ def update_user_privacy():
 
 def gamesUpdate():
     # Extracting data from request
-    maxPlayers = request.json['maxPlayers']
     sport = request.json['sport']
+    maxPlayers = request.json['maxPlayers']
     location = request.json['location']
     skill = request.json['skill']
-    which = request.json['which']
+    gameID = request.json['gameID']
 
-    dbData = ''
-    if which == 0 or which == 2:
+    if gameID == 0 or gameID == 2:
         dbData = teams
     else:
         dbData = events
 
     # Inserting into MongoDB
-    if location in teams:
+    location_exists = dbData.find({'_id': location})
+
+    if location_exists:
         # If location exists, append
-        teams.update_one({'_id': location}, {'$push': {'data': {
-            'maxPlayers': maxPlayers,
-            'sport': sport,
-            'skill': skill,
-            'which': which
-        }}})
+
+        # Create Team or Event
+        if gameID == 0 or gameID == 1:
+            dbData.update_one({'_id': location}, {'$push': {'data': {
+                'maxPlayers': maxPlayers,
+                'sport': sport,
+                'skill': skill,
+                'gameID': gameID
+            }}})
+        # Join Team/ Event
+        else:
+            return jsonify(dbData.find_one({'_id': location})), 200
+
+
+
     else:
+
+        if gameID == 2 or gameID == 3:
+            return jsonify({"message": "No Games or Teams Found!"}), 400
+
         # If location doesn't exist, create a new entry
-        teams.insert_one({'_id': location, 'data': [{
+        dbData.insert_one({'_id': location, 'data': [{
             'maxPlayers': maxPlayers,
             'sport': sport,
             'skill': skill,
-            'which': which
+            'gameID': gameID
+        }]})
+
+        return jsonify({"message": "Team successfully created"}), 200
+
+def gamesUpdate():
+    # Extracting data from request
+    sport = request.json['sport']
+    maxPlayers = request.json['maxPlayers']
+    location = request.json['location']
+    skill = request.json['skill']
+    gameID = request.json['gameID']
+
+    if gameID == 0 or gameID == 2:
+        dbData = teams
+    else:
+        dbData = events
+
+    # Inserting into MongoDB
+    location_exists = dbData.find({'_id': location})
+
+    if location_exists:
+        # If location exists, append
+
+        # Create Team or Event
+        if gameID == 0 or gameID == 1:
+            dbData.update_one({'_id': location}, {'$push': {'data': {
+                'maxPlayers': maxPlayers,
+                'sport': sport,
+                'skill': skill,
+                'gameID': gameID
+            }}})
+        # Join Team/ Event
+        else:
+            return jsonify(dbData.find_one({'_id': location})), 200
+
+
+
+    else:
+
+        if gameID == 2 or gameID == 3:
+            return jsonify({"message": "No Games or Teams Found!"}), 400
+
+        # If location doesn't exist, create a new entry
+        dbData.insert_one({'_id': location, 'data': [{
+            'maxPlayers': maxPlayers,
+            'sport': sport,
+            'skill': skill,
+            'gameID': gameID
         }]})
 
         return jsonify({"message": "Team successfully created"}), 200
