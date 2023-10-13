@@ -4,7 +4,7 @@ info:
   version: "1.0"
 
 paths:
-  # account creation endpoint
+  # account creation endpoints
   /create_account:
     post:
       operationId: app.create_account
@@ -19,6 +19,11 @@ paths:
                   type: string
                 password:
                   type: string
+                friends:
+                  type: array
+                  default: []
+                  items:
+                    type: string
       responses:
         "201":
           description: User created successfully
@@ -137,6 +142,85 @@ paths:
                   error:
                     type: string
 
+  /get_token:
+    post:
+      operationId: app.get_token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: Password Reset email sent!
+        "401":
+          description: Email does not exist!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /input_reset_token:
+    post:
+      operationId: app.input_reset_token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                reqToken:
+                  type: string
+      responses:
+        "200":
+          description: Password Token Verified!
+        "401":
+          description: Incorrect token!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /change_user_password:
+    post:
+      operationId: app.change_password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Password Changed!
+        "401":
+          description: Error!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
   /update_profile:
     post:
       operationId: app.update_user_profile
@@ -151,10 +235,6 @@ paths:
                   type: string
                 phoneNumber:
                   type: string
-                firstName:
-                  type: string
-                lastName:
-                  type: string
       responses:
         "200":
           description: Profile updated successfully
@@ -164,4 +244,94 @@ paths:
                 type: object
                 properties:
                   message:
+                    type: string
+
+  #   /update_games:
+  #     post:
+  #       operationId: app.gamesUpdate
+  #       requestBody:
+  #         required: true
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 skill:
+  #                   type: int
+  #                 maxPlayers:
+  #                   type: int
+  #                 sport:
+  #                   type: string
+  #                 location:
+  #                   type: string
+  #                 which:
+  #                   type: int
+  #       responses:
+  #         '201':
+  #           description: User created successfully
+  #         '401':
+  #           description: Email already has an account!
+  # # friends endpoint
+  #   /retrieve_friends:
+  #     get:
+  #       summary: Retrieve Friends
+  #       description: Retrieve a list of friends for a specific user.
+  #       operationId: app.retrieve_friends
+  #       parameters:
+  #         - name: user_id
+  #           in: query
+  #           description: The user id for which to retrieve friends.
+  #           required: true
+  #           schema:
+  #             type: string
+  #       responses:
+  #         '200':
+  #           description: Successful response
+  #           content:
+  #             application/json:
+  #               schema:
+  #                 type: object
+  #                 properties:
+  #                   friends:
+  #                     type: array
+  #                     items:
+  #                       type: string
+  #         '400':
+  #           description: Bad Request
+  #         '500':
+  #           description: Internal Server Error
+
+  # add friend endpoint
+  /add_friend:
+    post:
+      operationId: app.add_friend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                friend:
+                  type: string
+      responses:
+        "200":
+          description: Friend added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Friend already added!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
                     type: string
