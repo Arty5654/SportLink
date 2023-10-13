@@ -65,7 +65,7 @@ paths:
                   type: boolean
                   description: "Toggle account privacy"
                 displayPhoneNumber:
-                  type: boolean
+                  type: string
                   description: "Toggle phone number visibility"
                 
       responses:
@@ -279,7 +279,7 @@ paths:
                   type: boolean
                   description: "Toggle account privacy"
                 displayPhoneNumber:
-                  type: boolean
+                  type: string
                   description: "Toggle phone number visibility"
       responses:
         "200":
