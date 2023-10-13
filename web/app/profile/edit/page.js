@@ -52,7 +52,7 @@ export default function EditProfile() {
     console.log("Current user state:", profileData);
   }, [user, profileData]);
 
-  const countires = ["", "Prefer not to answer", "United States of America"];
+  const countries = ["", "Prefer not to answer", "United States of America"];
   const states = [
     "",
     "Prefer not to answer",
@@ -322,7 +322,7 @@ export default function EditProfile() {
                     onChange={handleCountry}
                     className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                   >
-                    {countires.map((country, index) => (
+                    {countries.map((country, index) => (
                       <option key={index} value={country}>
                         {country}
                       </option>
