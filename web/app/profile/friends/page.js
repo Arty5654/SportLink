@@ -83,6 +83,27 @@ const ProfilePage = () => {
     setNewFriendName(""); // Clear the input field
   };
 
+  const handleRemoveFriend = (friend) => {
+    try {
+      console.log("sending post request to remove " + friend + " as a friend");
+      const r = axios.post("http://localhost:5000/remove_friend", {
+        email: user.email,
+        friend_email: friend,
+      });
+      
+      r.then(() => {
+        console.log("request successfully responded");
+        const updatedFriends = friends.filter((f) => f !== friend);
+        const updatedUser = { ...user, friends: updatedFriends };
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        setFriends(updatedFriends); // Update the state variable
+      });
+    } catch (error) {
+      console.log("Error removing friend");
+      console.log(error);
+    }
+  }
+
 //   const handleRemoveFriend = (friend) => {
 //   // Handle removing the friend from your data
 //   // Update the friends list in the database
@@ -170,7 +191,7 @@ const ProfilePage = () => {
                 <button className="bg-black text-white px-4 py-2 rounded-lg mb-2 w-3/5">
                   View Profile
                 </button>
-                <button className="bg-red-500 text-white px-4 py-2 rounded-lg w-3/5" /*onClick={handleRemoveFriend}*/>
+                <button className="bg-red-500 text-white px-4 py-2 rounded-lg w-3/5" onClick={() => handleRemoveFriend(friend)}>
                   Remove Friend
                 </button>
               </div>

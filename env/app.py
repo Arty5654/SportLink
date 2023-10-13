@@ -399,26 +399,39 @@ def add_friend():
             return jsonify({'error': 'Friend already added!'}), 401
 
         users.update_one({"email": email}, {"$push": {"friends": new_friend}})
-        return jsonify({"message": "Friend Added"}), 200
+        users.update_one({"email": new_friend_email}, {"$push": {"friends": user}})
+        return jsonify({"message": "Friend Added - Both Ways"}), 200
 
     else:
         return jsonify({'error': 'Username invalid!'}), 401
     
-# def remove_friend():
-#     req = request.json
-#     email = req['email']
-#     friend_email = req['friend_email']
+def remove_friend():
+    req = request.json
+    email = req['email']
+    friend_email = req['friend_email']
 
-#     user = users.find_one({'email': email})
-#     # friend to remove is in the current users friends list
-#     friend_obj = next((friend for friend in user['friends'] if friend['email'] == friend_email), None)
+    user = users.find_one({'email': email})
+    other_user = users.find_one({'email': friend_email})
+    friend_obj = None
+    other_obj = None
 
-#     if user and friend_obj:
-#         users.update_one({"email": email}, {"$pull": {"friends": friend_obj}})
-#         return jsonify({"message": "Friend Removed"}), 200
+    for friend in user['friends']:
+        if isinstance(friend, dict) and friend['email'] == friend_email:
+            friend_obj = friend
+            break
 
-#     else:
-#         return jsonify({'error': 'Username invalid!'}), 401
+    for friend in other_user['friends']:
+        if isinstance(friend, dict) and friend['email'] == email:
+            other_obj = friend
+            break
+
+    if user and friend_obj and other_user and other_obj:
+        users.update_one({"email": email}, {"$pull": {"friends": friend_obj}})
+        users.update_one({"email": friend_email}, {"$pull": {"friends": other_obj}})
+        return jsonify({"message": "Friend Removed"}), 200
+
+    else:
+        return jsonify({'error': 'Username invalid!'}), 401
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
