@@ -121,6 +121,7 @@ export default function EditProfile() {
     const updatedUserData = {
       email: currentUser.email,
       phoneNumber: profileData.phoneNumber,
+      address: profileData.address,
     };
 
     axios.post('http://localhost:5000/update_profile', updatedUserData)
@@ -216,7 +217,6 @@ export default function EditProfile() {
               value={profileData.phoneNumber}
               onChange={handlePhoneNumberChange}
               maxLength={12}
-              required
               className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
               />
             </div>
