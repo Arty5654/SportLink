@@ -33,31 +33,56 @@ const UserProfile = () => {
     const storedAccountPrivacy = isSessionStorageAvailable ? sessionStorage.getItem("accountPrivacy") : null;
     return storedAccountPrivacy ? JSON.parse(storedAccountPrivacy) : true;
   });
-
+  /*
   const [displayPhoneNumber, setPhoneNumberPrivacy] = useState(() => {
     const storedDisplayPhoneNumber = isSessionStorageAvailable ? sessionStorage.getItem("displayPhoneNumber") : null;
     return storedDisplayPhoneNumber ? JSON.parse(storedDisplayPhoneNumber) : true;
   });
+  */
+
+  const [displayPhoneNumber, setPhoneNumberPrivacy] = useState('private');
 
   useEffect(() => {
-    setDisplayAge(JSON.parse(sessionStorage.getItem("displayAge")));
-    setDisplayLocation(JSON.parse(sessionStorage.getItem("displayLocation")));
-    setAccountPrivacy(JSON.parse(sessionStorage.getItem("accountPrivacy")));
-    setPhoneNumberPrivacy(JSON.parse(sessionStorage.getItem("displayPhoneNumber")));
+    const storedAccountPrivacy = sessionStorage.getItem('accountPrivacy');
+    setAccountPrivacy(storedAccountPrivacy ? JSON.parse(storedAccountPrivacy) : true);
+
+    // Initialize other states based on accountPrivacy
+    setDisplayAge(!accountPrivacy);
+    setDisplayLocation(!accountPrivacy);
   }, []);
 
+  const handleAccountPrivacyToggle = (checked) => {
+    setAccountPrivacy(checked);
 
+    if (checked) {
+      setDisplayAge(true);
+      setDisplayLocation(true);
+    }
+  };
+
+  const handleInstagram = () => {
+    const appId = "677121907689569";
+    const redirectURI = encodeURIComponent("https://SportLink.com/");
+    const scope = "user_profile,user_media";
+    const responseType = "code";
+
+    //insta auth url
+    const instaAuthURL = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectURI}&scope=${scope}&response_type=${responseType}`;
+    //redirect user to insta auth url
+    window.location.href = instaAuthURL;
+  };
 
   const handleSaveProfile = () => {
     const currentUser = JSON.parse(sessionStorage.getItem('user'));
-    const updatedUserData = {
+    let updatedUserData = {
       email: currentUser.email,
       displayPhoneNumber,
-      displayAge,
-      displayLocation,
+      displayAge: accountPrivacy === 'private' ? 'private' : displayAge,
+      displayLocation: accountPrivacy === 'private' ? 'private' : displayLocation,
       accountPrivacy
     };
 
+    
     sessionStorage.setItem('displayAge', JSON.stringify(displayAge));
     sessionStorage.setItem('displayLocation', JSON.stringify(displayLocation));
     sessionStorage.setItem('accountPrivacy', JSON.stringify(accountPrivacy));
@@ -68,6 +93,7 @@ const UserProfile = () => {
         console.log('Profile updated successfully:', response.data);
         // Keep saved values
         //setProfileData(response.data);
+        alert('Changes Saved!');
       })
       .catch(error => {
         console.error('Error updating profile', error);
@@ -84,21 +110,21 @@ const UserProfile = () => {
         <div className="pb-4">
           <p>Toggle Age Visibility:</p>
           <Switch
-            checked={displayAge}
-            onChange={() => {
-            setDisplayAge(!displayAge);
-          }}
-          />
+            checked={accountPrivacy ? true : displayAge}
+            onChange={(checked) => {
+              if (!accountPrivacy) setDisplayAge(checked);
+            }}
+            />
         </div>
 
         {/* Toggle location visibility */}
         <div className="pb-4">
           <p>Toggle Location Visibility:</p>
           <Switch
-            checked={displayLocation}
-            onChange={() => {
-            setDisplayLocation(!displayLocation);
-          }}
+            checked={accountPrivacy ? true : displayLocation}
+            onChange={(checked) => {
+              if (!accountPrivacy) setDisplayLocation(checked);
+            }}
           />
         </div>
 
@@ -107,28 +133,37 @@ const UserProfile = () => {
           <p>Toggle Account Privacy:</p>
           <Switch
             checked={accountPrivacy}
-            onChange={() => {
-            setAccountPrivacy(!accountPrivacy);
-          }}
+            onChange={(checked) => handleAccountPrivacyToggle(checked)}
           />
         </div>
 
         {/* Toggle Phone Number */}
         <div className="pb-4">
-          <p>Phone Number Visibility</p>
-          <Switch
-            checked={displayPhoneNumber}
-            onChange={() => {
-              setPhoneNumberPrivacy(!displayPhoneNumber);
-          }}
-        />
+          <p className="mb-3"> Toggle Phone Number Visibility:</p>
+            <select
+            value={displayPhoneNumber}
+            onChange={(e) => setPhoneNumberPrivacy(e.target.value)}
+            className="border border-gray-300 p-2 rounded-md"
+          >
+            <option value="private">Private</option>
+            <option value="friends">Share with Friends</option>
+            <option value="public">Public</option>
+          </select>
         </div>
+        <button
+          onClick={handleInstagram}
+          className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-white outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 bg-pink-500 resize-none mb-2"
+          >
+            Connect Instagram
+          </button>
+        <div className="mt-2">
         <button
               onClick={handleSaveProfile}
               className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-white outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 bg-blue-500 resize-none"
               >
                 Save Privacy Settings
               </button>
+              </div>
 
         {/* ... Existing code ... */}
       </div>
