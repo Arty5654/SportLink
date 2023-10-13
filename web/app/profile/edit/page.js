@@ -11,10 +11,13 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import Sidebar from "@components/profileSidebar";
 import User from "@app/User";
+import Image from "next/image";
+import ProfileImage from "@public/assets/default-profile.webp";
 import "@styles/global.css";
 
 export default function EditProfile() {
   const [user, setUser] = useState(new User());
+  const [profileImage, setProfileImage] = useState(ProfileImage);
 
   //store profile data
   const [profileData, setProfileData] = useState({
@@ -27,6 +30,8 @@ export default function EditProfile() {
     country: user.country,
     zipCode: user.zipCode,
     city: user.city,
+    gender: user.gender,
+    birthday: user.birthday,
   });
 
   useEffect(() => {
@@ -44,6 +49,8 @@ export default function EditProfile() {
       zipCode: currentUser.zipCode || "",
       address: currentUser.address || "",
       city: currentUser.city || "",
+      gender: currentUser.gender || "",
+      birthday: currentUser.birthday || "",
     });
   }, []);
 
@@ -107,6 +114,7 @@ export default function EditProfile() {
     "Wisconsin",
     "Wyoming",
   ];
+  const genders = ["", "Prefer not to answer", "Male", "Female"];
 
   const handleSaveProfile = () => {
     // Create a copy of the user object with updated profileData
@@ -116,13 +124,12 @@ export default function EditProfile() {
     };
 
     setUser(updatedUser);
-    console.log("Updated user state:", updatedUser);
-    console.log("Updated user state", user);
+    console.log("Updated user state:", user);
 
     axios
-      .post("http://localhost:5000/update_profile", updatedUser)
+      .post("http://localhost:5000/update_profile", user)
       .then((response) => {
-        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        sessionStorage.setItem("user", JSON.stringify(user));
         console.log("Profile updated successfully:", response.data);
       })
       .catch((error) => {
@@ -203,6 +210,22 @@ export default function EditProfile() {
     }));
   };
 
+  const handleGender = (e) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      gender: e.target.value,
+    }));
+  };
+
+  const handleBirthday = (e) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      birthday: e.target.value,
+    }));
+  };
+
   const handleInstagram = () => {
     const appId = "677121907689569";
     const redirectURI = encodeURIComponent("https://SportLink.com/");
@@ -215,8 +238,18 @@ export default function EditProfile() {
     window.location.href = instaAuthURL;
   };
 
-  const handlePasswordChange = () => {
-    //TODO: send an email to change password
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0]; // Get the selected file
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        // Set the selected image in the state
+        setProfileImage(e.target.result);
+      };
+
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -231,21 +264,18 @@ export default function EditProfile() {
             <h1 className="text-xl font-base pb-8">Account</h1>
             <div className="flex">
               {/* ITEM: Profile Pic */}
-              <div className="w-1/5">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1"
-                  stroke="currentColor"
-                  className="w-20 h-20"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
+              <div className="w-1/5 pr-16">
+                <img
+                  src={profileImage}
+                  alt="Profile Image"
+                  style={{ width: "100px", height: "100px" }}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="pr-8"
+                />
               </div>
               {/* ITEM: Edit Info */}
               <div className="w-4/5">
@@ -285,7 +315,7 @@ export default function EditProfile() {
         </div>
 
         {/* ITEM: Personal Info */}
-        <div className="px-8 py-10 border rounded-2xl border-gray-300">
+        <div className="px-8 py-10 border rounded-2xl border-gray-300 mb-8">
           <form className="w-full">
             <h1 className="text-xl font-base pb-6">Personal Information</h1>
 
@@ -293,7 +323,7 @@ export default function EditProfile() {
             <div className="pb-8">
               <p className="font-semibold text-sm">Name</p>
               <p>
-                {profileData.firstName} {profileData.lastName}
+                {user.firstName} {user.lastName}
               </p>
             </div>
 
@@ -381,15 +411,54 @@ export default function EditProfile() {
                 </div>
               </div>
             </div>
-            <div className="pb-6 flex justify-center">
-              <button
-                onClick={handleSaveProfile}
-                className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-white outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 bg-blue-500 resize-none"
-              >
-                Save Profile
-              </button>
+          </form>
+        </div>
+
+        {/* ITEM: Other Info */}
+        <div className="px-8 py-10 border rounded-2xl border-gray-300">
+          <form className="w-full">
+            <h1 className="text-xl font-base pb-6">Other Information</h1>
+
+            <div className="pb-8">
+              <div className="flex gap-8 pb-6">
+                <div>
+                  <p className="font-semibold text-sm">Birthday</p>
+                  <input
+                    type="text"
+                    name="birthday"
+                    value={profileData.birthday}
+                    onChange={handleBirthday}
+                    className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Gender</p>
+                  <select
+                    value={profileData.gender}
+                    name="gender"
+                    onChange={handleGender}
+                    className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  >
+                    {genders.map((gender, index) => (
+                      <option key={index} value={gender}>
+                        {gender}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
           </form>
+        </div>
+
+        {/* Save Button */}
+        <div className="pb-6 flex justify-center">
+          <button
+            onClick={handleSaveProfile}
+            className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-bold text-white outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 bg-blue-500 resize-none"
+          >
+            Save Profile
+          </button>
         </div>
       </div>
     </div>

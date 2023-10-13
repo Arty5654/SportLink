@@ -15,11 +15,13 @@ const ProfilePage = () => {
     username: user.username,
     phoneNumber: user.phoneNumber,
     email: user.email,
-    state: "",
-    country: "",
-    zipCode: "",
-    address: "",
-    city: "",
+    state: user.state,
+    country: user.country,
+    zipCode: user.zipcode,
+    address: user.address,
+    city: user.city,
+    birthday: user.birthday,
+    gender: user.gender,
   });
 
   useEffect(() => {
@@ -37,6 +39,8 @@ const ProfilePage = () => {
       zipCode: currentUser.zipCode || "",
       address: currentUser.address || "",
       city: currentUser.city || "",
+      gender: currentUser.gedner || "",
+      birthday: currentUser.gender || "",
     });
   }, []);
 
@@ -83,8 +87,10 @@ const ProfilePage = () => {
           </div>
         </div>
         <div className="flex gap-8 pb-8 border-b border-gray-200">
-          <Link href="/profile/friends"
-            className="border border-black bg-black text-white px-8 py-2 rounded-xl">
+          <Link
+            href="/profile/friends"
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+          >
             Friends
           </Link>
           <p className="border border-black bg-black text-white px-8 py-2 rounded-xl">
@@ -114,10 +120,10 @@ const ProfilePage = () => {
           <p className="pt-8 pb-4 text-xs text-gray-500">Basic Information</p>
           <div className="flex flex-col gap-4">
             <p className="items-end">
-              Birthday: <span className="text-sm">April 30, 2003</span>
+              Birthday: <span className="text-sm text-blue-500">{user.birthday}</span>
             </p>
             <p className="items-end">
-              Gender: <span className="text-sm">Male</span>
+              Gender: <span className="text-sm text-blue-500">{user.gender}</span>
             </p>
           </div>
         </div>
