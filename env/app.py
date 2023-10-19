@@ -125,7 +125,8 @@ def google_signin():
             username = user['username']
 
             userData = {
-                'username': username
+                'username': username,
+                'friends': []
             }
 
             optional_fields = ['friends']
@@ -157,6 +158,7 @@ def google_signin():
             'username': username,
             'firstName': firstName,
             'lastName': lastName,
+            'friends': []
         }
         
         users.insert_one(userData)
@@ -387,47 +389,58 @@ def gamesUpdate():
         return jsonify({"message": "Team successfully created"}), 200
 
 def add_friend():
+    # Extracting data from request
     req = request.json
     email = req['email']
     new_friend_email = req['friend_email']
 
+    # Assign user objects
     user = users.find_one({'email': email})
     new_friend = users.find_one({'email': new_friend_email})
 
+    # if users exist, add friend to both lists
     if user and new_friend:
-        if new_friend in user['friends']:
+        # check if friend already exists
+        if email in user['friends']:
             return jsonify({'error': 'Friend already added!'}), 401
 
-        users.update_one({"email": email}, {"$push": {"friends": new_friend}})
-        users.update_one({"email": new_friend_email}, {"$push": {"friends": user}})
+        # add friend to both lists
+        users.update_one({"email": email}, {"$push": {"friends": new_friend_email}})
+        users.update_one({"email": new_friend_email}, {"$push": {"friends": email}})
         return jsonify({"message": "Friend Added - Both Ways"}), 200
 
     else:
         return jsonify({'error': 'Username invalid!'}), 401
     
 def remove_friend():
+    # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
+    print(f"curr user email: {email}")
+    print(f"friend to delete: {friend_email}")
 
+    # Assign user objects
     user = users.find_one({'email': email})
     other_user = users.find_one({'email': friend_email})
-    friend_obj = None
-    other_obj = None
+    friend_in_user = False
+    friend_in_other = False
 
+    # validate that user to be deleted is a current friend
     for friend in user['friends']:
-        if isinstance(friend, dict) and friend['email'] == friend_email:
-            friend_obj = friend
+        if friend == friend_email:
+            friend_in_user = True
             break
 
+    # validate that current user is a friend of the user to delete
     for friend in other_user['friends']:
-        if isinstance(friend, dict) and friend['email'] == email:
-            other_obj = friend
+        if friend == email:
+            friend_in_other = True    
             break
 
-    if user and friend_obj and other_user and other_obj:
-        users.update_one({"email": email}, {"$pull": {"friends": friend_obj}})
-        users.update_one({"email": friend_email}, {"$pull": {"friends": other_obj}})
+    if user and friend_in_user and other_user and friend_in_other:
+        users.update_one({"email": email}, {"$pull": {"friends": friend_email}})
+        users.update_one({"email": friend_email}, {"$pull": {"friends": email}})
         return jsonify({"message": "Friend Removed"}), 200
 
     else:

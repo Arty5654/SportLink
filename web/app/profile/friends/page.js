@@ -165,16 +165,8 @@ const ProfilePage = () => {
           onScroll={handleScroll}
         >
           {/* Check if friends list is empty or not*/}
-          {friends.length === 0 && (
-            <div className="text-center">
-              <p className="text-lg">You have no friends yet!</p>
-              <p className="text-lg">Add some friends to get started.</p>
-            </div>
-          )}
-
-          {/* Display friends if friends list not empty*/}
-
-          {friends.slice(0, friendsToShow).map((friend) => (
+          {friends && friends.length > 0 ? (
+            friends.slice(0, friendsToShow).map((friend) => (
             <div
               // key={friend.id}
               className="bg-white rounded-lg shadow-md mb-4 flex"
@@ -196,7 +188,13 @@ const ProfilePage = () => {
                 </button>
               </div>
             </div>
-          ))}
+          ))
+          ) : (
+            <div className="text-center">
+              <p className="text-lg">You have no friends yet!</p>
+              <p className="text-lg">Add some friends to get started.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

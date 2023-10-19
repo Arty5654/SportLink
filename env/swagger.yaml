@@ -94,6 +94,11 @@ paths:
                 displayPhoneNumber:
                   type: string
                   description: "Toggle phone number visibility"
+                friends:
+                  type: array
+                  default: []
+                  items:
+                    type: string
 
       responses:
         "201":
