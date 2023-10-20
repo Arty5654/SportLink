@@ -63,6 +63,12 @@ const Nav = () => {
       </Link>
 
       <div className="flex gap-2">
+
+
+        <div className="relative group px-7">
+          <LogoutButton />
+        </div>
+        
         <div className="relative group">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -105,9 +111,6 @@ const Nav = () => {
               Your Account
             </span>
 
-            <div className="relative group">
-              <LogoutButton />
-            </div>
           </Link>
         </div>
       </div>

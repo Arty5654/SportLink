@@ -15,8 +15,6 @@ import axios from 'axios';
 
 export default function LogoutButton() {
 
-    const [confirmed, setConfirmed] = useState(false);
-
     const handleLogout = () => {
 
         // takes user out of session
