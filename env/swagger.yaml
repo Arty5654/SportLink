@@ -462,3 +462,36 @@ paths:
                 properties:
                   error:
                     type: string
+  /user_lookup:
+    get:
+      operationId: app.user_lookup
+      parameters:
+        - name: searchTerm
+          in: query
+          description: The search term (username, email, or phone number) to look up.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Users found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    phone:
+                      type: string
+        '404':
+          description: No results found!
+

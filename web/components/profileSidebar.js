@@ -35,7 +35,15 @@ const profileSidebar = ({ active }) => {
               Privacy
               </p>
         </Link>
-        <p>Password & Security</p>
+        <Link href="/profile/search">
+          <p
+            className={`cursor-pointer ${
+              active === "search" ? "border-l-4 border-blue-500 pl-1" : ""
+            } ` }
+            >
+              User Look Up
+              </p>
+        </Link>
         <p>Settings</p>
       </div>
     </div>

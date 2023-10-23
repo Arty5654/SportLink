@@ -446,6 +446,20 @@ def remove_friend():
     else:
         return jsonify({'error': 'Username invalid!'}), 401
 
+def user_lookup():
+    search_term = request.args.get('searchTerm')
+    matching_users = []
+    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phone": search_term}]}):
+        matching_users.append({
+            "id": str(user["_id"]),  
+            "name": user.get("name"),
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "phone": user.get("phone")
+        })
+    #print(f"Matching users: {matching_users}")
+    return jsonify(matching_users), 200
+
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
