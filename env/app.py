@@ -9,9 +9,11 @@ from dotenv import load_dotenv # pip install python-dotenv
 import os # no install
 from datetime import datetime, timedelta #pip install datetime
 import string # no install
+from flask_socketio import SocketIO
 
 load_dotenv()
 
+# Socket for messaging
 
 # Connect to MongoDB
 MONGO_URI = os.getenv('MONGO_URI')
@@ -460,10 +462,15 @@ def user_lookup():
     #print(f"Matching users: {matching_users}")
     return jsonify(matching_users), 200
 
+
+
+
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
 
+# Socket for messaging
+socketIo = SocketIO(app, cors_allowed_origins="*")
 flask_app = app.app
 
 #email sending information
@@ -477,6 +484,13 @@ flask_app.config['MAIL_USERNAME'] = 'apikey'
 flask_app.config['MAIL_PASSWORD'] = key
 flask_app.config['MAIL_DEFAULT_SENDER'] = sender
 mail = Mail(flask_app)
+
+
+
+@socketIo.on ("message")
+def handleMessage (msg) :
+    print (msg) send (msg, broadcast=True)
+    return None
 
 
 if __name__ == '__main__':
