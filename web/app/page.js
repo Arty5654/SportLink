@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
+import Feed from "@components/feed";
 
 const Home = () => {
-  return <div>Home</div>;
+  return <Feed />;
 };
 
 export default Home;
