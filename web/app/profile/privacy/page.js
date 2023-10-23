@@ -5,6 +5,13 @@ Created: 10/09/23
 This will serve as the location where users can edit their privacy settings 
 */
 
+/* 
+Author: Arteom Avetissian
+Created: 10/09/23
+@aavetiss, Purdue University
+This will serve as the location where users can edit their privacy settings 
+*/
+
 "use client";
 
 import axios from 'axios';
