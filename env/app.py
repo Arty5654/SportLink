@@ -103,6 +103,8 @@ def login():
 def google_signin():
     req_user = request.json
 
+    print(req_user)
+
     email = req_user['email']
     googleId = req_user['googleId']
     firstName = req_user['firstName']
@@ -123,10 +125,11 @@ def google_signin():
             username = user['username']
 
             userData = {
-                'username': username
+                'username': username,
+                'friends': []
             }
 
-            optional_fields = ['phoneNumber', 'friends']
+            optional_fields = ['friends']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -154,7 +157,8 @@ def google_signin():
             'password': googleId, #store google id as their password
             'username': username,
             'firstName': firstName,
-            'lastName': lastName
+            'lastName': lastName,
+            'friends': []
         }
         
         users.insert_one(userData)
@@ -228,13 +232,40 @@ def change_password():
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
 
 def update_user_profile():
-    user = request.json
-    email = user['email']
-    phone_number = user['phoneNumber']
-    firstName = user['firstName']
+    user = request.get_json()
+    email = user.get('email')
+    phoneNumber = user.get('phoneNumber')
+    firstName = user.get('firstName')
+    lastName = user.get('lastName')
+    username = user.get('username')
+    address = user.get('address')
+    state = user.get('state')
+    country = user.get('country')
+    zipCode = user.get('zipcode')
+    city = user.get('city')
+
     # udpate the user's phone number in the data base
-    # users.update_one({"email": email}, {"$set": {"phoneNumber": phone_number}})
-    users.update_one({"email": email}, {"$set": {"firstName": firstName}})
+    update_query = {}
+    if firstName is not None:
+        update_query['firstName'] = firstName
+    if lastName is not None:
+        update_query['lastName'] = lastName
+    if username is not None:
+        update_query['username'] = username
+    if phoneNumber is not None:
+        update_query['phoneNumber'] = phoneNumber
+    if address is not None:
+        update_query['address'] = address 
+    if state is not None:
+        update_query['state'] = state
+    if country is not None:
+        update_query['country'] = country
+    if zipCode is not None:
+        update_query['zipCode'] = zipCode
+    if city is not None:
+        update_query['city'] = city
+    
+    users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
 def update_user_privacy():
@@ -263,55 +294,171 @@ def update_user_privacy():
 
 def gamesUpdate():
     # Extracting data from request
-    maxPlayers = request.json['maxPlayers']
     sport = request.json['sport']
+    maxPlayers = request.json['maxPlayers']
     location = request.json['location']
     skill = request.json['skill']
-    which = request.json['which']
+    gameID = request.json['gameID']
 
-    dbData = ''
-    if which == 0 or which == 2:
+    if gameID == 0 or gameID == 2:
         dbData = teams
     else:
         dbData = events
 
     # Inserting into MongoDB
-    if location in teams:
+    location_exists = dbData.find({'_id': location})
+
+    if location_exists:
         # If location exists, append
-        teams.update_one({'_id': location}, {'$push': {'data': {
-            'maxPlayers': maxPlayers,
-            'sport': sport,
-            'skill': skill,
-            'which': which
-        }}})
+
+        # Create Team or Event
+        if gameID == 0 or gameID == 1:
+            dbData.update_one({'_id': location}, {'$push': {'data': {
+                'maxPlayers': maxPlayers,
+                'sport': sport,
+                'skill': skill,
+                'gameID': gameID
+            }}})
+        # Join Team/ Event
+        else:
+            return jsonify(dbData.find_one({'_id': location})), 200
+
+
+
     else:
+
+        if gameID == 2 or gameID == 3:
+            return jsonify({"message": "No Games or Teams Found!"}), 400
+
         # If location doesn't exist, create a new entry
-        teams.insert_one({'_id': location, 'data': [{
+        dbData.insert_one({'_id': location, 'data': [{
             'maxPlayers': maxPlayers,
             'sport': sport,
             'skill': skill,
-            'which': which
+            'gameID': gameID
+        }]})
+
+        return jsonify({"message": "Team successfully created"}), 200
+
+def gamesUpdate():
+    # Extracting data from request
+    sport = request.json['sport']
+    maxPlayers = request.json['maxPlayers']
+    location = request.json['location']
+    skill = request.json['skill']
+    gameID = request.json['gameID']
+
+    if gameID == 0 or gameID == 2:
+        dbData = teams
+    else:
+        dbData = events
+
+    # Inserting into MongoDB
+    location_exists = dbData.find({'_id': location})
+
+    if location_exists:
+        # If location exists, append
+
+        # Create Team or Event
+        if gameID == 0 or gameID == 1:
+            dbData.update_one({'_id': location}, {'$push': {'data': {
+                'maxPlayers': maxPlayers,
+                'sport': sport,
+                'skill': skill,
+                'gameID': gameID
+            }}})
+        # Join Team/ Event
+        else:
+            return jsonify(dbData.find_one({'_id': location})), 200
+
+
+
+    else:
+
+        if gameID == 2 or gameID == 3:
+            return jsonify({"message": "No Games or Teams Found!"}), 400
+
+        # If location doesn't exist, create a new entry
+        dbData.insert_one({'_id': location, 'data': [{
+            'maxPlayers': maxPlayers,
+            'sport': sport,
+            'skill': skill,
+            'gameID': gameID
         }]})
 
         return jsonify({"message": "Team successfully created"}), 200
 
 def add_friend():
+    # Extracting data from request
     req = request.json
     email = req['email']
-    friend = req['friend']
+    new_friend_email = req['friend_email']
 
+    # Assign user objects
     user = users.find_one({'email': email})
-    # friend = users.find_one({'username': friend})
+    new_friend = users.find_one({'email': new_friend_email})
 
-    if user and friend:
-        if friend in user['friends']:
+    # if users exist, add friend to both lists
+    if user and new_friend:
+        # check if friend already exists
+        if email in user['friends']:
             return jsonify({'error': 'Friend already added!'}), 401
 
-        users.update_one({"email": email}, {"$push": {"friends": friend}})
-        return 200
+        # add friend to both lists
+        users.update_one({"email": email}, {"$push": {"friends": new_friend_email}})
+        users.update_one({"email": new_friend_email}, {"$push": {"friends": email}})
+        return jsonify({"message": "Friend Added - Both Ways"}), 200
 
     else:
         return jsonify({'error': 'Username invalid!'}), 401
+    
+def remove_friend():
+    # Extracting data from request
+    req = request.json
+    email = req['email']
+    friend_email = req['friend_email']
+    print(f"curr user email: {email}")
+    print(f"friend to delete: {friend_email}")
+
+    # Assign user objects
+    user = users.find_one({'email': email})
+    other_user = users.find_one({'email': friend_email})
+    friend_in_user = False
+    friend_in_other = False
+
+    # validate that user to be deleted is a current friend
+    for friend in user['friends']:
+        if friend == friend_email:
+            friend_in_user = True
+            break
+
+    # validate that current user is a friend of the user to delete
+    for friend in other_user['friends']:
+        if friend == email:
+            friend_in_other = True    
+            break
+
+    if user and friend_in_user and other_user and friend_in_other:
+        users.update_one({"email": email}, {"$pull": {"friends": friend_email}})
+        users.update_one({"email": friend_email}, {"$pull": {"friends": email}})
+        return jsonify({"message": "Friend Removed"}), 200
+
+    else:
+        return jsonify({'error': 'Username invalid!'}), 401
+
+def user_lookup():
+    search_term = request.args.get('searchTerm')
+    matching_users = []
+    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phone": search_term}]}):
+        matching_users.append({
+            "id": str(user["_id"]),  
+            "name": user.get("name"),
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "phone": user.get("phone")
+        })
+    #print(f"Matching users: {matching_users}")
+    return jsonify(matching_users), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
