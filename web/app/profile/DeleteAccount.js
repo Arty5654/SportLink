@@ -16,15 +16,36 @@ import axios from 'axios';
 export default function DeleteAccount(email) {
 
     const [deleting, setDeleting] = useState(false);
+    const [error, setError] = useState('');
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
 
 
         // API call to take user out of database
 
-        // takes user out of session and sets them back to sign in page
-        sessionStorage.removeItem('user');
-        window.location.href = '/signin';
+        try {
+
+            console.log("sending request");
+       
+            const e = email;
+            console.log(typeof(e));
+            const r = await axios.post('http://localhost:5000/delete_account', email, {
+                        headers: {
+                        'Content-Type': 'text/plain',
+                        },
+                    }); 
+
+            console.log("Account went bye bye");
+
+            // takes user out of session and sets them back to sign in page
+            sessionStorage.removeItem('user');
+            window.location.href = '/signin';
+
+        } catch (error) {
+            setError("Issue deleting account");
+            return;
+        }
+
     }
 
 
@@ -51,6 +72,7 @@ export default function DeleteAccount(email) {
                         onClick={() => setDeleting(false)}>
                         Go back
                     </button>
+                    {error && <p className="text-center text-red-500 mb-4">{error}</p>}
                 </div>
             </div>
             }
