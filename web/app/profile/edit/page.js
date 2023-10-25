@@ -242,10 +242,10 @@ export default function EditProfile() {
   };
 
   const handleAge = (e) => {
-    const { name, value } = e.target;
+    let age = e.target.value.replace(/\D/g, "");
     setProfileData((prev) => ({
       ...prev,
-      age: value,
+      age,
     }));
   };
 
