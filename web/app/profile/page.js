@@ -112,7 +112,7 @@ const ProfilePage = () => {
               <span className="text-blue-500 text-sm"> {user.email}</span>
             </p>
             <p className="items-end">
-              Address:
+              Location:
               <span className="text-sm text-blue-500">{`${user.address}, ${user.city}, ${user.state} ${user.zipCode}`}</span>
             </p>
           </div>
