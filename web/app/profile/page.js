@@ -22,6 +22,7 @@ const ProfilePage = () => {
     city: user.city,
     birthday: user.birthday,
     gender: user.gender,
+    age: user.age,
   });
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const ProfilePage = () => {
       city: currentUser.city || "",
       gender: currentUser.gedner || "",
       birthday: currentUser.gender || "",
+      age: currentUser.age || "",
     });
   }, []);
 
