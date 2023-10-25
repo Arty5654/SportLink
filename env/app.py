@@ -463,6 +463,19 @@ def user_lookup():
     return jsonify(matching_users), 200
 
 
+def message():
+
+    payload = request.json
+
+    name = payload['name']
+    ip = payload['IP']
+    msg = payload['content']
+
+    # Emit the message to the appropriate "room"
+    socketIo.emit('new_message', {'name': name, 'message': msg}, room=ip)
+
+    return jsonify({'status': 'message sent'})
+
 
 
 app = connexion.App(__name__, specification_dir='.')
@@ -470,12 +483,13 @@ CORS(app.app)
 app.add_api('swagger.yaml')
 
 # Socket for messaging
-socketIo = SocketIO(app, cors_allowed_origins="*")
+socketIo = SocketIO(app.app, cors_allowed_origins="*")
 flask_app = app.app
 
 #email sending information
 key = os.getenv("SG_API_KEY")
 sender = os.getenv("MAIL_SENDER")
+
 
 flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 flask_app.config['MAIL_PORT'] = 587
@@ -486,11 +500,16 @@ flask_app.config['MAIL_DEFAULT_SENDER'] = sender
 mail = Mail(flask_app)
 
 
+@socketIo.on('connect')
+def handle_connect():
+    print('Client connected')
 
-@socketIo.on ("message")
-def handleMessage (msg) :
-    print (msg) send (msg, broadcast=True)
-    return None
+@socketIo.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+
+
 
 
 if __name__ == '__main__':
