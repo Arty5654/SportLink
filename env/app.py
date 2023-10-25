@@ -463,6 +463,32 @@ def user_lookup():
         })
     #print(f"Matching users: {matching_users}")
     return jsonify(matching_users), 200
+    
+def get_user_info():
+    email = request.args.get('email')
+
+    # Query the database for the user based on email
+    user = users.find_one({"email": email})
+
+    if user:
+        # User found, return user information
+        user_info = {
+            "firstName": user.get("firstName"),
+            "lastName": user.get("lastName"),
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "phoneNumber": user.get("phoneNumber"),
+            "address": user.get("address"),
+            "state": user.get("state"),
+            "country": user.get("country"),
+            "zipCode": user.get("zipCode"),
+            "city": user.get("city"),
+            "age": user.get("age")
+        }
+        return jsonify(user_info), 200
+    else:
+        # User not found
+        return jsonify({'message': 'User not found'}), 404
 
 def delete_account():
 
