@@ -243,6 +243,7 @@ def update_user_profile():
     country = user.get('country')
     zipCode = user.get('zipcode')
     city = user.get('city')
+    age = user.get('age')
 
     # udpate the user's phone number in the data base
     update_query = {}
@@ -264,6 +265,8 @@ def update_user_profile():
         update_query['zipCode'] = zipCode
     if city is not None:
         update_query['city'] = city
+    if age is not None:
+        update_query['age'] = age
     
     users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Profile updated successfully'}), 200

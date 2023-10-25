@@ -33,6 +33,7 @@ export default function EditProfile() {
     city: user.city,
     gender: user.gender,
     birthday: user.birthday,
+    age: user.age,
   });
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function EditProfile() {
       city: currentUser.city || "",
       gender: currentUser.gender || "",
       birthday: currentUser.birthday || "",
+      age: currentUser.age || "",
     });
   }, []);
 
@@ -236,6 +238,14 @@ export default function EditProfile() {
     setProfileData((prev) => ({
       ...prev,
       birthday: e.target.value,
+    }));
+  };
+
+  const handleAge = (e) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      age: value,
     }));
   };
 
@@ -449,6 +459,19 @@ export default function EditProfile() {
                     className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                   />
                 </div>
+                <div className="pb-8">
+              <div className="flex gap-8 pb-6">
+                <div>
+                  <p className="font-semibold text-sm">Age</p>
+                  <input
+                    type="text"
+                    name="birthday"
+                    value={profileData.age}
+                    maxLength={2}
+                    onChange={handleAge}
+                    className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                  />
+                </div>
                 <div>
                   <p className="font-semibold text-sm">Gender</p>
                   <select
@@ -466,6 +489,8 @@ export default function EditProfile() {
                 </div>
               </div>
             </div>
+          </div>
+          </div>
           </form>
         </div>
 
