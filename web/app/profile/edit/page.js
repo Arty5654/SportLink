@@ -128,9 +128,9 @@ export default function EditProfile() {
     console.log("Updated user state:", user);
 
     axios
-      .post("http://localhost:5000/update_profile", user)
+      .post("http://localhost:5000/update_profile", updatedUser)
       .then((response) => {
-        sessionStorage.setItem("user", JSON.stringify(user));
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
         console.log("Profile updated successfully:", response.data);
       })
       .catch((error) => {
@@ -163,12 +163,24 @@ export default function EditProfile() {
   };
 
   const handlePhoneNumber = (e) => {
-    const { name, value } = e.target;
+    // only digits
+    const inputPhoneNumber = e.target.value.replace(/\D/g, '');
+  
+    // add dashses
+    let formattedPhoneNumber = '';
+    for (let i = 0; i < inputPhoneNumber.length; i++) {
+      if (i === 3 || i === 6) {
+        formattedPhoneNumber += '-';
+      }
+      formattedPhoneNumber += inputPhoneNumber[i];
+    }
+  
     setProfileData((prev) => ({
       ...prev,
-      phoneNumber: e.target.value,
+      phoneNumber: formattedPhoneNumber,
     }));
   };
+  
 
   const handleAddress = (e) => {
     const { name, value } = e.target;
@@ -340,6 +352,7 @@ export default function EditProfile() {
                 type="tel"
                 name="phoneNumber"
                 value={profileData.phoneNumber}
+                maxLength={12}
                 onChange={handlePhoneNumber}
                 required
                 className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
