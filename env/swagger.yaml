@@ -294,6 +294,8 @@ paths:
                   type: string
                 city:
                   type: string
+                age:
+                  type: string
       responses:
         "200":
           description: Profile updated successfully

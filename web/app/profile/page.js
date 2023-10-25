@@ -125,6 +125,9 @@ const ProfilePage = () => {
             <p className="items-end">
               Gender: <span className="text-sm text-blue-500">{user.gender}</span>
             </p>
+            <p className="items-end">
+              Age: <span className="text-sm text-blue-500">{user.age}</span>
+            </p>
           </div>
         </div>
       </div>
