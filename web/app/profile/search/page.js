@@ -9,6 +9,7 @@ import Image from "next/image";
 import ProfileImage from "@public/assets/default-profile.webp";
 import "@styles/global.css";
 import { userAgent } from 'next/server';
+import Link from 'next/link';
 
 function UserLookupPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,6 +31,7 @@ function UserLookupPage() {
   useEffect(() => {
     // Optionally, you can automatically trigger the search when the component mounts
     // handleSearch();
+   // sessionStorage.setItem("email", JSON.stringify(user.email));
   }, []);
 
   return (
@@ -64,17 +66,19 @@ function UserLookupPage() {
         <div className="mt-4 space-y-4">
           {searchResults.map((user) => (
             <div key={user.id} className="bg-white shadow rounded-lg p-4">
-              <img
-                src={ProfileImage}
-                alt="Profile"
-                className="w-16 h-16 rounded-full object-cover"
-              />
-              <div>
-                <p className="text-lg font-semibold">{user.name}</p>
-                <p className="text-gray-600">Username: {user.username}</p>
-                <p className="text-gray-600">Email: {user.email}</p>
-                <p className="text-gray-600">Phone: {user.phone}</p>
-              </div>
+              <Link href={"/profile/userProfilePage"}>
+                  <img
+                    src={ProfileImage}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-lg font-semibold">{user.name}</p>
+                    <p className="text-gray-600">Username: {user.username}</p>
+                    <p className="text-gray-600">Email: {user.email}</p>
+                    <p className="text-gray-600">Phone: {user.phone}</p>
+                  </div>
+              </Link>
             </div>
           ))}
         </div>
