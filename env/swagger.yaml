@@ -4,26 +4,6 @@ info:
   version: "1.0"
 
 paths:
-  /message:
-    post:
-      operationId: app.message
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                IP:
-                  type: string
-                content:
-                  type: string
-      responses:
-        '200':
-          description: "Success!"
-
   /update_games:
     post:
       operationId: app.gamesUpdate

@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import './board.css';
-import axios from 'axios'; // Import axios
 import io from 'socket.io-client';
 const socket = io('http://localhost:5000');
 
@@ -11,12 +10,33 @@ function Messages() {
         socket.on('connect', () => {
             // Join a "room" corresponding to its own IP/port
             console.log("HERE");
-            socket.emit('join', 'hostAddress'); // or 'localhost:3001' for the other frontend
+            socket.emit('join', hostAddress); // or 'localhost:3001' for the other frontend
         });
 
-        socket.on('new_message', (data) => {
+        socket.on('message', (data) => {
             console.log(data);  // Handle the received message here
         });
+
+        socket.on('message_response', (data) => {
+            const { name, content } = data;
+
+            setCurrentChats(prevChats => {
+                if (prevChats[name]) {
+                    // If the chat with the given name already exists, append the new message
+                    return {
+                        ...prevChats,
+                        [name]: [...prevChats[name], content]
+                    };
+                } else {
+                    // If the chat with the given name doesn't exist, create it and initialize with the new message
+                    return {
+                        ...prevChats,
+                        [name]: [content]
+                    };
+                }
+            });
+        });
+
     }, []);
     const [currentChats, setCurrentChats] = useState({
         'Alice': ['Hello!', 'How are you?'],
@@ -41,19 +61,14 @@ function Messages() {
         };
 
         // Make an API call
-        axios.post('http://localhost:5000/message', data)
-            .then(response => {
-                console.log('Message sent successfully:', response.data);
-                // After successful API call, update the local state
-                setCurrentChats(prevChats => ({
-                    ...prevChats,
-                    [selectedChat]: [...prevChats[selectedChat], inputMessage]
-                }));
-                setInputMessage('');
-            })
-            .catch(error => {
-                console.error('Error sending message:', error);
-            });
+        socket.emit('new_message', data);
+
+        setCurrentChats(prevChats => ({
+            ...prevChats,
+            [selectedChat]: [...prevChats[selectedChat], inputMessage]
+        }));
+        setInputMessage('');
+
     };
 
     const addNewChat = () => {

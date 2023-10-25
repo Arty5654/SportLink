@@ -9,7 +9,7 @@ from dotenv import load_dotenv # pip install python-dotenv
 import os # no install
 from datetime import datetime, timedelta #pip install datetime
 import string # no install
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, send, join_room, emit
 
 load_dotenv()
 
@@ -463,19 +463,6 @@ def user_lookup():
     return jsonify(matching_users), 200
 
 
-def message():
-
-    payload = request.json
-
-    name = payload['name']
-    ip = payload['IP']
-    msg = payload['content']
-
-    # Emit the message to the appropriate "room"
-    socketIo.emit('new_message', {'name': name, 'message': msg}, room=ip)
-
-    return jsonify({'status': 'message sent'})
-
 
 
 app = connexion.App(__name__, specification_dir='.')
@@ -508,8 +495,23 @@ def handle_connect():
 def handle_disconnect():
     print('Client disconnected')
 
+@socketIo.on('join')
+def handle_join(obj):
+    print(obj)
+    join_room(obj)
+    send(f"{request.sid} has entered the room.", room=obj)
 
-
+@socketIo.on('new_message')
+def handle_new_message(data):
+    IP = data['IP']
+    name = data['name']
+    content = data['content']
+    # Handle the message, possibly broadcasting it or storing it, etc.
+    print(IP)
+    print(name)
+    print(content)
+    # Optionally, you can send an acknowledgment or response back to the client
+    emit('message_response', {'name': name, 'content': content}, room=IP)
 
 
 if __name__ == '__main__':
