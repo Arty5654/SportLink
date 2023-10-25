@@ -9,6 +9,7 @@ from dotenv import load_dotenv # pip install python-dotenv
 import os # no install
 from datetime import datetime, timedelta #pip install datetime
 import string # no install
+import json # no install
 
 load_dotenv()
 
@@ -462,6 +463,16 @@ def user_lookup():
         })
     #print(f"Matching users: {matching_users}")
     return jsonify(matching_users), 200
+
+def delete_account():
+
+    req = request.data.decode("utf-8")
+    parsed = json.loads(req)
+    email = parsed.get('email', '')
+
+    print(email)
+    users.delete_one({"email": email})
+    return 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

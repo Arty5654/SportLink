@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import Sidebar from "@components/profileSidebar";
 import User from "@app/User";
+import DeleteAccount from "./DeleteAccount";
 
 const ProfilePage = () => {
   const [user, setUser] = useState(new User());
@@ -131,6 +132,10 @@ const ProfilePage = () => {
               Age: <span className="text-sm text-blue-500">{user.age}</span>
             </p>
           </div>
+        </div>
+        {/* ITEM: Account deletion */}
+        <div>
+          <DeleteAccount email={user.email} />
         </div>
       </div>
     </div>
