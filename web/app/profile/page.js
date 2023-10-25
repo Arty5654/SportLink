@@ -103,7 +103,7 @@ const ProfilePage = () => {
           <p className="pt-8 pb-4 text-xs text-gray-500">Contact Information</p>
           <div className="flex flex-col gap-4">
             <p className="items-end">
-              Phone: <span className="text-blue-500 text-sm">571 435 2311</span>
+              Phone: <span className="text-blue-500 text-sm"> {user.phoneNumber}</span>
             </p>
             <p className="items-end">
               Email:
