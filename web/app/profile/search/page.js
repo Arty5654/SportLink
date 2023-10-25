@@ -1,13 +1,10 @@
-"use client";
-
-import axios from 'axios';
-import { useEffect, useState } from "react";
+"use client"
+import React, { useState, useEffect } from "react";
 import Sidebar from "@components/profileSidebar";
+import axios from "axios";
 import "@styles/global.css";
-import User from "@app/User";
 import Image from "next/image";
 import ProfileImage from "@public/assets/default-profile.webp";
-import "@styles/global.css";
 import { userAgent } from 'next/server';
 import Link from 'next/link';
 
@@ -26,13 +23,7 @@ function UserLookupPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    // Optionally, you can automatically trigger the search when the component mounts
-    // handleSearch();
-   // sessionStorage.setItem("email", JSON.stringify(user.email));
-  }, []);
+  }
 
   return (
     <div className="flex h-screen">
@@ -66,7 +57,7 @@ function UserLookupPage() {
         <div className="mt-4 space-y-4">
           {searchResults.map((user) => (
             <div key={user.id} className="bg-white shadow rounded-lg p-4">
-              <Link href={"/profile/userProfilePage"}>
+              <Link href={`/profile/userProfilePage?email=${user.email}`}>
                   <img
                     src={ProfileImage}
                     alt="Profile"
