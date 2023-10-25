@@ -22,13 +22,13 @@ const EventCard = ({
   const status = open ? "Open" : "Closed";
 
   return (
-    <div className="border border-gray-400 rounded-xl px-4 py-6 mb-4">
+    <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64">
       <h1 className="font-semibold">{title}</h1>
       <p className="text-sm text-gray-500 pb-4">
         {sport} in {city} - <span className="text-blue-500">{status}</span>
       </p>
       <p className="text-sm pb-4">{desc}</p>
-      <p className="text-sm text-blue-500">
+      <p className="text-sm text-blue-500 ">
         People Registered:{" "}
         <span>
           {currentParticipants} / {maxParticpants}
