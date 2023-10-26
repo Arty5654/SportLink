@@ -263,7 +263,7 @@ paths:
                 properties:
                   error:
                     type: string
-
+                    
   /update_profile:
     post:
       operationId: app.update_user_profile
@@ -486,13 +486,15 @@ paths:
                   properties:
                     id:
                       type: string
-                    name:
+                    firstName:
                       type: string
                     username:
                       type: string
                     email:
                       type: string
                     phone:
+                      type: string
+                    lastName:
                       type: string
         '404':
           description: No results found!
@@ -537,6 +539,8 @@ paths:
                   city:
                     type: string
                   age:
+                    type: string
+                  displayPhoneNumber:
                     type: string
         '404':
           description: User not found

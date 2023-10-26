@@ -452,10 +452,11 @@ def remove_friend():
 def user_lookup():
     search_term = request.args.get('searchTerm')
     matching_users = []
-    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phone": search_term}]}):
+    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phoneNumber": search_term}, {"firstName": search_term}, {"lastName": search_term}]}):
         matching_users.append({
             "id": str(user["_id"]),  
-            "name": user.get("name"),
+            "firstName": user.get("firstName"),
+            "lastName": user.get("lastName"),
             "username": user.get("username"),
             "email": user.get("email"),
             "phone": user.get("phone")
@@ -482,7 +483,8 @@ def get_user_info():
             "country": user.get("country"),
             "zipCode": user.get("zipCode"),
             "city": user.get("city"),
-            "age": user.get("age")
+            "age": user.get("age"),
+            "displayPhoneNumber": user.get("displayPhoneNumber")
         }
         return jsonify(user_info), 200
     else:

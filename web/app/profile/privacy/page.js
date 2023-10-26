@@ -56,6 +56,7 @@ const UserProfile = () => {
     // Initialize other states based on accountPrivacy
     setDisplayAge(!accountPrivacy);
     setDisplayLocation(!accountPrivacy);
+   // setPhoneNumberPrivacy(displayPhoneNumber);
   }, []);
 
   const handleAccountPrivacyToggle = (checked) => {
