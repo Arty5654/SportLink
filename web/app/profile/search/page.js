@@ -1,23 +1,48 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import Sidebar from "@components/profileSidebar";
 import axios from "axios";
 import "@styles/global.css";
 import Image from "next/image";
 import ProfileImage from "@public/assets/default-profile.webp";
-import { userAgent } from 'next/server';
 import Link from 'next/link';
 
 function UserLookupPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [visitedProfiles, setVisitedProfiles] = useState([]);
 
-  const handleSearch = async () => {
+  // Load visited profiles history from localStorage on component mount
+  useEffect(() => {
+    const savedVisitedProfiles = localStorage.getItem('visitedProfiles');
+    if (savedVisitedProfiles) {
+      setVisitedProfiles(JSON.parse(savedVisitedProfiles));
+    }
+  }, []);
+
+  // Save visited profile to history
+  const saveVisitedProfileToHistory = (user) => {
+    const updatedVisitedProfiles = [user, ...visitedProfiles];
+    setVisitedProfiles(updatedVisitedProfiles);
+
+    // Save the updated history to localStorage
+    localStorage.setItem('visitedProfiles', JSON.stringify(updatedVisitedProfiles));
+  };
+
+  const handleSearchTermChange = async (e) => {
+    const input = e.target.value;
+    setSearchTerm(input);
+
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/user_lookup?searchTerm=${searchTerm}`);
-      setSearchResults(response.data); 
+      //clear search results when empty
+      if (input.trim() === '') {
+        setSearchResults([]);
+      } else {
+        const response = await axios.get(`http://localhost:5000/user_lookup?searchTerm=${input}`);
+        setSearchResults(response.data);
+      }
     } catch (error) {
       console.error('Error searching for users', error);
     } finally {
@@ -37,18 +62,10 @@ function UserLookupPage() {
             type="text"
             placeholder="Enter username, email, or phone number"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onInput={handleSearchTermChange}
             className="w-full p-2 border rounded-lg focus:outline-none focus:border-blue-500"
           />
         </div>
-
-        <button
-          onClick={handleSearch}
-          disabled={loading}
-          className="bg-blue-500 text-white py-2 px-4 rounded-lg cursor-pointer"
-        >
-          {loading ? 'Searching...' : 'Search'}
-        </button>
 
         {searchResults.length === 0 && !loading && (
           <p className="mt-4 text-gray-600">No results found.</p>
@@ -57,21 +74,29 @@ function UserLookupPage() {
         <div className="mt-4 space-y-4">
           {searchResults.map((user) => (
             <div key={user.id} className="bg-white shadow rounded-lg p-4">
-              <Link href={`/profile/userProfilePage?email=${user.email}`}>
-                  <img
-                    src={ProfileImage}
-                    alt="Profile"
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="text-lg font-semibold">{user.name}</p>
-                    <p className="text-gray-600">Username: {user.username}</p>
-                    <p className="text-gray-600">Email: {user.email}</p>
-                    <p className="text-gray-600">Phone: {user.phone}</p>
-                  </div>
+              <Link href={`/profile/userProfilePage?email=${user.email}`} onClick={() => saveVisitedProfileToHistory(user)}>
+                <img
+                  src={ProfileImage}
+                  alt="Profile"
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+                <div>
+                  <p className="text-gray-600">Name: {`${user.firstName} ${user.lastName}`}</p>
+                  <p className="text-gray-600">Username: {user.username}</p>
+                  <p className="text-gray-600">Email: {user.email}</p>
+                </div>
               </Link>
             </div>
           ))}
+        </div>
+
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-2">Visited Profiles</h2>
+          <ul>
+            {visitedProfiles.map((user, index) => (
+              <li key={index}>{user.firstName} {user.lastName}</li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
