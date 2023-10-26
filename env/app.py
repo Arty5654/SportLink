@@ -503,15 +503,18 @@ def handle_join(obj):
 
 @socketIo.on('new_message')
 def handle_new_message(data):
-    IP = data['IP']
+    IP_TO = data['IP_TO']
     name = data['name']
     content = data['content']
+    IP_FROM = data['IP_FROM']
+
     # Handle the message, possibly broadcasting it or storing it, etc.
-    print(IP)
+    print(IP_FROM)
+    print(IP_TO)
     print(name)
     print(content)
     # Optionally, you can send an acknowledgment or response back to the client
-    emit('message_response', {'name': name, 'content': content}, room=IP)
+    emit('message_response', {'name': name, 'content': content, 'IP_FROM': IP_FROM}, room=IP_TO)
 
 
 if __name__ == '__main__':

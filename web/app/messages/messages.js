@@ -18,7 +18,7 @@ function Messages() {
         });
 
         socket.on('message_response', (data) => {
-            const { name, content } = data;
+            const { name, content, IP_FROM } = data;
 
             setCurrentChats(prevChats => {
                 if (prevChats[name]) {
@@ -35,6 +35,12 @@ function Messages() {
                     };
                 }
             });
+            if (!chatIPs[name]) {
+                setChatIPs(prevIPs => ({
+                    ...prevIPs,
+                    [name]: IP_FROM
+                }));
+            }
         });
 
     }, []);
@@ -55,7 +61,8 @@ function Messages() {
     const sendMessage = () => {
         // Gather required data for API call
         const data = {
-            IP: chatIPs[selectedChat],
+            IP_FROM: hostAddress,
+            IP_TO: chatIPs[selectedChat],
             name: selectedChat,
             content: inputMessage
         };
