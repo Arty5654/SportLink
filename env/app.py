@@ -86,7 +86,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -127,10 +127,9 @@ def google_signin():
 
             userData = {
                 'username': username,
-                'friends': []
             }
 
-            optional_fields = ['friends']
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -242,9 +241,11 @@ def update_user_profile():
     address = user.get('address')
     state = user.get('state')
     country = user.get('country')
-    zipCode = user.get('zipcode')
+    zipCode = user.get('zipCode')
     city = user.get('city')
     age = user.get('age')
+    birthday = user.get('birthday')
+    gender = user.get('gender')
 
     # udpate the user's phone number in the data base
     update_query = {}
@@ -268,6 +269,10 @@ def update_user_profile():
         update_query['city'] = city
     if age is not None:
         update_query['age'] = age
+    if birthday is not None:
+        update_query['birthday'] = birthday
+    if gender is not None:
+        update_query['gender'] = gender
     
     users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Profile updated successfully'}), 200
