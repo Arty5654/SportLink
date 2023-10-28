@@ -8,11 +8,17 @@ class User {
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.phone;
+        this.phoneNumber;
         this.location;
         this.age;
         this.gender;
         this.friends;
+        this.state;
+        this.country;
+        this.zipCode;
+        this.address;
+        this.city;
+        this.birthday;
     }
 
     // adds new field to a user - username, age etc.

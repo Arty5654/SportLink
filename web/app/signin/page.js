@@ -71,11 +71,43 @@ export default function SignIn() {
                 // optional fields
 
                 if (resp.phoneNumber) {
-                    user.phone = resp.phoneNumber;
+                    user.phoneNumber = resp.phoneNumber;
                 }
 
                 if (resp.friends) {
                     user.friends = resp.friends;
+                }
+
+                if (resp.address) {
+                    user.address = resp.address;
+                }
+
+                if (resp.city) {
+                    user.city = resp.city;
+                }
+
+                if (resp.country) {
+                    user.country = resp.country;
+                }
+
+                if (resp.state) {
+                    user.state = resp.state;
+                }
+
+                if (resp.zipCode) {
+                    user.zipCode = resp.zipCode;
+                }
+
+                if (resp.birthday) {
+                    user.birthday = resp.birthday;
+                }
+
+                if (resp.age) {
+                    user.age = resp.age;
+                }
+
+                if (resp.gender) {
+                    user.gender = resp.gender;
                 }
 
                 sessionStorage.setItem('user', JSON.stringify(user));

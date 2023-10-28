@@ -20,47 +20,17 @@ export default function EditProfile() {
   const [profileImage, setProfileImage] = useState(ProfileImage);
   const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
 
-  //store profile data
-  const [profileData, setProfileData] = useState({
-    firstName: user.firstName,
-    lastName: user.lastName,
-    username: user.username,
-    phoneNumber: user.phoneNumber,
-    address: user.address,
-    state: user.state,
-    country: user.country,
-    zipCode: user.zipCode,
-    city: user.city,
-    gender: user.gender,
-    birthday: user.birthday,
-    age: user.age,
-  });
 
   useEffect(() => {
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
     setUser(currentUser);
 
-    // Initialize profileData with user data from currentUser, if undefined set ""
-    setProfileData({
-      firstName: currentUser.firstName || "",
-      lastName: currentUser.lastName || "",
-      username: currentUser.username || "",
-      phoneNumber: currentUser.phoneNumber || "",
-      state: currentUser.state || "",
-      country: currentUser.country || "",
-      zipCode: currentUser.zipCode || "",
-      address: currentUser.address || "",
-      city: currentUser.city || "",
-      gender: currentUser.gender || "",
-      birthday: currentUser.birthday || "",
-      age: currentUser.age || "",
-    });
   }, []);
 
   useEffect(() => {
     // This effect will trigger when either user or profileData changes
-    console.log("Current user state:", profileData);
-  }, [user, profileData]);
+    console.log("Current user state:", user);
+  }, [user]);
 
   const countries = ["", "Prefer not to answer", "United States of America"];
   const states = [
@@ -120,19 +90,14 @@ export default function EditProfile() {
   const genders = ["", "Prefer not to answer", "Male", "Female"];
 
   const handleSaveProfile = () => {
-    // Create a copy of the user object with updated profileData
-    const updatedUser = {
-      ...user,
-      ...profileData,
-    };
-
-    setUser(updatedUser);
-    console.log("Updated user state:", user);
 
     axios
-      .post("http://localhost:5000/update_profile", updatedUser)
+      .post("http://localhost:5000/update_profile", user)
       .then((response) => {
-        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+        sessionStorage.removeItem('user');
+        sessionStorage.setItem("user", JSON.stringify(user));
+
         console.log("Profile updated successfully:", response.data);
       })
       .catch((error) => {
@@ -140,27 +105,11 @@ export default function EditProfile() {
       });
   };
 
-  const handleFirstName = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfileData((prev) => ({
+    setUser(prev => ({
       ...prev,
-      firstName: value,
-    }));
-  };
-
-  const handleLastName = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      lastName: value,
-    }));
-  };
-
-  const handleUsername = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      username: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -177,73 +126,25 @@ export default function EditProfile() {
       formattedPhoneNumber += inputPhoneNumber[i];
     }
   
-    setProfileData((prev) => ({
+    setUser((prev) => ({
       ...prev,
       phoneNumber: formattedPhoneNumber,
-    }));
-  };
-  
-
-  const handleAddress = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      address: e.target.value,
-    }));
-  };
-
-  const handleCity = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      city: e.target.value,
-    }));
-  };
-
-  const handleState = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      state: e.target.value,
-    }));
-  };
-
-  const handleCountry = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      country: e.target.value,
     }));
   };
 
   const handleZipCode = (e) => {
     //remove non numbers
     let zipCode = e.target.value.replace(/\D/g, "");
-    setProfileData((prev) => ({
+    setUser((prev) => ({
       ...prev,
       zipCode,
     }));
   };
 
-  const handleGender = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      gender: e.target.value,
-    }));
-  };
-
-  const handleBirthday = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      birthday: e.target.value,
-    }));
-  };
 
   const handleAge = (e) => {
     let age = e.target.value.replace(/\D/g, "");
-    setProfileData((prev) => ({
+    setUser((prev) => ({
       ...prev,
       age,
     }));
@@ -311,8 +212,8 @@ export default function EditProfile() {
                     <p className="font-semibold text-sm">First Name</p>
                     <textarea
                       name="firstName"
-                      onChange={handleFirstName}
-                      value={profileData.firstName}
+                      onChange={handleInputChange}
+                      value={user.firstName}
                       className="w-72 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                     />
                   </div>
@@ -321,8 +222,8 @@ export default function EditProfile() {
                     <textarea
                       name="lastName"
                       className="w-72 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
-                      value={profileData.lastName}
-                      onChange={handleLastName}
+                      value={user.lastName}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
@@ -331,9 +232,9 @@ export default function EditProfile() {
                   <input
                     type="text"
                     name="username"
-                    value={profileData.username}
+                    value={user.username}
                     className="w-full rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
-                    onChange={handleUsername}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
@@ -361,7 +262,7 @@ export default function EditProfile() {
               <input
                 type="tel"
                 name="phoneNumber"
-                value={profileData.phoneNumber}
+                value={user.phoneNumber}
                 maxLength={12}
                 onChange={handlePhoneNumber}
                 required
@@ -375,9 +276,9 @@ export default function EditProfile() {
                 <div>
                   <p className="font-semibold text-sm">Country</p>
                   <select
-                    value={profileData.country}
+                    value={user.country}
                     name="country"
-                    onChange={handleCountry}
+                    onChange={handleInputChange}
                     className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                   >
                     {countries.map((country, index) => (
@@ -390,9 +291,9 @@ export default function EditProfile() {
                 <div>
                   <p className="font-semibold text-sm">State</p>
                   <select
-                    value={profileData.state}
+                    value={user.state}
                     name="state"
-                    onChange={handleState}
+                    onChange={handleInputChange}
                     className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                   >
                     {states.map((state, index) => (
@@ -408,8 +309,8 @@ export default function EditProfile() {
                 <input
                   type="text"
                   name="address"
-                  value={profileData.address}
-                  onChange={handleAddress}
+                  value={user.address}
+                  onChange={handleInputChange}
                   className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none mb-1"
                 />
               </div>
@@ -419,8 +320,8 @@ export default function EditProfile() {
                   <input
                     type="text"
                     name="city"
-                    value={profileData.city}
-                    onChange={handleCity}
+                    value={user.city}
+                    onChange={handleInputChange}
                     className="w-96 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                   />
                 </div>
@@ -431,7 +332,7 @@ export default function EditProfile() {
                   <br />
                   <input
                     name="zipCode"
-                    value={profileData.zipCode}
+                    value={user.zipCode}
                     maxLength={5}
                     onChange={handleZipCode}
                     className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
@@ -454,8 +355,8 @@ export default function EditProfile() {
                   <input
                     type="text"
                     name="birthday"
-                    value={profileData.birthday}
-                    onChange={handleBirthday}
+                    value={user.birthday}
+                    onChange={handleInputChange}
                     className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                   />
                 </div>
@@ -466,7 +367,7 @@ export default function EditProfile() {
                   <input
                     type="text"
                     name="birthday"
-                    value={profileData.age}
+                    value={user.age}
                     maxLength={2}
                     onChange={handleAge}
                     className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
@@ -475,9 +376,9 @@ export default function EditProfile() {
                 <div>
                   <p className="font-semibold text-sm">Gender</p>
                   <select
-                    value={profileData.gender}
+                    value={user.gender}
                     name="gender"
-                    onChange={handleGender}
+                    onChange={handleInputChange}
                     className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
                   >
                     {genders.map((gender, index) => (
