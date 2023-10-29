@@ -19,6 +19,7 @@ class User {
         this.address;
         this.city;
         this.birthday;
+        this.reportReason
     }
 
     // adds new field to a user - username, age etc.
