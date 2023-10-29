@@ -761,4 +761,26 @@ paths:
           description: Account deleted
         "401":
           description: Error deleting account
+
+  /get_events:
+    get:
+      summary: Get Event Information
+      description: Retrieve event information from the database.
+      operationId: app.get_events
+      responses:
+        "200":
+          description: Event information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    desc:
+                      type: string
+        "404":
+          description: Event not found
         
