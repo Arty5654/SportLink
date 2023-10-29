@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "@components/profileSidebar";
 import axios from "axios";
 import "@styles/global.css";
+import Link from 'next/link';
 
 function UserProfilePage() {
   const [userProfile, setUserProfile] = useState({});
@@ -40,6 +41,14 @@ function UserProfilePage() {
           </div>
           <div className="flex gap-8 pb-8 border-b border-gray-200">
             {/* You can add the Friends and Messages links here */}
+          </div>
+          <div className="flex gap-8 pb-8 border-b border-gray-200">
+          <Link
+            href="http://localhost:3000/profile/friends"
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+          >
+            Send Friend Request
+          </Link>
           </div>
           <div className="text-base pb-4">
             <p className="pt-8 pb-4 text-xs text-gray-500">Contact Information</p>
