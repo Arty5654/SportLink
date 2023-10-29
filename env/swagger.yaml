@@ -25,9 +25,8 @@ paths:
                 location:
                   type: string
 
-
       responses:
-        '200':
+        "200":
           description: "Success!"
   # account creation endpoints
   /create_account:
@@ -191,7 +190,7 @@ paths:
                     type: string
                   gender:
                     type: string
-                  zipCode: 
+                  zipCode:
                     type: string
                   birthday:
                     type: string
@@ -438,7 +437,7 @@ paths:
   #         '500':
   #           description: Internal Server Error
 
-# friends endpoint
+  # friends endpoint
   /send_friend_request:
     post:
       operationId: app.send_friend_request
@@ -549,7 +548,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Friend requests retrieved successfully
           content:
             application/json:
@@ -564,7 +563,7 @@ paths:
                       type: string
                     status:
                       type: string
-        '404':
+        "404":
           description: No friend requests found!
   /get_friends:
     get:
@@ -577,7 +576,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Friends retrieved successfully
           content:
             application/json:
@@ -592,7 +591,7 @@ paths:
                       type: string
                     status:
                       type: string
-        '404':
+        "404":
           description: No friends found!
   /remove_friend:
     post:
@@ -638,7 +637,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Users found
           content:
             application/json:
@@ -661,7 +660,7 @@ paths:
                       type: string
                     lastName:
                       type: string
-        '404':
+        "404":
           description: No results found!
   /get_user_info:
     get:
@@ -676,7 +675,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: User information retrieved successfully
           content:
             application/json:
@@ -709,9 +708,8 @@ paths:
                     type: string
                   gender:
                     type: string
-        '404':
+        "404":
           description: User not found
-
 
   /delete_account:
     post:
@@ -727,3 +725,25 @@ paths:
           description: Account deleted
         "401":
           description: Error deleting account
+
+  /get_events:
+    get:
+      summary: Get Event Information
+      description: Retrieve event information from the database.
+      operationId: app.get_events
+      responses:
+        "200":
+          description: Event information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    desc:
+                      type: string
+        "404":
+          description: Event not found
