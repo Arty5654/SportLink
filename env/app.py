@@ -87,7 +87,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -131,7 +131,7 @@ def google_signin():
                 'friends': []
             }
 
-            optional_fields = ['friends']
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -243,7 +243,7 @@ def update_user_profile():
     address = user.get('address')
     state = user.get('state')
     country = user.get('country')
-    zipCode = user.get('zipcode')
+    zipCode = user.get('zipCode')
     city = user.get('city')
     age = user.get('age')
     gender = user.get('gender')
@@ -531,13 +531,13 @@ def remove_friend():
 def user_lookup():
     search_term = request.args.get('searchTerm')
     matching_users = []
-    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phone": search_term}, {"firstName": search_term}, {"lastName": search_term}]}):
+    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phoneNumber": search_term}, {"firstName": search_term}, {"lastName": search_term}]}):
         matching_users.append({
             "id": str(user["_id"]),  
             "name": user.get("name"),
             "username": user.get("username"),
             "email": user.get("email"),
-            "phone": user.get("phone"),
+            "phoneNumber": user.get("phoneNumber"),
             "firstName": user.get("firstName"),
             "lastName": user.get("lastName")
         })
@@ -563,11 +563,10 @@ def get_user_info():
             "country": user.get("country"),
             "zipCode": user.get("zipCode"),
             "city": user.get("city"),
-            "gender": user.get("gender"),
-            "birthday": user.get("birthday"),
             "age": user.get("age"),
+            "gender": user.get("gender"),
+            "birthday": user.get("birthday")
         }
-        #print(user_info)
         return jsonify(user_info), 200
     else:
         # User not found
@@ -609,6 +608,24 @@ def get_user_info():
         # User not found
         return jsonify({'message': 'User not found'}), 404
 
+def submit_report():
+    user = request.get_json()
+    email = user.get('email')
+    reportReason = user.get('reportReason')
+
+    # Assuming you have a "reports" collection to store report reasons
+    # Create a new document for each report
+    report = {
+        'reported_user_email': email,
+        'report_reason': reportReason,
+        'timestamp': datetime.now()
+        # Add more details if needed
+    }
+
+    # Insert the report into the "reports" collection
+    db.reports.insert_one(report)
+
+    return jsonify({'message': 'Report submitted successfully'}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

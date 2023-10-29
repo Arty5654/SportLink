@@ -80,26 +80,6 @@ paths:
                   type: string
                 lastName:
                   type: string
-                city:
-                  type: string
-                displayAge:
-                  type: boolean
-                  description: "Toggle age visibility"
-                displayLocation:
-                  type: boolean
-                  description: "Toggle location visibility"
-                accountPrivacy:
-                  type: boolean
-                  description: "Toggle account privacy"
-                displayPhoneNumber:
-                  type: string
-                  description: "Toggle phone number visibility"
-                friends:
-                  type: array
-                  default: []
-                  items:
-                    type: string
-
       responses:
         "201":
           description: Google User Account Created
@@ -119,8 +99,39 @@ paths:
                 properties:
                   username:
                     type: string
+                  city:
+                    type: string
+                  phoneNumber:
+                    type: string
+                  age:
+                    type: integer
+                  state:
+                    type: string
+                  gender:
+                    type: string
+                  country:
+                    type: string
+                  address:
+                    type: string
+                  zipCode:
+                    type: string
+                  birthday:
+                    type: string
+                  displayAge:
+                    type: boolean
+                    description: "Toggle age visibility"
+                  displayLocation:
+                    type: boolean
+                    description: "Toggle location visibility"
+                  accountPrivacy:
+                    type: boolean
+                    description: "Toggle account privacy"
+                  displayPhoneNumber:
+                    type: string
+                    description: "Toggle phone number visibility"
                   friends:
                     type: array
+                    default: []
                     items:
                       type: string
                 required:
@@ -168,10 +179,38 @@ paths:
                     type: string
                   phoneNumber:
                     type: string
+                  age:
+                    type: integer
+                  city:
+                    type: string
+                  state:
+                    type: string
+                  country:
+                    type: string
+                  address:
+                    type: string
+                  gender:
+                    type: string
+                  zipCode: 
+                    type: string
+                  birthday:
+                    type: string
                   friends:
                     type: array
                     items:
                       type: string
+                  displayAge:
+                    type: boolean
+                    description: "Toggle age visibility"
+                  displayLocation:
+                    type: boolean
+                    description: "Toggle location visibility"
+                  accountPrivacy:
+                    type: boolean
+                    description: "Toggle account privacy"
+                  displayPhoneNumber:
+                    type: string
+                    description: "Toggle phone number visibility"
                 required:
                   - email
                   - username
@@ -616,7 +655,7 @@ paths:
                       type: string
                     email:
                       type: string
-                    phone:
+                    phoneNumber:
                       type: string
                     firstName:
                       type: string
@@ -624,6 +663,7 @@ paths:
                       type: string
         '404':
           description: No results found!
+
   /get_user_info:
     get:
       summary: Get User Information
@@ -650,10 +690,6 @@ paths:
                     type: string
                   username:
                     type: string
-                  birthday:
-                    type: string
-                  gender:
-                    type: string
                   email:
                     type: string
                   phoneNumber:
@@ -670,9 +706,46 @@ paths:
                     type: string
                   age:
                     type: string
+                  birthday:
+                    type: string
+                  gender:
+                    type: string
         '404':
           description: User not found
 
+  /submit_report:
+    post:
+      operationId: app.submit_report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reportReason:
+                  type: string
+                reportedUserEmail:
+                  type: string
+      responses:
+        "200":
+          description: Reported Successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Not reported
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 
   /delete_account:
     post:
@@ -688,3 +761,4 @@ paths:
           description: Account deleted
         "401":
           description: Error deleting account
+        
