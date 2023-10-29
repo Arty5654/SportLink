@@ -87,7 +87,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -131,7 +131,7 @@ def google_signin():
                 'friends': []
             }
 
-            optional_fields = ['friends']
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -243,7 +243,7 @@ def update_user_profile():
     address = user.get('address')
     state = user.get('state')
     country = user.get('country')
-    zipCode = user.get('zipcode')
+    zipCode = user.get('zipCode')
     city = user.get('city')
     age = user.get('age')
     gender = user.get('gender')
