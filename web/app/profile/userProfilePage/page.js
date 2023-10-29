@@ -53,7 +53,7 @@ function UserProfilePage() {
           <div className="text-base pb-4">
             <p className="pt-8 pb-4 text-xs text-gray-500">Contact Information</p>
             <div className="flex flex-col gap-4">
-             {userProfile.displayPhoneNumber === "public" && (
+             {userProfile.displayPhoneNumber !== "public" && (
                 <p className="items-end">
                   Phone Number:{" "}
                   <span className="text-blue-500 text-sm">
