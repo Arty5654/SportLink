@@ -87,7 +87,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -563,10 +563,11 @@ def get_user_info():
             "country": user.get("country"),
             "zipCode": user.get("zipCode"),
             "city": user.get("city"),
-            "age": user.get("age"),
             "gender": user.get("gender"),
-            "birthday": user.get("birthday")
+            "birthday": user.get("birthday"),
+            "age": user.get("age"),
         }
+        #print(user_info)
         return jsonify(user_info), 200
     else:
         # User not found

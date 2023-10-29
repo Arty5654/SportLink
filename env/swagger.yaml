@@ -650,6 +650,10 @@ paths:
                     type: string
                   username:
                     type: string
+                  birthday:
+                    type: string
+                  gender:
+                    type: string
                   email:
                     type: string
                   phoneNumber:
@@ -665,10 +669,6 @@ paths:
                   city:
                     type: string
                   age:
-                    type: string
-                  birthday:
-                    type: string
-                  gender:
                     type: string
         '404':
           description: User not found
