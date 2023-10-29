@@ -614,6 +614,10 @@ paths:
                       type: string
                     phone:
                       type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
         '404':
           description: No results found!
   /get_user_info:
