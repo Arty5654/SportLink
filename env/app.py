@@ -10,7 +10,7 @@ import os # no install
 from datetime import datetime, timedelta #pip install datetime
 import string # no install
 import json # no install
-
+import pdb # python debugger, pip install pypdb
 load_dotenv()
 
 
@@ -21,6 +21,7 @@ db = client['group21']
 users = db["users"]
 teams = db["teams"]
 events = db["events"]
+friends = db["friends"]
 
 #sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
@@ -86,7 +87,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -127,9 +128,10 @@ def google_signin():
 
             userData = {
                 'username': username,
+                'friends': []
             }
 
-            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
+            optional_fields = ['friends']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -241,11 +243,9 @@ def update_user_profile():
     address = user.get('address')
     state = user.get('state')
     country = user.get('country')
-    zipCode = user.get('zipCode')
+    zipCode = user.get('zipcode')
     city = user.get('city')
     age = user.get('age')
-    birthday = user.get('birthday')
-    gender = user.get('gender')
 
     # udpate the user's phone number in the data base
     update_query = {}
@@ -269,10 +269,6 @@ def update_user_profile():
         update_query['city'] = city
     if age is not None:
         update_query['age'] = age
-    if birthday is not None:
-        update_query['birthday'] = birthday
-    if gender is not None:
-        update_query['gender'] = gender
     
     users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Profile updated successfully'}), 200
@@ -397,72 +393,142 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
-def add_friend():
+def send_friend_request():
     # Extracting data from request
     req = request.json
     email = req['email']
-    new_friend_email = req['friend_email']
+    friend_email = req['friend_email']
 
-    # Assign user objects
-    user = users.find_one({'email': email})
-    new_friend = users.find_one({'email': new_friend_email})
+    # check if friend exists
+    if not users.find_one({'email': friend_email}): 
+        return jsonify({'info': 'Friend does not exist!'}), 204
 
-    # if users exist, add friend to both lists
-    if user and new_friend:
-        # check if friend already exists
-        if email in user['friends']:
-            return jsonify({'error': 'Friend already added!'}), 401
+    # check if friend request already exists
+    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'pending'}):
+        return jsonify({'info': 'There is already a request pending between you and this user!'}), 204
+    elif friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
+        return jsonify({'info': 'There is already a request pending between you and this user!'}), 204
+    
+    # check if already friends
+    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
+        return jsonify({'info': 'Already Friends!'}), 204
 
-        # add friend to both lists
-        users.update_one({"email": email}, {"$push": {"friends": new_friend_email}})
-        users.update_one({"email": new_friend_email}, {"$push": {"friends": email}})
-        return jsonify({"message": "Friend Added - Both Ways"}), 200
+    # setup request data
+    requestData = {
+        'user': email,
+        'friend': friend_email,
+        'status': 'pending'
+    }
 
-    else:
-        return jsonify({'error': 'Username invalid!'}), 401
+    # insert friend request into db
+    friends.insert_one(requestData)
+
+    # send email to friend
+    # msg = Message('New Friend Request!', recipients=[friend_email])
+    # msg.html = '<p>You have a new friend request on SportLink! Check your friends list to accept or deny the request.</p>'
+    # mail.send(msg)
+
+    return jsonify({"message": "Friend Request Sent"}), 200
+
+# should be called when a user accepts a friend request
+# user is presented all the requests where they are the friend email
+def accept_friend_request():
+    # Extracting data from request
+    req = request.json
+    email = req['email']
+    friend_email = req['friend_email']
+
+    # check if already friends
+    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}) or friends.find_one({'user': friend_email, 'friend': email, 'status': 'friends'}):
+        return jsonify({'info': 'Already Friends!'}), 401
+    
+    # update friend request status to friends
+    print(f"updating the request where the user is {friend_email} and the friend is {email}")
+    friends.update_one({'user': friend_email, 'friend': email, 'status': 'pending'}, {'$set': {'status': 'friends'}})
+
+    # add a new entry for the other user
+    print(f"inserting a new entry where the user is {email} and the friend is {friend_email}")
+    friends.insert_one({'user': email, 'friend': friend_email, 'status': 'friends'})
+
+    return jsonify({"message": "Friend Request Accepted"}), 200
+
+# should be called when a user denies a friend request
+# user is presented all the requests where they are the friend email
+def deny_friend_request():
+    # Extracting data from request
+    req = request.json
+    email = req['email']
+    friend_email = req['friend_email']
+
+    # check that the request exists
+    if not friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
+        return jsonify({'info': 'Request does not exist!'}), 401
+    
+    # delete friend request
+    friends.delete_one({'user': friend_email, 'friend': email, 'status': 'pending'})
+
+    return jsonify({"message": "Friend Request Denied"}), 200
+    
+
+def get_friend_requests():
+    # Extracting data from request
+    # pdb.set_trace()
+    curr_email = request.args.get('email')
+
+    # get all friend requests for the user
+    friend_requests = []
+
+    for freq in friends.find({'friend': curr_email, 'status': 'pending'}):
+        friend_requests.append({
+            'user': freq['user'],
+            'friend': freq['friend'],
+            'status': freq['status']
+        })
+
+    return jsonify(friend_requests), 200
+
+def get_friends():
+    # # Extracting data from request
+    # req = request.json
+    # email = req['email']
+    # print(email)
+    curr_email = request.args.get('email')
+
+    curr_friends = []
+
+    for relation in friends.find({'user': curr_email, 'status': 'friends'}):
+        print(relation)
+        curr_friends.append({
+            'user': relation['user'],
+            'friend': relation['friend'],
+            'status': relation['status']
+        })
+        
+    return jsonify(curr_friends), 200
     
 def remove_friend():
     # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
-    print(f"curr user email: {email}")
-    print(f"friend to delete: {friend_email}")
 
-    # Assign user objects
-    user = users.find_one({'email': email})
-    other_user = users.find_one({'email': friend_email})
-    friend_in_user = False
-    friend_in_other = False
+    # check that the friendship exists
+    if not friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
+        return jsonify({'info': 'Friendship does not exist!'}), 401
+    
+    # delete friendship, from both ends
+    friends.delete_one({'user': email, 'friend': friend_email, 'status': 'friends'})
+    friends.delete_one({'user': friend_email, 'friend': email, 'status': 'friends'})
 
-    # validate that user to be deleted is a current friend
-    for friend in user['friends']:
-        if friend == friend_email:
-            friend_in_user = True
-            break
-
-    # validate that current user is a friend of the user to delete
-    for friend in other_user['friends']:
-        if friend == email:
-            friend_in_other = True    
-            break
-
-    if user and friend_in_user and other_user and friend_in_other:
-        users.update_one({"email": email}, {"$pull": {"friends": friend_email}})
-        users.update_one({"email": friend_email}, {"$pull": {"friends": email}})
-        return jsonify({"message": "Friend Removed"}), 200
-
-    else:
-        return jsonify({'error': 'Username invalid!'}), 401
+    return jsonify({"message": "Friend Removed"}), 200
 
 def user_lookup():
     search_term = request.args.get('searchTerm')
     matching_users = []
-    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phoneNumber": search_term}, {"firstName": search_term}, {"lastName": search_term}]}):
+    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phone": search_term}]}):
         matching_users.append({
             "id": str(user["_id"]),  
-            "firstName": user.get("firstName"),
-            "lastName": user.get("lastName"),
+            "name": user.get("name"),
             "username": user.get("username"),
             "email": user.get("email"),
             "phone": user.get("phone")
@@ -525,8 +591,7 @@ def get_user_info():
             "country": user.get("country"),
             "zipCode": user.get("zipCode"),
             "city": user.get("city"),
-            "age": user.get("age"),
-            "displayPhoneNumber": user.get("displayPhoneNumber")
+            "age": user.get("age")
         }
         return jsonify(user_info), 200
     else:
