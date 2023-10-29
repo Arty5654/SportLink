@@ -3,11 +3,15 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "@components/profileSidebar";
 import axios from "axios";
 import "@styles/global.css";
+import User from "@app/User";
+import ProfileImage from "@public/assets/default-profile.webp";
 import Link from 'next/link';
 
 function UserProfilePage() {
   const [userProfile, setUserProfile] = useState({});
   const [loading, setLoading] = useState(true);
+  const [reportOptionsVisible, setReportOptionsVisible] = useState(false);
+  const [reportReason, setReportReason] = useState('');
 
   useEffect(() => {
     // Get the email query parameter from the URL
@@ -25,6 +29,26 @@ function UserProfilePage() {
         setLoading(false);
       });
   }, []);
+
+  const handleReportClick = () => {
+    setReportOptionsVisible(true);
+  };
+
+  const handleReportSubmit = () => {
+    // Perform report submission action
+    axios.post('http://localhost:5000/submit_report', {
+      email: userProfile.email,
+      reportReason: reportReason,
+    })
+    .then(response => {
+      setReportOptionsVisible(false);
+      alert('User reported successfully!');
+    })
+    .catch(error => {
+      console.error('Error submitting report', error);
+    });
+  };
+
 
   return (
     <div className="w-full flex">
@@ -50,6 +74,25 @@ function UserProfilePage() {
             Send Friend Request
           </Link>
           </div>
+          <div className="flex gap-8 pb-8 border-b border-gray-200">
+            <button
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+            onClick={handleReportClick}
+            > Report User
+            </button>
+          </div>
+          {reportOptionsVisible && (
+          <div>
+            <p>Select a reason for reporting:</p>
+            <input
+              type="text"
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Enter reason"
+            />
+            <button onClick={handleReportSubmit}>Submit Report</button>
+          </div>
+        )}
           <div className="text-base pb-4">
             <p className="pt-8 pb-4 text-xs text-gray-500">Contact Information</p>
             <div className="flex flex-col gap-4">
