@@ -1,3 +1,4 @@
+# Import Necessary libraries
 from flask import Flask, jsonify, request # pip install flask
 from flask_mail import Mail, Message # pip install flask_mail
 from pymongo import MongoClient #pip install pymogo
@@ -11,8 +12,12 @@ from datetime import datetime, timedelta #pip install datetime
 import string # no install
 import json # no install
 import pdb # python debugger, pip install pypdb
-load_dotenv()
 
+
+# Import functions from other files
+from events import get_events
+
+load_dotenv()
 
 # Connect to MongoDB
 MONGO_URI = os.getenv('MONGO_URI')
@@ -20,7 +25,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["events"]
+events = db["tempEvents"] # REMINDER: Change back to events
 friends = db["friends"]
 
 #sendgridtemplates
@@ -599,6 +604,18 @@ def get_user_info():
     else:
         # User not found
         return jsonify({'message': 'User not found'}), 404
+
+def get_events():
+    event_data = list(events.find())
+
+    # Convert ObjectId to string within the event data
+    for event in event_data:
+        event['_id'] = str(event['_id'])
+
+    # Return the modified event data as JSON
+    return jsonify(event_data), 200
+
+
 
 
 app = connexion.App(__name__, specification_dir='.')
