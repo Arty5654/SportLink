@@ -296,6 +296,10 @@ paths:
                   type: string
                 age:
                   type: string
+                gender:
+                  type: string
+                birthday:
+                  type: string
       responses:
         "200":
           description: Profile updated successfully
@@ -661,6 +665,10 @@ paths:
                   city:
                     type: string
                   age:
+                    type: string
+                  birthday:
+                    type: string
+                  gender:
                     type: string
         '404':
           description: User not found
