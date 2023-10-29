@@ -10,11 +10,11 @@ This component represents the friends page, an extension of the profile page.
 import { useState, useEffect, useContext, useRef } from "react";
 import Link from "next/link";
 import axios from "axios";
-import Sidebar from "@components/profileSidebar";
+import ProfileImage from "@public/assets/default-profile.webp";
 import { UserContext } from "@app/UserContext";
 import User from "@app/User";
 
-const ProfilePage = () => {
+const FriendsPage = () => {
   const [user, setUser] = useState(new User());
   const [friends, setFriends] = useState([]);
   const [friendsToShow, setFriendsToShow] = useState(5);
@@ -28,14 +28,26 @@ const ProfilePage = () => {
   }, []);
 
   useEffect(() => {
-    // prints user object
-    console.log("Current User:", user);
-  }, [user]);
-
-  useEffect(() => {
-    const currentUser = JSON.parse(sessionStorage.getItem("user"));
-    setFriends(currentUser.friends);
-  }, []);
+    const fetchData = async () => {
+      try {
+        var curr_email = user.email;
+        console.log("Getting friends for user:", curr_email)
+        const response = await axios.get(`http://localhost:5000/get_friends?email=${curr_email}`);
+  
+        // only set friends if the data array is not empty
+        if (response.data.length > 0) {
+          console.log("response.data:", response.data)
+          setFriends(response.data);
+        }
+      } catch (error) {
+        console.error('Error getting friends', error);
+      }
+    }
+  
+    if (user.email) {
+      fetchData(); // Call the async function here
+    }
+  }, [user.email]);
 
   // infinite scroll, loading 5 more friends at a time
   const handleScroll = () => {
@@ -56,23 +68,22 @@ const ProfilePage = () => {
     setIsAddingFriends(true);
   }
 
-  const handleAddFriend = () => {
-    // Handle adding the new friend to your data
+  const sendFriendRequest = () => {
+    // send a friend request, adding a request to the friends collection
     if (newFriendName) {
-      // Update the friends list in the database
       try {
-        console.log("sending post request to add " + newFriendName + " as a friend");
-        const r = axios.post("http://localhost:5000/add_friend", {
+        console.log("sending friend request to " + newFriendName + ", using POST");
+        const r = axios.post("http://localhost:5000/send_friend_request", {
           email: user.email,
           friend_email: newFriendName,
         });
-        
-        r.then(() => {
-          console.log("request successfully responded");
-          const updatedFriends = [...friends, newFriendName];
-          const updatedUser = { ...user, friends: updatedFriends };
-          sessionStorage.setItem("user", JSON.stringify(updatedUser));
-          setFriends(updatedFriends); // Update the state variable
+      
+        r.then((response) => {
+          if (response.status === 200) {
+            console.log("Friend request sent");
+          } else if (response.status === 204) {
+            console.log("There is already a request pending between you and this user!");
+          }
         });
       } catch (error) {
         console.log("Error adding friend");
@@ -83,17 +94,18 @@ const ProfilePage = () => {
     setNewFriendName(""); // Clear the input field
   };
 
-  const handleRemoveFriend = (friend) => {
+  const handleRemoveFriend = (relationship) => {
     try {
-      console.log("sending post request to remove " + friend + " as a friend");
+      var email_to_remove = relationship.friend;
+      console.log("sending post request to remove " + email_to_remove + " as a friend");
       const r = axios.post("http://localhost:5000/remove_friend", {
         email: user.email,
-        friend_email: friend,
+        friend_email: email_to_remove,
       });
       
       r.then(() => {
         console.log("request successfully responded");
-        const updatedFriends = friends.filter((f) => f !== friend);
+        const updatedFriends = friends.filter((f) => f !== relationship);
         const updatedUser = { ...user, friends: updatedFriends };
         sessionStorage.setItem("user", JSON.stringify(updatedUser));
         setFriends(updatedFriends); // Update the state variable
@@ -103,29 +115,6 @@ const ProfilePage = () => {
       console.log(error);
     }
   }
-
-//   const handleRemoveFriend = (friend) => {
-//   // Handle removing the friend from your data
-//   // Update the friends list in the database
-//   try {
-//     console.log("sending post request to remove " + friend.email + " as a friend");
-//     const r = axios.post("http://localhost:5000/remove_friend", {
-//       email: user.email,
-//       friend_email: friend.email,
-//     });
-    
-//     r.then(() => {
-//       console.log("request successfully responded");
-//       const updatedFriends = friends.filter((f) => f.email !== friend.email);
-//       const updatedUser = { ...user, friends: updatedFriends };
-//       sessionStorage.setItem("user", JSON.stringify(updatedUser));
-//       setFriends(updatedFriends); // Update the state variable
-//     });
-//   } catch (error) {
-//     console.log("Error removing friend");
-//     console.log(error);
-//   }
-// };
 
   return (
     <div className="w-full flex">
@@ -151,7 +140,7 @@ const ProfilePage = () => {
           />
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
-            onClick={handleAddFriend}
+            onClick={sendFriendRequest}
           >
             Add
           </button>
@@ -166,24 +155,25 @@ const ProfilePage = () => {
         >
           {/* Check if friends list is empty or not*/}
           {friends && friends.length > 0 ? (
-            friends.slice(0, friendsToShow).map((friend) => (
+            friends.slice(0, friendsToShow).map((relationship) => (
             <div
-              // key={friend.id}
+              key={relationship.friend}
               className="bg-white rounded-lg shadow-md mb-4 flex"
             >
               <img
-                src={"https://randomuser.me/api/portraits/men/2.jpg"}
-                className="w-1/5 rounded-t-lg"
+                src={ProfileImage}
+                alt="Profile"
+                className="w-16 h-16 rounded-full object-cover"
               />
               <div className="p-4 w-3/5">
-                <h2 className="text-lg font-medium">{friend}</h2>
-                <p className="text-gray-500">@{friend}</p>
+                <h2 className="text-lg font-medium">{relationship.friend}</h2>
+                <p className="text-gray-500">@{relationship.friend}</p>
               </div>
               <div className="w-2/5 flex flex-col justify-center items-center">
                 <button className="bg-black text-white px-4 py-2 rounded-lg mb-2 w-3/5">
                   View Profile
                 </button>
-                <button className="bg-red-500 text-white px-4 py-2 rounded-lg w-3/5" onClick={() => handleRemoveFriend(friend)}>
+                <button className="bg-red-500 text-white px-4 py-2 rounded-lg w-3/5" onClick={() => handleRemoveFriend(relationship)}>
                   Remove Friend
                 </button>
               </div>
@@ -201,5 +191,5 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default FriendsPage;
 

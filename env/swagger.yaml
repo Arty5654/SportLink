@@ -80,6 +80,26 @@ paths:
                   type: string
                 lastName:
                   type: string
+                city:
+                  type: string
+                displayAge:
+                  type: boolean
+                  description: "Toggle age visibility"
+                displayLocation:
+                  type: boolean
+                  description: "Toggle location visibility"
+                accountPrivacy:
+                  type: boolean
+                  description: "Toggle account privacy"
+                displayPhoneNumber:
+                  type: string
+                  description: "Toggle phone number visibility"
+                friends:
+                  type: array
+                  default: []
+                  items:
+                    type: string
+
       responses:
         "201":
           description: Google User Account Created
@@ -99,41 +119,12 @@ paths:
                 properties:
                   username:
                     type: string
-                  city:
-                    type: string
-                  phoneNumber:
-                    type: string
-                  age:
-                    type: integer
-                  state:
-                    type: string
-                  gender:
-                    type: string
-                  country:
-                    type: string
-                  address:
-                    type: string
-                  zipCode:
-                    type: string
-                  birthday:
-                    type: string
-                  displayAge:
-                    type: boolean
-                    description: "Toggle age visibility"
-                  displayLocation:
-                    type: boolean
-                    description: "Toggle location visibility"
-                  accountPrivacy:
-                    type: boolean
-                    description: "Toggle account privacy"
-                  displayPhoneNumber:
-                    type: string
-                    description: "Toggle phone number visibility"
                   friends:
                     type: array
-                    default: []
                     items:
                       type: string
+                required:
+                  - username
         "401":
           description: Incorrect email or password!
           content:
@@ -177,38 +168,10 @@ paths:
                     type: string
                   phoneNumber:
                     type: string
-                  age:
-                    type: integer
-                  city:
-                    type: string
-                  state:
-                    type: string
-                  country:
-                    type: string
-                  address:
-                    type: string
-                  gender:
-                    type: string
-                  zipCode: 
-                    type: string
-                  birthday:
-                    type: string
                   friends:
                     type: array
                     items:
                       type: string
-                  displayAge:
-                    type: boolean
-                    description: "Toggle age visibility"
-                  displayLocation:
-                    type: boolean
-                    description: "Toggle location visibility"
-                  accountPrivacy:
-                    type: boolean
-                    description: "Toggle account privacy"
-                  displayPhoneNumber:
-                    type: string
-                    description: "Toggle phone number visibility"
                 required:
                   - email
                   - username
@@ -300,7 +263,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    
+
   /update_profile:
     post:
       operationId: app.update_user_profile
@@ -332,10 +295,6 @@ paths:
                 city:
                   type: string
                 age:
-                  type: string
-                birthday:
-                  type: string
-                gender:
                   type: string
       responses:
         "200":
@@ -436,10 +395,10 @@ paths:
   #         '500':
   #           description: Internal Server Error
 
-# add friend endpoint
-  /add_friend:
+# friends endpoint
+  /send_friend_request:
     post:
-      operationId: app.add_friend
+      operationId: app.send_friend_request
       requestBody:
         required: true
         content:
@@ -453,7 +412,40 @@ paths:
                   type: string
       responses:
         "200":
-          description: Friend added successfully
+          description: Friend request sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "204":
+          description: There is already a request pending between you and this user!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /accept_friend_request:
+    post:
+      operationId: app.accept_friend_request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                friend_email:
+                  type: string
+      responses:
+        "200":
+          description: Friend request accepted successfully
           content:
             application/json:
               schema:
@@ -462,7 +454,7 @@ paths:
                   message:
                     type: string
         "401":
-          description: Friend already added!
+          description: Friend request already accepted!
           content:
             application/json:
               schema:
@@ -470,8 +462,95 @@ paths:
                 properties:
                   error:
                     type: string
-
-  # remove friend endpoint
+  /deny_friend_request:
+    post:
+      operationId: app.deny_friend_request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                friend_email:
+                  type: string
+      responses:
+        "200":
+          description: Friend request denied successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Friend request already denied!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /get_friend_requests:
+    get:
+      operationId: app.get_friend_requests
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve friend requests.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Friend requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                    friend:
+                      type: string
+                    status:
+                      type: string
+        '404':
+          description: No friend requests found!
+  /get_friends:
+    get:
+      operationId: app.get_friends
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve friends.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Friends retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                    friend:
+                      type: string
+                    status:
+                      type: string
+        '404':
+          description: No friends found!
   /remove_friend:
     post:
       operationId: app.remove_friend
@@ -527,15 +606,13 @@ paths:
                   properties:
                     id:
                       type: string
-                    firstName:
+                    name:
                       type: string
                     username:
                       type: string
                     email:
                       type: string
                     phone:
-                      type: string
-                    lastName:
                       type: string
         '404':
           description: No results found!
@@ -580,8 +657,6 @@ paths:
                   city:
                     type: string
                   age:
-                    type: string
-                  displayPhoneNumber:
                     type: string
         '404':
           description: User not found
