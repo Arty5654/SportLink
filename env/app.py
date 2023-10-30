@@ -11,8 +11,12 @@ from datetime import datetime, timedelta #pip install datetime
 import string # no install
 import json # no install
 import pdb # python debugger, pip install pypdb
+from flask_socketio import SocketIO, send, join_room, emit
+
+Messaging
 load_dotenv()
 
+# Socket for messaging
 
 # Connect to MongoDB
 MONGO_URI = os.getenv('MONGO_URI')
@@ -638,15 +642,21 @@ def submit_report():
 
     return jsonify({'message': 'Report submitted successfully'}), 200
 
+
+
+
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
 
+# Socket for messaging
+socketIo = SocketIO(app.app, cors_allowed_origins="*")
 flask_app = app.app
 
 #email sending information
 key = os.getenv("SG_API_KEY")
 sender = os.getenv("MAIL_SENDER")
+
 
 flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 flask_app.config['MAIL_PORT'] = 587
@@ -655,6 +665,36 @@ flask_app.config['MAIL_USERNAME'] = 'apikey'
 flask_app.config['MAIL_PASSWORD'] = key
 flask_app.config['MAIL_DEFAULT_SENDER'] = sender
 mail = Mail(flask_app)
+
+
+@socketIo.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketIo.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketIo.on('join')
+def handle_join(obj):
+    print(obj)
+    join_room(obj)
+    send(f"{request.sid} has entered the room.", room=obj)
+
+@socketIo.on('new_message')
+def handle_new_message(data):
+    IP_TO = data['IP_TO']
+    name = data['name']
+    content = data['content']
+    IP_FROM = data['IP_FROM']
+
+    # Handle the message, possibly broadcasting it or storing it, etc.
+    print(IP_FROM)
+    print(IP_TO)
+    print(name)
+    print(content)
+    # Optionally, you can send an acknowledgment or response back to the client
+    emit('message_response', {'name': name, 'content': content, 'IP_FROM': IP_FROM}, room=IP_TO)
 
 
 if __name__ == '__main__':

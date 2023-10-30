@@ -1,0 +1,64 @@
+.switch-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 50vw;
+    border: 1px solid #ddd;
+    padding: 10px 0;
+    margin: 0 auto;
+}
+.team-container {
+    display: flex;
+    align-items: center; /* vertical alignment */
+    justify-content: center; /* horizontal alignment */
+
+}
+.team-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-card input,
+.team-card textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.team-card button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.team-card button:hover {
+    background-color: #0056b3;
+}
+
+.switch-option {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px 0;
+    border-radius: 5px;
+    color: black;  /* Default text color is black */
+    transition: background-color 0.3s;  /* smooth transition for background changes */
+}
+
+.switch-container.team-selected .switch-option:first-child,
+.switch-container.event-selected .switch-option:last-child {
+    background-color: #007BFF;
+    color: black;  /* Text color for selected option is white */
+}
