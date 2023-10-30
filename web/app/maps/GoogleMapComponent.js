@@ -21,7 +21,7 @@ const containerStyle = {
   
   function GoogleMapComponent({ center, zoom }) {
     return (
-      <div className="border-2 border-black rounded-md mx-auto my-4 w-full h-full p-2">
+      <div className="shadow-2xl border-8 border-gray-500 rounded-xl overflow-hidden">
       <LoadScript
         googleMapsApiKey={apiKey}// Replace with your API key
       >
