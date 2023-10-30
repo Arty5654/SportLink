@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import Sidebar from "@components/profileSidebar";
 import User from "@app/User";
+import DeleteAccount from "./DeleteAccount";
 
 const ProfilePage = () => {
   const [user, setUser] = useState(new User());
@@ -22,6 +23,7 @@ const ProfilePage = () => {
     city: user.city,
     birthday: user.birthday,
     gender: user.gender,
+    age: user.age,
   });
 
   useEffect(() => {
@@ -41,6 +43,7 @@ const ProfilePage = () => {
       city: currentUser.city || "",
       gender: currentUser.gedner || "",
       birthday: currentUser.gender || "",
+      age: currentUser.age || "",
     });
   }, []);
 
@@ -103,14 +106,14 @@ const ProfilePage = () => {
           <p className="pt-8 pb-4 text-xs text-gray-500">Contact Information</p>
           <div className="flex flex-col gap-4">
             <p className="items-end">
-              Phone: <span className="text-blue-500 text-sm">571 435 2311</span>
+              Phone: <span className="text-blue-500 text-sm"> {user.phoneNumber}</span>
             </p>
             <p className="items-end">
               Email:
               <span className="text-blue-500 text-sm"> {user.email}</span>
             </p>
             <p className="items-end">
-              Address:
+              Location:
               <span className="text-sm text-blue-500">{`${user.address}, ${user.city}, ${user.state} ${user.zipCode}`}</span>
             </p>
           </div>
@@ -125,7 +128,14 @@ const ProfilePage = () => {
             <p className="items-end">
               Gender: <span className="text-sm text-blue-500">{user.gender}</span>
             </p>
+            <p className="items-end">
+              Age: <span className="text-sm text-blue-500">{user.age}</span>
+            </p>
           </div>
+        </div>
+        {/* ITEM: Account deletion */}
+        <div>
+          <DeleteAccount email={user.email} />
         </div>
       </div>
     </div>

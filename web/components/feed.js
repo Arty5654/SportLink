@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 const HistoryBar = () => {
   // REMINDER: Change padding for outline component
@@ -17,21 +18,21 @@ const EventCard = ({
   desc,
   open,
   currentParticipants,
-  maxParticpants,
+  maxParticipants,
 }) => {
   const status = open ? "Open" : "Closed";
 
   return (
-    <div className="border border-gray-400 rounded-xl px-4 py-6 mb-4">
+    <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64">
       <h1 className="font-semibold">{title}</h1>
       <p className="text-sm text-gray-500 pb-4">
         {sport} in {city} - <span className="text-blue-500">{status}</span>
       </p>
       <p className="text-sm pb-4">{desc}</p>
-      <p className="text-sm text-blue-500">
+      <p className="text-sm text-blue-500 ">
         People Registered:{" "}
         <span>
-          {currentParticipants} / {maxParticpants}
+          {currentParticipants} / {maxParticipants}
         </span>
       </p>
     </div>
@@ -39,44 +40,14 @@ const EventCard = ({
 };
 
 const Feed = () => {
-  const [events, setEvents] = useState([
-    {
-      title: "5 v 5 Pickup Basketball",
-      sport: "Basketball",
-      city: "West Lafayette",
-      desc: "Come play 5 v 5 pickup basketball at the Purdue Corec. Winner stays on, games to 15 and win by 2.",
-      open: true,
-      currentParticipants: 6,
-      maxParticpants: 10,
-    },
-    {
-      title: "Casual Soccer Match",
-      sport: "Soccer",
-      city: "New York City",
-      desc: "Join us for a casual soccer match at Central Park. All skill levels welcome. We'll divide into teams and have a friendly game.",
-      open: false,
-      currentParticipants: 6,
-      maxParticpants: 10,
-    },
-    {
-      title: "Weekend Tennis Tournament",
-      sport: "Tennis",
-      city: "Los Angeles",
-      desc: "Participate in our weekend tennis tournament at the local tennis courts. Singles and doubles matches available. Prizes for the winners!",
-      open: true,
-      currentParticipants: 6,
-      maxParticpants: 10,
-    },
-    {
-      title: "Flag Football Fun Day",
-      sport: "Flag Football",
-      city: "Chicago",
-      desc: "Come out and enjoy a day of flag football at Grant Park. We'll organize teams and play a series of friendly flag football games.",
-      open: true,
-      currentParticipants: 6,
-      maxParticpants: 10,
-    },
-  ]);
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    // Make an HTTP GET request to fetch events from your Flask backend
+    axios.get("http://localhost:5000/get_events").then((response) => {
+      setEvents(response.data);
+    });
+  }, []);
 
   return (
     <div className="w-full">
