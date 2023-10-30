@@ -20,7 +20,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["events"]
+events = db["tempEvents"] # REMINDER: Change back to events
 friends = db["friends"]
 
 #sendgridtemplates
