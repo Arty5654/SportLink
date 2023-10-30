@@ -18,7 +18,7 @@ const EventCard = ({
   desc,
   open,
   currentParticipants,
-  maxParticpants,
+  maxParticipants,
 }) => {
   const status = open ? "Open" : "Closed";
 
@@ -32,7 +32,7 @@ const EventCard = ({
       <p className="text-sm text-blue-500 ">
         People Registered:{" "}
         <span>
-          {currentParticipants} / {maxParticpants}
+          {currentParticipants} / {maxParticipants}
         </span>
       </p>
     </div>
@@ -43,14 +43,10 @@ const Feed = () => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    console.log("Pulling Data");
-
     // Make an HTTP GET request to fetch events from your Flask backend
     axios.get("http://localhost:5000/get_events").then((response) => {
       setEvents(response.data);
     });
-
-    console.log(events);
   }, []);
 
   return (
