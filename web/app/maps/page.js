@@ -6,9 +6,9 @@ import GoogleMapComponent from "./GoogleMapComponent";
 
 const MapsPage = () => {
   
-  const [filter, setFilter] = useState('');
-  const [radius, setRadius] = useState(10); // initialize radius to 10 miles
-  const [center, setCenter] = useState({lat: 0, lng: 0/*west laf default */});
+  const [filter, setFilter] = useState('Select');
+  const [radius, setRadius] = useState("Select"); // initialize radius to 10 miles
+  const [center, setCenter] = useState({lat: 40.4261983,lng: -86.9108354/*west laf default */});
 
 
   useEffect(() => {
@@ -32,7 +32,6 @@ const MapsPage = () => {
   
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
-    console.log(center);
   };
 
   const handleRadiusChange = (e) => {
@@ -41,12 +40,13 @@ const MapsPage = () => {
 
   const handleCenterChange = (e) => {
     setCenter(e);
+    setFilter("Select");
   };
   
   
   return (
     
-    <div className="flex flex-col items-center my-4 -mt-10">
+    <div className="flex flex-col items-center my-4 -mt-20">
       <div className="flex items-center mb-4">
         <span className="text-3xl font-bold text-blue-500">
           Sport
@@ -59,23 +59,28 @@ const MapsPage = () => {
       <div className="border-2 border-grey-600 p-4 rounded-md flex items-center mb-4 shadow-lg">
         <div className="flex items-center mr-4">
           <label className="mr-2 font-bold">Sport:</label>
-          <select value={filter} onChange={handleFilterChange} className="border rounded-md p-2">
-            <option value="Select a sport...">Select</option>
-            <option value="basketball">Basketball</option>
-            <option value="tennis">Tennis</option>
-            <option value="weightlifting">Weightlifting</option>
-            <option value="soccer">Soccer</option>
+          <select value={filter} onChange={handleFilterChange} className="border rounded-lg p-2">
+            <option value="Select">Select...</option>
+            <option value="Basketball Court">Basketball</option>
+            <option value="Tennis Court">Tennis</option>
+            <option value="Weightlifting">Weightlifting</option>
+            <option value="Soccer Field">Soccer</option>
+            <option value="Running Track">Running</option>
+            <option value="Golf Course">Golf</option>
           </select>
         </div>
         
-        <div className="flex items-center">
-          <label className="mr-2 mx-5 font-bold">Radius (km):</label>
-          <input 
-            type="number" 
-            value={radius} 
-            onChange={handleRadiusChange} 
-            className="border rounded-md p-2"
-          />
+        <div className="flex items-center mr-4">
+          <label className="mr-2 font-bold">Radius(Km):</label>
+          <select value={radius} onChange={handleRadiusChange} className="border rounded-lg p-2">
+            <option value="Select">Select...</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">25</option>
+            <option value="30">25</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+          </select>
         </div>
       </div>
 
@@ -83,6 +88,8 @@ const MapsPage = () => {
         center={center}
         zoom={13} 
         handleNewCenter={handleCenterChange}
+        sport={filter}
+        radius={radius /*in meters; convert to KM*/}
        />
 
     </div>
