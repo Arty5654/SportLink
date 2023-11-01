@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@components/profileSidebar";
 import User from "@app/User";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import ProfileImage from "@public/assets/default-profile.webp";
 import "@styles/global.css";
 
@@ -19,16 +20,7 @@ export default function EditProfile() {
   const [user, setUser] = useState(new User());
   const [profileImage, setProfileImage] = useState(ProfileImage);
   const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
-
-  useEffect(() => {
-    const currentUser = JSON.parse(sessionStorage.getItem("user"));
-    setUser(currentUser);
-  }, []);
-
-  useEffect(() => {
-    // This effect will trigger when either user or profileData changes
-    console.log("Current user state:", user);
-  }, [user]);
+  const router = useRouter();
 
   const countries = ["", "Prefer not to answer", "United States of America"];
   const states = [
@@ -87,6 +79,15 @@ export default function EditProfile() {
   ];
   const genders = ["", "Prefer not to answer", "Male", "Female"];
 
+  useEffect(() => {
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
+  }, []);
+
+  useEffect(() => {
+    console.log(user);
+  });
+
   const handleSaveProfile = () => {
     axios
       .post("http://localhost:5000/update_profile", user)
@@ -99,6 +100,29 @@ export default function EditProfile() {
       .catch((error) => {
         console.error("Error updating profile", error);
       });
+    router.push("/profile");
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxFileSize) {
+        alert(
+          "Selected file exceeds the maximum allowed size (5MB). Please choose a smaller file."
+        );
+        event.target.value = null; // Clear the input field
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setProfileImage(e.target.result);
+          // setUser((prev) => ({
+          //   ...prev,
+          //   profileImage: profileImage,
+          // }));
+        };
+        reader.readAsDataURL(file);
+      }
+    }
   };
 
   const handleInputChange = (e) => {
@@ -143,36 +167,6 @@ export default function EditProfile() {
       ...prev,
       age,
     }));
-  };
-
-  const handleInstagram = () => {
-    const appId = "677121907689569";
-    const redirectURI = encodeURIComponent("https://SportLink.com/");
-    const scope = "user_profile,user_media";
-    const responseType = "code";
-
-    //insta auth url
-    const instaAuthURL = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectURI}&scope=${scope}&response_type=${responseType}`;
-    //redirect user to insta auth url
-    window.location.href = instaAuthURL;
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > maxFileSize) {
-        alert(
-          "Selected file exceeds the maximum allowed size (5MB). Please choose a smaller file."
-        );
-        event.target.value = null; // Clear the input field
-      } else {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setProfileImage(e.target.result);
-        };
-        reader.readAsDataURL(file);
-      }
-    }
   };
 
   return (

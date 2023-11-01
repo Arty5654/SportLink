@@ -4,36 +4,28 @@ Author Alex Younkers
 This is the password reset forms
 */
 
-"use client"
+"use client";
 
-import React from 'react';
-import  { useState } from 'react';
-import axios from 'axios';
-
-
-
+import React from "react";
+import { useState } from "react";
+import axios from "axios";
 
 export default function LogoutButton() {
+  const handleLogout = () => {
+    // takes user out of session
+    sessionStorage.removeItem("user");
 
-    const handleLogout = () => {
+    window.location.href = "/signin";
+  };
 
-        // takes user out of session
-        sessionStorage.removeItem('user');
-
-        window.location.href = '/signin';
-    }
-
-
-    return (
-
-        <div>
-            
-            <button className="bg-red-500 text-black rounded-full px-4 py-2 transition-colors duration-300 ease-in-out hover:bg-black hover:text-white"
-            onClick={handleLogout}>
-                Log Out
-            </button>
-
-        </div>
-    );
-
+  return (
+    <div>
+      <button
+        className="bg-black text-white rounded-full px-4 py-1 transition-colors duration-300 ease-in-out hover:bg-red-500 hover:text-white"
+        onClick={handleLogout}
+      >
+        Log Out
+      </button>
+    </div>
+  );
 }

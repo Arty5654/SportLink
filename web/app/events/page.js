@@ -19,6 +19,7 @@ const EventDetails = () => {
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
   const searchParams = useSearchParams();
+  const router = useRouter();
   const eventID = searchParams.get("id");
 
   useEffect(() => {
@@ -50,7 +51,11 @@ const EventDetails = () => {
 
   const handleJoinEvent = () => {
     if (event.currentParticipants < event.maxParticipants) {
-      console.log(data);
+      if (!user) {
+        console.log("user not logged in...");
+        router.push("/signin");
+        return;
+      }
     } else {
       console.log("Ran");
       alert("The event is full. You cannot join at the moment.");

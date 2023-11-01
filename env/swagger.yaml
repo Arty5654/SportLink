@@ -338,6 +338,8 @@ paths:
                   type: string
                 birthday:
                   type: string
+                profileImage:
+                  type: object
       responses:
         "200":
           description: Profile updated successfully

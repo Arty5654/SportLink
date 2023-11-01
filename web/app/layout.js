@@ -1,6 +1,7 @@
 import React from "react";
-import "@styles/global.css";
 import Nav from "@components/nav";
+import Provider from "@components/provider";
+import "@styles/global.css";
 
 export const metadata = {
   title: "SportLink",
@@ -11,10 +12,10 @@ const RootLayout = ({ children }) => {
   return (
     <html lang="en">
       <body>
-          <div className="app">
-            <Nav />
-            <main className="w-full">{children}</main>
-          </div>
+        <div className="app">
+          <Nav />
+          <main className="w-full">{children}</main>
+        </div>
       </body>
     </html>
   );
