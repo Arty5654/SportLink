@@ -776,6 +776,8 @@ paths:
                 items:
                   type: object
                   properties:
+                    objectID:
+                      type: string
                     title:
                       type: string
                     sport:
@@ -790,5 +792,42 @@ paths:
                       type: integer
                     maxParticipants:
                       type: integer
+        "404":
+          description: Event not found
+
+  /get_event_details:
+    get:
+      summary: Get Event Details
+      description: Retrieve detailed information about a specific event.
+      operationId: app.get_event_details
+      parameters:
+        - name: id
+          in: query
+          description: The ID of the event to retrieve details for.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  sport:
+                    type: string
+                  city:
+                    type: string
+                  desc:
+                    type: string
+                  open:
+                    type: boolean
+                  currentParticipants:
+                    type: integer
+                  maxParticipants:
+                    type: integer
         "404":
           description: Event not found

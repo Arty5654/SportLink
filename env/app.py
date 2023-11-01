@@ -618,6 +618,27 @@ def get_events():
     # Return the modified event data as JSON
     return jsonify(event_data), 200
 
+# @app.route("/get_event_details", methods=["GET"])
+def get_event_details():
+    eventID = request.args.get("id")
+    event_data = list(events.find())
+
+    for event in event_data:
+        if str(eventID) == str(event["_id"]):
+            event_info = {
+                "title": event["title"],
+                "desc": event["desc"],
+                "city": event["city"],
+                "open": event["open"],
+                "sport": event["sport"],
+                "currentParticipants": event["currentParticipants"],
+                "maxParticipants": event["maxParticipants"],
+            }
+            break
+
+    return jsonify(event_info), 200
+
+        
 
 def submit_report():
     user = request.get_json()
