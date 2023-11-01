@@ -21,14 +21,13 @@ const Nav = () => {
           const fetchData = async () => {
             try {
               var curr_email = user1.email;
-              console.log("Getting friend requests for user:", curr_email)
               const response = await axios.get(`http://localhost:5000/get_friend_requests?email=${curr_email}`);
 
               // only set friend requests if the data array is not empty
               if (response.data.length > 0) {
                 for (var i = 0; i < response.data.length; i++) {
                   if (response.data[i].status == "pending") {
-                    console.log("Pending friend requests found")
+                    console.log("Pending friend requests found for", curr_email)
                     setPendingRequests(true);
                     break;
                   }
