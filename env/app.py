@@ -111,7 +111,7 @@ def google_signin():
     googleId = req_user['googleId']
     firstName = req_user['firstName']
     lastName = req_user['lastName']
-    
+
     user = users.find_one({'email': email})
 
     # check if they have a googleId as password,
@@ -162,12 +162,12 @@ def google_signin():
             'lastName': lastName,
             'friends': []
         }
-        
+
         users.insert_one(userData)
         return jsonify({'username': username}), 201
 
 def get_token():
-    req = request.json     
+    req = request.json
     email = req['email']
 
 
@@ -188,29 +188,29 @@ def get_token():
 
     else:
         return jsonify({'error': 'No account with this email!'}), 401
-    
+
 def input_reset_token():
     req = request.json
     email = req['email']
     reqToken = req['reqToken']
 
     user = users.find_one({'email': email})
-    
+
     if user and 'reset_code' in user and 'code_expiration' in user:
         uToken = user['reset_code']
         expire = user['code_expiration']
 
         if datetime.now() > expire:
             return jsonify({'error': 'Code expired!'}), 401
-        
+
         if reqToken != uToken:
             return jsonify({'error': 'Invalid code!'}), 401
-        
+
         return 200
 
     else:
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
-    
+
 def change_password():
 
     req = request.json
@@ -226,10 +226,10 @@ def change_password():
         users.update_one(
                         {'email': email}, {"$set": {"password": hashWord.decode('utf-8')},
                                            "$unset": {"reset_code": '', "code_exipiration": ''}})
-        
-        
+
+
         return 200
-    
+
     else:
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
 
@@ -278,7 +278,7 @@ def update_user_profile():
         update_query['gender'] = gender
     if profileImage is not None:
         update_query['profileImage'] = profileImage
-    
+
     users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Profile updated successfully'}), 200
 
@@ -409,7 +409,7 @@ def send_friend_request():
     friend_email = req['friend_email']
 
     # check if friend exists
-    if not users.find_one({'email': friend_email}): 
+    if not users.find_one({'email': friend_email}):
         return jsonify({'info': 'Friend does not exist!'}), 204
 
     # check if friend request already exists
@@ -417,7 +417,7 @@ def send_friend_request():
         return jsonify({'info': 'There is already a request pending between you and this user!'}), 204
     elif friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
         return jsonify({'info': 'There is already a request pending between you and this user!'}), 204
-    
+
     # check if already friends
     if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
         return jsonify({'info': 'Already Friends!'}), 204
@@ -433,9 +433,12 @@ def send_friend_request():
     friends.insert_one(requestData)
 
     # send email to friend
-    # msg = Message('New Friend Request!', recipients=[friend_email])
-    # msg.html = '<p>You have a new friend request on SportLink! Check your friends list to accept or deny the request.</p>'
-    # mail.send(msg)
+    print(f"Want to send email to {friend_email}")
+    print(f"Sender is {email}")
+    msg = Message('New Friend Request!', recipients=[friend_email])
+    # msg.html = '<p>Hello! You have a friend request waiting for you! Click here to view -> LINK</p>'
+    msg.html = '<p>Hello! You have a friend request waiting for you! Sign in <a href="http://localhost:3000/signin">here</a> and click the bell in the top right to view.</p>'
+    mail.send(msg)
 
     return jsonify({"message": "Friend Request Sent"}), 200
 
@@ -450,7 +453,7 @@ def accept_friend_request():
     # check if already friends
     if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}) or friends.find_one({'user': friend_email, 'friend': email, 'status': 'friends'}):
         return jsonify({'info': 'Already Friends!'}), 401
-    
+
     # update friend request status to friends
     print(f"updating the request where the user is {friend_email} and the friend is {email}")
     friends.update_one({'user': friend_email, 'friend': email, 'status': 'pending'}, {'$set': {'status': 'friends'}})
@@ -472,12 +475,12 @@ def deny_friend_request():
     # check that the request exists
     if not friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
         return jsonify({'info': 'Request does not exist!'}), 401
-    
+
     # delete friend request
     friends.delete_one({'user': friend_email, 'friend': email, 'status': 'pending'})
 
     return jsonify({"message": "Friend Request Denied"}), 200
-    
+
 
 def get_friend_requests():
     # Extracting data from request
@@ -487,7 +490,8 @@ def get_friend_requests():
     # get all friend requests for the user
     friend_requests = []
 
-    for freq in friends.find({'friend': curr_email, 'status': 'pending'}):
+    for freq in friends.find({'friend': curr_email}):
+    # for freq in friends.find({'friend': curr_email, 'status': 'pending'}):
         friend_requests.append({
             'user': freq['user'],
             'friend': freq['friend'],
@@ -512,9 +516,9 @@ def get_friends():
             'friend': relation['friend'],
             'status': relation['status']
         })
-        
+
     return jsonify(curr_friends), 200
-    
+
 def remove_friend():
     # Extracting data from request
     req = request.json
@@ -524,7 +528,7 @@ def remove_friend():
     # check that the friendship exists
     if not friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
         return jsonify({'info': 'Friendship does not exist!'}), 401
-    
+
     # delete friendship, from both ends
     friends.delete_one({'user': email, 'friend': friend_email, 'status': 'friends'})
     friends.delete_one({'user': friend_email, 'friend': email, 'status': 'friends'})
@@ -536,7 +540,7 @@ def user_lookup():
     matching_users = []
     for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phoneNumber": search_term}, {"firstName": search_term}, {"lastName": search_term}]}):
         matching_users.append({
-            "id": str(user["_id"]),  
+            "id": str(user["_id"]),
             "name": user.get("name"),
             "username": user.get("username"),
             "email": user.get("email"),
@@ -546,7 +550,7 @@ def user_lookup():
         })
     #print(f"Matching users: {matching_users}")
     return jsonify(matching_users), 200
-    
+
 def get_user_info():
     email = request.args.get('email')
 
@@ -640,8 +644,6 @@ def get_event_details():
             break
 
     return jsonify(event_info), 200
-
-        
 
 def submit_report():
     user = request.get_json()

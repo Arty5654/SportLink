@@ -1,4 +1,4 @@
-/* 
+/*
 Author: Yash Mehta
 Created: 10/10/2023
 @ymehta10, Purdue University
@@ -33,7 +33,7 @@ const FriendsPage = () => {
         var curr_email = user.email;
         console.log("Getting friends for user:", curr_email)
         const response = await axios.get(`http://localhost:5000/get_friends?email=${curr_email}`);
-  
+
         // only set friends if the data array is not empty
         if (response.data.length > 0) {
           console.log("response.data:", response.data)
@@ -43,7 +43,7 @@ const FriendsPage = () => {
         console.error('Error getting friends', error);
       }
     }
-  
+
     if (user.email) {
       fetchData(); // Call the async function here
     }
@@ -77,11 +77,12 @@ const FriendsPage = () => {
           email: user.email,
           friend_email: newFriendName,
         });
-      
+
         r.then((response) => {
           if (response.status === 200) {
             console.log("Friend request sent");
           } else if (response.status === 204) {
+            // pop up saying that the user is already friends with this person
             console.log("There is already a request pending between you and this user!");
           }
         });
@@ -102,7 +103,7 @@ const FriendsPage = () => {
         email: user.email,
         friend_email: email_to_remove,
       });
-      
+
       r.then(() => {
         console.log("request successfully responded");
         const updatedFriends = friends.filter((f) => f !== relationship);
@@ -158,22 +159,24 @@ const FriendsPage = () => {
             friends.slice(0, friendsToShow).map((relationship) => (
             <div
               key={relationship.friend}
-              className="bg-white rounded-lg shadow-md mb-4 flex"
+              className="bg-white rounded-lg shadow-md mb-4 flex items-center p-4"
             >
               <img
                 src={ProfileImage}
                 alt="Profile"
-                className="w-16 h-16 rounded-full object-cover"
+                className="w-16 h-16 rounded-full object-cover mr-4r"
               />
-              <div className="p-4 w-3/5">
+              <div className="flex-grow">
                 <h2 className="text-lg font-medium">{relationship.friend}</h2>
                 <p className="text-gray-500">@{relationship.friend}</p>
               </div>
-              <div className="w-2/5 flex flex-col justify-center items-center">
-                <button className="bg-black text-white px-4 py-2 rounded-lg mb-2 w-3/5">
-                  View Profile
-                </button>
-                <button className="bg-red-500 text-white px-4 py-2 rounded-lg w-3/5" onClick={() => handleRemoveFriend(relationship)}>
+              <div className="flex flex-col items-stretch ml-4">
+                <Link href={`/profile/userProfilePage?email=${relationship.friend}`}>
+                  <button className="bg-black text-white px-4 py-2 rounded-lg mb-2 flex justify-center items-center flex-grow">
+                    View Profile
+                  </button>
+                </Link>
+                <button className="bg-red-500 text-white px-4 py-2 rounded-lg mb-2 flex justify-center items-center flex-grow" onClick={() => handleRemoveFriend(relationship)}>
                   Remove Friend
                 </button>
               </div>
