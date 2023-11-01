@@ -455,11 +455,11 @@ def accept_friend_request():
         return jsonify({'info': 'Already Friends!'}), 401
 
     # update friend request status to friends
-    print(f"updating the request where the user is {friend_email} and the friend is {email}")
+    # print(f"updating the request where the user is {friend_email} and the friend is {email}")
     friends.update_one({'user': friend_email, 'friend': email, 'status': 'pending'}, {'$set': {'status': 'friends'}})
 
     # add a new entry for the other user
-    print(f"inserting a new entry where the user is {email} and the friend is {friend_email}")
+    # print(f"inserting a new entry where the user is {email} and the friend is {friend_email}")
     friends.insert_one({'user': email, 'friend': friend_email, 'status': 'friends'})
 
     return jsonify({"message": "Friend Request Accepted"}), 200
