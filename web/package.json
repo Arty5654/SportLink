@@ -23,6 +23,7 @@
     "mongodb": "^6.1.0",
     "mongoose": "^7.6.0",
     "next": "latest",
+    "next-auth": "^4.24.4",
     "react": "latest",
     "react-dom": "latest",
     "react-switch": "^7.0.0",
