@@ -33,7 +33,7 @@ const EventCard = ({ event }) => {
         {event.desc}
       </p>
 
-      <p className="text-sm text-blue-500 ">
+      <p className="text-sm text-blue-500 absolute bottom-6">
         People Registered:{" "}
         <span>
           {event.currentParticipants} / {event.maxParticipants}
