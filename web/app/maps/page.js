@@ -9,7 +9,7 @@ const MapsPage = () => {
   const [filter, setFilter] = useState('Select');
   const [radius, setRadius] = useState("Select"); // initialize radius to 10 miles
   const [center, setCenter] = useState({lat: 40.4261983,lng: -86.9108354/*west laf default */});
-
+  const [recenter, setRecenter] = useState(false);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -21,6 +21,7 @@ const MapsPage = () => {
         
       },
       (error) => {
+        console.log(error)
         // if they decline, set default location to west lafayette
         setCenter({
           lat: 40.4261983,
@@ -28,7 +29,8 @@ const MapsPage = () => {
         })
       }
     );
-  }, []);
+    setRecenter(false); // reset recenter var
+  }, [, recenter]);
   
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -41,7 +43,14 @@ const MapsPage = () => {
   const handleCenterChange = (e) => {
     setCenter(e);
     setFilter("Select");
+    setRadius("Select");
   };
+
+  const handleRecenter = () => {
+    setRecenter(true);
+    setFilter("Select");
+    setRadius("Select");
+  }
   
   
   return (
@@ -76,8 +85,8 @@ const MapsPage = () => {
             <option value="Select">Select...</option>
             <option value="5">5</option>
             <option value="10">10</option>
-            <option value="20">25</option>
-            <option value="30">25</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
             <option value="40">40</option>
             <option value="50">50</option>
           </select>
@@ -91,6 +100,15 @@ const MapsPage = () => {
         sport={filter}
         radius={radius /*in meters; convert to KM*/}
        />
+
+      <div className="flex justify-center items-center">
+        <button 
+        onClick={handleRecenter}
+        className="mt-5 px-10 py-2 text-white bg-orange-500 hover:bg-purple-500 rounded-md hover:animate-pulse transition ease-in-out"
+        >
+          Re-center at my location!
+        </button>
+      </div>
 
     </div>
   );

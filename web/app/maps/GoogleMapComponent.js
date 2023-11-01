@@ -19,14 +19,18 @@ const containerStyle = {
 };
 const libs = ["places"];
   
-function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius }) {
+function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius}) {
   
   /* CONST VARS */
   const [autocomplete, setAutocomplete] = useState(null);
   const onAcLoad = (autoC) => setAutocomplete(autoC);
+  const [ac, setAc] = useState('');
   const [markers, setMarkers] = useState([]);
   const [queryError, setQueryError] = useState(false);
+
+  // refs
   const mapRef = useRef();
+  const iw = useRef(null);
 
   /* WHEN A FILTER CHANGES, UPDATE MARKERS */
   useEffect(() => {
@@ -35,6 +39,12 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius }) {
     } else if (sport === "Select" || radius === "Select") {
       setMarkers([]);
     }
+
+    // close window if filter changes (mess handling)
+    if (iw.current != null) {
+      iw.current.close();
+    }
+
   }, [sport, radius, mapRef]);
 
 
@@ -43,11 +53,21 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius }) {
     googleMapsApiKey: apiKey,
     libraries: libs,
   });
+
+  // load in infoWindow reference
+  useEffect(() => {
+    if (isLoaded) {
+      iw.current = new window.google.maps.InfoWindow({
+        content: ''
+      });
+    }
+  }, [isLoaded]);
+
   if (loadError) {
     return <div>Error loading map! Please refresh.</div>;
   }
   if (!isLoaded) {
-    return <div className="font-bold font-xl">Loading Map...</div>;
+    return <div className="font-bold font-xl animate-ping">Loading Map...</div>;
   }
   const onMapLoad = (map) => {
     mapRef.current = map;
@@ -68,9 +88,10 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius }) {
         handleNewCenter({
           lat: loc.geometry.location.lat(),
           lng: loc.geometry.location.lng()
-        });
+        }, false);
       }
     }
+    setAc('');
   };
 
   /* GRAB AND UPDATE MARKERS DYNAMICALLY */
@@ -94,13 +115,25 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius }) {
         .map(result => ({
           position: result.geometry.location,
           title: result.name,
+          address: result.vicinity || '',
         }));
         setMarkers(sportMarkers);
       } else {
+        // something went wrong, make user refresh
         setQueryError(true);
       }
     });
   };
+
+  /* set info window ref to be selection of marker */
+  const mSelect = (marker) => {
+
+    const c = `<h1>${marker.title}</h1><h3>${marker.address}</h3>`
+
+    iw.current.setContent(c);
+    iw.current.setPosition(marker.position);
+    iw.current.open(mapRef.current);
+  }
 
 
   return (
@@ -121,8 +154,9 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius }) {
         <Marker 
           key={index} 
           position={marker.position} 
-          title={marker.title}  
-        />
+          title={marker.title}
+          onClick={() => mSelect(marker)}  
+        /> 
       ))}
 
       </GoogleMap>
@@ -136,6 +170,8 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius }) {
               type="text"
               placeholder="ex. West Lafayette, IN"
               className="p-2 border-2 border-gray-7400 rounded-md flex-grow"
+              value={ac}
+              onChange={(e) => setAc(e.target.value)}
             />
         </Autocomplete>
         <button className="flex items-center mt-5 p-2 text-white bg-blue-500 hover:bg-green-500 rounded-md" type="submit">Enter</button>
