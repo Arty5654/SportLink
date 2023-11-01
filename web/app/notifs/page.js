@@ -61,8 +61,8 @@ const NotifsPage = () => {
         var friend_email = requester;
         console.log("Accepting friend request from " + friend_email + ", using POST");
         const response = axios.post("http://localhost:5000/accept_friend_request", {
-            email: curr_email,
-            friend_email: friend_email
+            "email": curr_email,
+            "friend_email": friend_email
         })
         .then((response) => {
           console.log("Friend request accepted");
@@ -89,9 +89,8 @@ const NotifsPage = () => {
         var friend_email = requester;
         console.log("Denying friend request from " + friend_email + ", using POST");
         const response = axios.post("http://localhost:5000/deny_friend_request", {
-            user: friend_email,
-            friend: curr_email,
-            status: "friends"
+            "email": curr_email,
+            "friend_email": friend_email,
         })
         .then((response) => {
           console.log("Friend request denied");

@@ -74,8 +74,8 @@ const FriendsPage = () => {
       try {
         console.log("sending friend request to " + newFriendName + ", using POST");
         const r = axios.post("http://localhost:5000/send_friend_request", {
-          email: user.email,
-          friend_email: newFriendName,
+          "email": user.email,
+          "friend_email": newFriendName,
         });
 
         r.then((response) => {
@@ -100,8 +100,8 @@ const FriendsPage = () => {
       var email_to_remove = relationship.friend;
       console.log("sending post request to remove " + email_to_remove + " as a friend");
       const r = axios.post("http://localhost:5000/remove_friend", {
-        email: user.email,
-        friend_email: email_to_remove,
+        "email": user.email,
+        "friend_email": email_to_remove,
       });
 
       r.then(() => {
