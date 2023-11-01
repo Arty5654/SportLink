@@ -248,6 +248,7 @@ def update_user_profile():
     age = user.get('age')
     gender = user.get('gender')
     birthday = user.get('birthday')
+    profileImage = user.get('profileImage')
 
     # udpate the user's phone number in the data base
     update_query = {}
@@ -275,6 +276,8 @@ def update_user_profile():
         update_query['birthday'] = birthday
     if gender is not None:
         update_query['gender'] = gender
+    if profileImage is not None:
+        update_query['profileImage'] = profileImage
     
     users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Profile updated successfully'}), 200
