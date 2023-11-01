@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import axios from "axios";
 
 const HistoryBar = () => {
@@ -11,28 +13,28 @@ const HistoryBar = () => {
   );
 };
 
-const EventCard = ({
-  title,
-  sport,
-  city,
-  desc,
-  open,
-  currentParticipants,
-  maxParticipants,
-}) => {
+const EventCard = ({ event }) => {
   const status = open ? "Open" : "Closed";
+  const router = useRouter();
+
+  const handleEventClick = () => {
+    router.push(`/events?id=${event._id}`);
+  };
 
   return (
     <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64">
-      <h1 className="font-semibold">{title}</h1>
+      <h1 className="font-semibold cursor-pointer" onClick={handleEventClick}>
+        {event.title}
+      </h1>
       <p className="text-sm text-gray-500 pb-4">
-        {sport} in {city} - <span className="text-blue-500">{status}</span>
+        {event.sport} in {event.city} - <span className="text-blue-500">{status}</span>
       </p>
-      <p className="text-sm pb-4">{desc}</p>
+      <p className="text-sm pb-4">{event.desc}</p>
+
       <p className="text-sm text-blue-500 ">
         People Registered:{" "}
         <span>
-          {currentParticipants} / {maxParticipants}
+          {event.currentParticipants} / {event.maxParticipants}
         </span>
       </p>
     </div>
@@ -57,7 +59,7 @@ const Feed = () => {
           <div className="grid grid-cols-3 gap-4">
             {/* Map through the events array and render two events in one column */}
             {events.map((event, index) => (
-              <EventCard key={index} {...event} />
+              <EventCard key={index} event={event} {...event} />
             ))}
           </div>
         </div>
