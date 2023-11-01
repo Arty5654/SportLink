@@ -5,7 +5,6 @@ import Link from "next/link";
 import LogoutButton from "@app/signin/LogoutButton";
 
 const Nav = () => {
-
   return (
     <nav className="w-full bg-white text-black h-12 border-b border-grey-500 flex items-center justify-between py-8 mb-24">
       <div className="flex gap-2">
@@ -62,13 +61,11 @@ const Nav = () => {
         </div>
       </Link>
 
-      <div className="flex gap-2">
-
-
+      <div className="flex gap-2 items-center">
         <div className="relative group px-7">
           <LogoutButton />
         </div>
-        
+
         <div className="relative group">
           <Link href="/notifs">
             <svg
@@ -112,7 +109,6 @@ const Nav = () => {
             <span className="absolute top-full mt-1 mb-2 left-1/2 transform -translate-x-1/2 px-2 py-1 text-sm text-white bg-black rounded opacity-0 group-hover:opacity-100 transition duration-500 whitespace-nowrap">
               Your Account
             </span>
-
           </Link>
         </div>
       </div>
