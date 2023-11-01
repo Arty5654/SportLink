@@ -20,11 +20,9 @@ export default function EditProfile() {
   const [profileImage, setProfileImage] = useState(ProfileImage);
   const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
 
-
   useEffect(() => {
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
     setUser(currentUser);
-
   }, []);
 
   useEffect(() => {
@@ -90,12 +88,10 @@ export default function EditProfile() {
   const genders = ["", "Prefer not to answer", "Male", "Female"];
 
   const handleSaveProfile = () => {
-
     axios
       .post("http://localhost:5000/update_profile", user)
       .then((response) => {
-
-        sessionStorage.removeItem('user');
+        sessionStorage.removeItem("user");
         sessionStorage.setItem("user", JSON.stringify(user));
 
         console.log("Profile updated successfully:", response.data);
@@ -107,7 +103,7 @@ export default function EditProfile() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUser(prev => ({
+    setUser((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -115,17 +111,17 @@ export default function EditProfile() {
 
   const handlePhoneNumber = (e) => {
     // only digits
-    const inputPhoneNumber = e.target.value.replace(/\D/g, '');
-  
+    const inputPhoneNumber = e.target.value.replace(/\D/g, "");
+
     // add dashses
-    let formattedPhoneNumber = '';
+    let formattedPhoneNumber = "";
     for (let i = 0; i < inputPhoneNumber.length; i++) {
       if (i === 3 || i === 6) {
-        formattedPhoneNumber += '-';
+        formattedPhoneNumber += "-";
       }
       formattedPhoneNumber += inputPhoneNumber[i];
     }
-  
+
     setUser((prev) => ({
       ...prev,
       phoneNumber: formattedPhoneNumber,
@@ -140,7 +136,6 @@ export default function EditProfile() {
       zipCode,
     }));
   };
-
 
   const handleAge = (e) => {
     let age = e.target.value.replace(/\D/g, "");
@@ -361,37 +356,37 @@ export default function EditProfile() {
                   />
                 </div>
                 <div className="pb-8">
-              <div className="flex gap-8 pb-6">
-                <div>
-                  <p className="font-semibold text-sm">Age</p>
-                  <input
-                    type="text"
-                    name="birthday"
-                    value={user.age}
-                    maxLength={2}
-                    onChange={handleAge}
-                    className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
-                  />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">Gender</p>
-                  <select
-                    value={user.gender}
-                    name="gender"
-                    onChange={handleInputChange}
-                    className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
-                  >
-                    {genders.map((gender, index) => (
-                      <option key={index} value={gender}>
-                        {gender}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-8 pb-6">
+                    <div>
+                      <p className="font-semibold text-sm">Age</p>
+                      <input
+                        type="text"
+                        name="birthday"
+                        value={user.age}
+                        maxLength={2}
+                        onChange={handleAge}
+                        className="w-64 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">Gender</p>
+                      <select
+                        value={user.gender}
+                        name="gender"
+                        onChange={handleInputChange}
+                        className="w-48 rounded-lg h-8 mt-2 pl-2 pt-1 text-sm text-gray-500 outline-0 border-2 border-blue-100 hover:border-blue-200 active:border-blue-200 resize-none"
+                      >
+                        {genders.map((gender, index) => (
+                          <option key={index} value={gender}>
+                            {gender}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          </div>
           </form>
         </div>
 
