@@ -1,4 +1,4 @@
-/* 
+/*
 Author: Yash Mehta
 Created: 10/10/2023
 @ymehta10, Purdue University
@@ -26,7 +26,7 @@ const NotifsPage = () => {
             var curr_email = user1.email;
             console.log("Getting friend requests for user:", curr_email)
             const response = await axios.get(`http://localhost:5000/get_friend_requests?email=${curr_email}`);
-      
+
             // only set friend requests if the data array is not empty
             if (response.data.length > 0) {
               setFriendRequests(response.data);
@@ -36,29 +36,9 @@ const NotifsPage = () => {
             console.error('Error getting friend requests', error);
           }
         };
-      
+
         fetchData(); // Call the async function here
     }, []);
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //     try {
-    //         var curr_email = user.email;
-    //         console.log("Getting friend requests for user:", curr_email)
-    //         const response = await axios.get(`http://localhost:5000/get_friend_requests?email=${curr_email}`);
-
-    //         // only set friend requests if the data array is not empty
-    //         if (response.data.length > 0)
-    //             setFriendRequests(response.data);
-    //             console.log("Friend requests response:", friendRequests)
-    //     } catch (error) {
-    //         console.error('Error getting friend requests', error);
-    //     }
-    //     };
-    
-    //     fetchData(); // Call the async function here
-    // }, [user]);
-      
 
     // infinite scroll, loading 5 more friends at a time
     const handleScroll = () => {
@@ -91,6 +71,14 @@ const NotifsPage = () => {
             return request.user !== friend_email;
           });
 
+          // add an entry of the format "You accepted a request from friend_email"
+          var newFriendRequest = {
+            user: friend_email,
+            status: "friends"
+          }
+
+          updatedFriendRequests.push(newFriendRequest);
+
           setFriendRequests(updatedFriendRequests);
         });
     }
@@ -101,8 +89,9 @@ const NotifsPage = () => {
         var friend_email = requester;
         console.log("Denying friend request from " + friend_email + ", using POST");
         const response = axios.post("http://localhost:5000/deny_friend_request", {
-            email: curr_email,
-            friend_email: friend_email
+            user: friend_email,
+            friend: curr_email,
+            status: "friends"
         })
         .then((response) => {
           console.log("Friend request denied");
@@ -118,17 +107,28 @@ const NotifsPage = () => {
     return (
         <div>
           <div className="pb-4 flex justify-between items-center">
-          {" "}
-          {/* Use flex to align "Your Friends" and "Add Friends" */}
-          <h1 className="font-base text-3xl">Notifications</h1>
-        </div>
+            {" "}
+            {/* Use flex to align "Your Friends" and "Add Friends" */}
+            <h1 className="font-base text-3xl">Notifications</h1>
+          </div>
           {friendRequests && friendRequests.length > 0 && (
             <ul>
-              {friendRequests.map((request, index) => (
+              {friendRequests
+                .reverse()
+                .map((request, index) => (
                 <li key={index}>
-                  {request.user} wants to be friends with you!
-                  <button className="mx-2 bg-green-500 text-white px-4 py-2 rounded-lg" onClick={() => handleAcceptFriendRequest(request.user)}>Accept</button>
-                  <button className="bg-red-500 text-white px-4 py-2 rounded-lg" onClick={() => handleDenyFriendRequest(request.user)}>Deny</button>
+                  {request.status === "friends"
+                    ? `You accepted a request from ${request.user}`
+                    : `${request.user} wants to be friends with you!`}
+                  {request.status !== "friends" &&
+                    <>
+                      <Link href={`/profile/userProfilePage?email=${request.user}`}>
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">View Profile</button>
+                      </Link>
+                      <button className="mx-2 bg-green-500 text-white px-4 py-2 rounded-lg" onClick={() => handleAcceptFriendRequest(request.user)}>Accept</button>
+                      <button className="bg-red-500 text-white px-4 py-2 rounded-lg" onClick={() => handleDenyFriendRequest(request.user)}>Deny</button>
+                    </>
+                  }
                 </li>
               ))}
             </ul>

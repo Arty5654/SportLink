@@ -3,8 +3,46 @@
 import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import LogoutButton from "@app/signin/LogoutButton";
+import axios from "axios";
+import User from "@app/User";
 
 const Nav = () => {
+  const [user, setUser] = useState(new User());
+  const [pendingRequests, setPendingRequests] = useState(false);
+
+    useEffect(() => {
+        const user1 = JSON.parse(sessionStorage.getItem("user"));
+        setUser(user1);
+
+        if (user1 == null) {
+          console.log("No user logged in");
+        } else {
+          console.log("User logged in:", user1.email);
+          const fetchData = async () => {
+            try {
+              var curr_email = user1.email;
+              console.log("Getting friend requests for user:", curr_email)
+              const response = await axios.get(`http://localhost:5000/get_friend_requests?email=${curr_email}`);
+
+              // only set friend requests if the data array is not empty
+              if (response.data.length > 0) {
+                for (var i = 0; i < response.data.length; i++) {
+                  if (response.data[i].status == "pending") {
+                    console.log("Pending friend requests found")
+                    setPendingRequests(true);
+                    break;
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error getting friend requests', error);
+            }
+          };
+
+        fetchData(); // Call the async function here
+        }
+    }, []);
+
   return (
     <nav className="w-full bg-white text-black h-12 border-b border-grey-500 flex items-center justify-between py-8 mb-24">
       <div className="flex gap-2">
@@ -65,23 +103,34 @@ const Nav = () => {
         <div className="relative group px-7">
           <LogoutButton />
         </div>
-
         <div className="relative group">
           <Link href="/notifs">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-              />
-            </svg>
+            {! pendingRequests
+            ? <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+                />
+              </svg>
+              : <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="1.4em"
+                viewBox="0 0 448 512"
+              >
+                <path
+                  fill="#ff0000"
+                  d="M224 0c-17.7 0-32 14.3-32 32V51.2C119 66 64 130.6 64 208v18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416H416c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8V208c0-77.4-55-142-128-156.8V32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"
+                />
+              </svg>
+            }
 
             <span className="absolute top-full mt-1 mb-2 left-1/2 transform -translate-x-1/2 px-2 py-1 text-sm text-white bg-black rounded opacity-0 group-hover:opacity-100 transition duration-500 whitespace-nowrap">
               Notifications
