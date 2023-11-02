@@ -112,24 +112,36 @@ const NotifsPage = () => {
           </div>
           {friendRequests && friendRequests.length > 0 && (
             <ul>
-              {friendRequests
-                .reverse()
+              {friendRequests.reverse()
                 .map((request, index) => (
-                <li key={index}>
-                  {request.status === "friends"
-                    ? `You accepted a request from ${request.user}`
-                    : `${request.user} wants to be friends with you!`}
-                  {request.status !== "friends" &&
-                    <>
-                      <Link href={`/profile/userProfilePage?email=${request.user}`}>
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">View Profile</button>
-                      </Link>
-                      <button className="mx-2 bg-green-500 text-white px-4 py-2 rounded-lg" onClick={() => handleAcceptFriendRequest(request.user)}>Accept</button>
-                      <button className="bg-red-500 text-white px-4 py-2 rounded-lg" onClick={() => handleDenyFriendRequest(request.user)}>Deny</button>
-                    </>
-                  }
-                </li>
-              ))}
+                  <li key={index} className="font-bold bg-gray-100 p-2 rounded-md mb-3 flex justify-between items-center">
+                      {request.status === "friends"
+                        ? <>
+                          <div>
+                            You're now friends with {request.user}
+                          </div>
+                          <div className="flex space-x-2">
+                            <Link href={`/profile/userProfilePage?email=${request.user}`}>
+                              <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">View Profile</button>
+                            </Link>
+                          </div>
+                        </>
+                        : <>
+                          <div>
+                            {request.user} wants to be friends with you!
+                          </div>
+                          <div className="flex space-x-2">
+                            <Link href={`/profile/userProfilePage?email=${request.user}`}>
+                              <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">View Profile</button>
+                            </Link>
+                            <button className="mx-2 bg-green-500 text-white px-4 py-2 rounded-lg" onClick={() => handleAcceptFriendRequest(request.user)}>Accept</button>
+                            <button className="bg-red-500 text-white px-4 py-2 rounded-lg" onClick={() => handleDenyFriendRequest(request.user)}>Deny</button>
+                          </div>
+                        </>
+                      }
+                  </li>
+                )
+              )}
             </ul>
           )}
           {!friendRequests || friendRequests.length === 0 && (
