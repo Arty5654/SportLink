@@ -11,11 +11,16 @@ from datetime import datetime, timedelta #pip install datetime
 import string # no install
 import json # no install
 import pdb # python debugger, pip install pypdb
+from flask_socketio import SocketIO, send, join_room, emit
+
+
+
 from bson.json_util import dumps
 from bson.regex import Regex
 import re
 load_dotenv()
 
+# Socket for messaging
 
 # Connect to MongoDB
 MONGO_URI = os.getenv('MONGO_URI')
@@ -23,12 +28,59 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["tempEvents"] # REMINDER: Change back to events
+events = db["events"]
 friends = db["friends"]
+stats = db["stats"]
+
 
 #sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
 
+def check_stats():
+    emails = request.json["friends"]
+
+    response_data = []
+
+    for email in emails:
+        user_stats = stats.find_one({"_id": email})
+        if not user_stats:
+            default_stats = {
+                "_id": email,
+                "wins": 0,
+                "losses": 0,
+                "elo": 0
+            }
+            stats.insert_one(default_stats)
+            response_data.append(default_stats)
+        else:
+            response_data.append(user_stats)
+
+    return jsonify(response_data), 200
+def create():
+    payload = request.json
+    events.insert_one(payload)
+    emails = payload['participants']
+
+    curr = emails[0]
+    msg = Message('Invite to SportLink', recipients=emails)
+    msg.html = f'<p>You have been invited by {curr} to play!</p>'
+    mail.send(msg)
+    return "Created"
+
+def fetch_friends():
+    obj = request.json
+
+    email = obj['email']
+    friend_requests = []
+
+    print("HERE")
+    for friend in friends.find({"user": email}):
+        # Convert ObjectId to string
+        friend['_id'] = str(friend['_id'])
+        friend_requests.append(friend)
+        print("HERE")
+
+    return jsonify({'friends': friend_requests}), 200
 
 def create_account():
     user = request.json
@@ -742,6 +794,7 @@ def submit_report():
 
     return jsonify({'message': 'Report submitted successfully'}), 200
 
+
 def block_user():
     user = request.get_json()
     email = user.get('blocker')
@@ -759,11 +812,14 @@ app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
 
+# Socket for messaging
+socketIo = SocketIO(app.app, cors_allowed_origins="*")
 flask_app = app.app
 
 #email sending information
 key = os.getenv("SG_API_KEY")
 sender = os.getenv("MAIL_SENDER")
+
 
 flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 flask_app.config['MAIL_PORT'] = 587
@@ -772,6 +828,36 @@ flask_app.config['MAIL_USERNAME'] = 'apikey'
 flask_app.config['MAIL_PASSWORD'] = key
 flask_app.config['MAIL_DEFAULT_SENDER'] = sender
 mail = Mail(flask_app)
+
+
+@socketIo.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketIo.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketIo.on('join')
+def handle_join(obj):
+    print(obj)
+    join_room(obj)
+    send(f"{request.sid} has entered the room.", room=obj)
+
+@socketIo.on('new_message')
+def handle_new_message(data):
+    IP_TO = data['IP_TO']
+    name = data['name']
+    content = data['content']
+    IP_FROM = data['IP_FROM']
+
+    # Handle the message, possibly broadcasting it or storing it, etc.
+    print(IP_FROM)
+    print(IP_TO)
+    print(name)
+    print(content)
+    # Optionally, you can send an acknowledgment or response back to the client
+    emit('message_response', {'name': name, 'content': content, 'IP_FROM': IP_FROM}, room=IP_TO)
 
 
 if __name__ == '__main__':
