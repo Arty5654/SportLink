@@ -410,17 +410,17 @@ def send_friend_request():
 
     # check if friend exists
     if not users.find_one({'email': friend_email}):
-        return jsonify({'info': 'Friend does not exist!'}), 204
+        return jsonify({'message': 'Friend does not exist!'}), 404
 
     # check if friend request already exists
     if friends.find_one({'user': email, 'friend': friend_email, 'status': 'pending'}):
-        return jsonify({'info': 'There is already a request pending between you and this user!'}), 204
+        return jsonify({'message': 'There is already a request pending between you and this user!'}), 409
     elif friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
-        return jsonify({'info': 'There is already a request pending between you and this user!'}), 204
+        return jsonify({'message': 'There is already a request pending between you and this user!'}), 409
 
     # check if already friends
     if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
-        return jsonify({'info': 'Already Friends!'}), 204
+        return jsonify({'message': 'Already Friends!'}), 409
 
     # setup request data
     requestData = {
@@ -433,10 +433,8 @@ def send_friend_request():
     friends.insert_one(requestData)
 
     # send email to friend
-    print(f"Want to send email to {friend_email}")
-    print(f"Sender is {email}")
+    print(f"Want to send email to {friend_email}, from {email}")
     msg = Message('New Friend Request!', recipients=[friend_email])
-    # msg.html = '<p>Hello! You have a friend request waiting for you! Click here to view -> LINK</p>'
     msg.html = '<p>Hello! You have a friend request waiting for you! Sign in <a href="http://localhost:3000/signin">here</a> and click the bell in the top right to view.</p>'
     mail.send(msg)
 
