@@ -12,6 +12,8 @@ import string # no install
 import json # no install
 import pdb # python debugger, pip install pypdb
 from bson.json_util import dumps
+from bson.regex import Regex
+import re
 load_dotenv()
 
 
@@ -529,9 +531,6 @@ def get_reports():
 
     return jsonify(user_reports_list), 200
 
-
-
-
 def get_blocked_users():
     email = request.args.get('email')
     user = users.find_one({'email': email})
@@ -573,25 +572,27 @@ def remove_friend():
 
     return jsonify({"message": "Friend Removed"}), 200
 
+def preprocess_phone_number(phone_number):
+    # Remove non-digit characters from the phone number
+    return re.sub(r'\D', '', phone_number)
+
 def user_lookup():
     search_term = request.args.get('searchTerm')
     searching_user_email = request.args.get('email')
     matching_users = []
 
+    # Create a case-insensitive regular expression for the search term
+    regex = Regex(f"{search_term}", "i")
+
     # Querying the users directly and iterating over the cursor
     for user in users.find({
         "$or": [
-            {"username": search_term},
-            {"email": search_term},
-            {"phoneNumber": search_term},
-            {"firstName": search_term},
-            {"lastName": search_term}
-        ],
-        "email": {"$nin": [searching_user_email]},
-        "username": {"$nin": [searching_user_email]},
-        "phoneNumber": {"$nin": [searching_user_email]},
-        "firstName": {"$nin": [searching_user_email]}, 
-        "lastName": {"$nin": [searching_user_email]} 
+            {"username": regex},
+            {"email": regex},
+            {"phoneNumber": regex},
+            {"firstName": regex},
+            {"lastName": regex}
+        ]
     }):
         # Check if the searched user is blocked by the user performing the search
         is_blocked = searching_user_email in user.get("blocked_users", [])
@@ -620,26 +621,42 @@ def get_user_info():
     user = users.find_one({"email": email})
 
     if user:
-        # User found, return user information
+        # Fetch user privacy settings
+        display_phone_number = user.get("displayPhoneNumber")
+        display_age = user.get("displayAge")
+        display_location = user.get("displayLocation")
+
+        # Prepare user information based on privacy settings
         user_info = {
             "firstName": user.get("firstName"),
             "lastName": user.get("lastName"),
             "username": user.get("username"),
             "email": user.get("email"),
-            "phoneNumber": user.get("phoneNumber"),
-            "address": user.get("address"),
-            "state": user.get("state"),
-            "country": user.get("country"),
-            "zipCode": user.get("zipCode"),
-            "city": user.get("city"),
-            "age": user.get("age"),
             "gender": user.get("gender"),
             "birthday": user.get("birthday")
         }
+
+        # Add fields conditionally based on privacy settings
+        if display_phone_number != "private":
+            user_info["phoneNumber"] = user.get("phoneNumber")
+        else:
+            user_info["phoneNumber"] = "This information is set on private by the user."
+
+        if not display_age:
+            user_info["age"] = user.get("age")
+        else:
+            user_info["age"] = "This information is set on private by the user."
+
+        if not display_location:
+            user_info["city"] = user.get("city")
+        else:
+            user_info["city"] = "This information is set on private by the user."
+
         return jsonify(user_info), 200
     else:
         # User not found
         return jsonify({'message': 'User not found'}), 404
+
 
 def delete_account():
 

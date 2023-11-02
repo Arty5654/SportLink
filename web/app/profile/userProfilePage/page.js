@@ -155,9 +155,14 @@ function UserProfilePage() {
               <p className="items-end">
                 Email: <span className="text-blue-500 text-sm"> {userProfile.email}</span>
               </p>
-              <p className="items-end">
-                Address: <span className="text-sm text-blue-500">{userProfile.city}</span>
-              </p>
+              {userProfile.displayLocation !== "true" && (
+                <p className="items-end">
+                  Location:{" "}
+                  <span className="text-blue-500 text-sm">
+                    {userProfile.city}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
           <div>
@@ -169,9 +174,14 @@ function UserProfilePage() {
               <p className="items-end">
                 Gender: <span className="text-sm text-blue-500">{userProfile.gender}</span>
               </p>
-              <p className="items-end">
-                Age: <span className="text-sm text-blue-500">{userProfile.age}</span>
-              </p>
+              {userProfile.displayAge !== "true" && (
+                <p className="items-end">
+                  Age:{" "}
+                  <span className="text-blue-500 text-sm">
+                    {userProfile.age}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
         </div>
