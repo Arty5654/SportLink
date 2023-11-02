@@ -691,6 +691,7 @@ def get_event_details():
                 "city": event["city"],
                 "open": event["open"],
                 "sport": event["sport"],
+                "level": event["level"],
                 "currentParticipants": event["currentParticipants"],
                 "maxParticipants": event["maxParticipants"],
                 "participants": event["participants"],

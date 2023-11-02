@@ -27,16 +27,19 @@ const EventCard = ({ event }) => {
         {event.title}
       </h1>
       <p className="text-sm text-gray-500 pb-4 cursor-pointer" onClick={handleEventClick}>
-        {event.sport} in {event.city} - <span className="text-blue-500">{status}</span>
+        {event.sport} in {event.city} - <span className="text-blue-500">{event.level}</span>
       </p>
       <p className="text-sm pb-4 cursor-pointer" onClick={handleEventClick}>
         {event.desc}
       </p>
 
-      <p className="text-sm text-blue-500 absolute bottom-6">
-        People Registered:{" "}
+      <p className="text-sm absolute bottom-6">
         <span>
-          {event.currentParticipants} / {event.maxParticipants}
+          Registered {event.currentParticipants} / {event.maxParticipants}
+          {" • "}
+          <span className={status === "Open" ? "text-green-500" : "text-red-500"}>
+            {status}
+          </span>
         </span>
       </p>
     </div>
@@ -45,10 +48,10 @@ const EventCard = ({ event }) => {
 
 const Feed = () => {
   const [events, setEvents] = useState([]);
-  const [selectedSport, setSelectedSport] = useState("All"); // Initialize with "All" as the default option
+  const [selectedSport, setSelectedSport] = useState("All");
+  const [selectedLevel, setSelectedLevel] = useState("All"); // Initialize with "All" as the default option
 
   useEffect(() => {
-    // Make an HTTP GET request to fetch events from your Flask backend
     axios.get("http://localhost:5000/get_events").then((response) => {
       setEvents(response.data);
     });
@@ -60,28 +63,50 @@ const Feed = () => {
       <div className="flex gap-8">
         <div className="w-4/5">
           {/* ITEM: Filter */}
-          <div className="border border-gray-400 rounded-xl px-2 py-2 mb-6">
-            <label htmlFor="sportFilter" className="pr-4">
-              Sport:
-            </label>
-            <select
-              id="sportFilter"
-              name="sport"
-              onChange={(e) => setSelectedSport(e.target.value)}
-              value={selectedSport}
-            >
-              <option value="All">All</option>
-              <option value="Basketball">Basketball</option>
-              <option value="Tennis">Tennis</option>
-              <option value="Weightlifting">Weightlifting</option>
-              <option value="Soccer">Soccer</option>
-            </select>
+          <div className="border border-gray-400 rounded-xl px-2 py-2 mb-6 flex gap-6">
+            <div>
+              <label htmlFor="sportFilter" className="pr-4">
+                Sport:
+              </label>
+              <select
+                id="sportFilter"
+                name="sport"
+                onChange={(e) => setSelectedSport(e.target.value)}
+                value={selectedSport}
+              >
+                <option value="All">All</option>
+                <option value="Basketball">Basketball</option>
+                <option value="Tennis">Tennis</option>
+                <option value="Weightlifting">Weightlifting</option>
+                <option value="Soccer">Soccer</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="levelFilter" className="pr-4">
+                Level:
+              </label>
+              <select
+                id="levelFilter"
+                name="level"
+                onChange={(e) => setSelectedLevel(e.target.value)}
+                value={selectedLevel}
+              >
+                <option value="All">All</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
           </div>
+
           {/* ITEM: Event Cards */}
           <div className="grid grid-cols-3 gap-4">
-            {/* Map through the events array, filter and render event cards based on the selected sport */}
             {events
-              .filter((event) => selectedSport === "All" || event.sport === selectedSport)
+              .filter(
+                (event) =>
+                  (selectedSport === "All" || event.sport === selectedSport) &&
+                  (selectedLevel === "All" || event.level === selectedLevel)
+              )
               .map((event, index) => (
                 <EventCard key={index} event={event} {...event} />
               ))}

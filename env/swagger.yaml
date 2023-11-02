@@ -768,6 +768,8 @@ paths:
                       type: string
                     desc:
                       type: string
+                    level:
+                      type: string
                     open:
                       type: boolean
                     currentParticipants:
@@ -804,6 +806,8 @@ paths:
                   city:
                     type: string
                   desc:
+                    type: string
+                  level:
                     type: string
                   open:
                     type: boolean
