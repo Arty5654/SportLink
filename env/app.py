@@ -666,9 +666,6 @@ def join_event():
 
 
 
-
-
-
 def submit_report():
     user = request.get_json()
     email = user.get('email')
