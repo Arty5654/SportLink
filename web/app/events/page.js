@@ -6,8 +6,9 @@ import axios from "axios";
 import User from "@app/User";
 
 const EventDetails = () => {
-  const [user, setUser] = useState(new User());
+  const [user, setUser] = useState(new User()); // current logged in user
   const [event, setEvent] = useState({
+    // event details
     title: "",
     desc: "",
     city: "",
@@ -15,17 +16,23 @@ const EventDetails = () => {
     open: false,
     currentParticipants: 0,
     maxParticipants: 0,
+    participants: [],
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const eventID = searchParams.get("id");
+  const router = useRouter(); // create router object
+  const searchParams = useSearchParams(); // create searchParams object
+  const eventID = searchParams.get("id"); // get the id from the URL
 
+  // Set the user as current user is session
   useEffect(() => {
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
     setUser(currentUser);
   }, []);
+
+  useEffect(() => {
+    console.log(event.participants);
+  }, [event.participants]);
 
   useEffect(() => {
     const getEventDetails = async () => {
@@ -40,6 +47,7 @@ const EventDetails = () => {
             open: data.open,
             currentParticipants: data.currentParticipants,
             maxParticipants: data.maxParticipants,
+            participants: data.participants,
           });
         });
       } catch (error) {
@@ -52,12 +60,27 @@ const EventDetails = () => {
   const handleJoinEvent = () => {
     if (event.currentParticipants < event.maxParticipants) {
       if (!user) {
-        console.log("user not logged in...");
+        // If no user session
+        console.log("User not logged in...");
         router.push("/signin");
         return;
+      } else {
+        axios
+          .post("http://localhost:5000/join_event", {
+            id: eventID,
+            username: user.username,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              alert("You have successfully joined the event!");
+              window.location.reload();
+            }
+          })
+          .catch((error) => {
+            console.error("Error joining event: ", error);
+          });
       }
     } else {
-      console.log("Ran");
       alert("The event is full. You cannot join at the moment.");
     }
   };
@@ -93,10 +116,18 @@ const EventDetails = () => {
           </p>
           <button
             onClick={handleJoinEvent}
-            className="w-full bg-green-500 text-white font-semibold text-lg ho rounded-xl py-2"
+            className="w-full bg-green-500 text-white font-semibold text-lg ho rounded-xl py-2 mb-4"
           >
             Join Event
           </button>
+          <div>
+            <h2 className="pb-2">Currently Registered</h2>
+            <div className="grid grid-cols-2">
+              {event.participants.map((event, index) => (
+                <p className="text-sm">{event}</p>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
