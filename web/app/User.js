@@ -20,6 +20,7 @@ class User {
     this.birthday;
     this.reportReason;
     this.profileImage;
+    this.blocked_users
   }
 
   // adds new field to a user - username, age etc.

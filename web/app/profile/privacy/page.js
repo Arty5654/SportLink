@@ -20,6 +20,8 @@ import Sidebar from "@components/profileSidebar";
 import "@styles/global.css";
 import Switch from "react-switch";
 import { userAgent } from 'next/server';
+import Link from "next/link";
+
 
 const UserProfile = () => {
 
@@ -164,6 +166,12 @@ const UserProfile = () => {
           >
             Connect Instagram
           </button>
+          <Link
+            href="/profile/unblock"
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+          >
+            Blocked List
+          </Link>
         <div className="mt-2">
         <button
               onClick={handleSaveProfile}
