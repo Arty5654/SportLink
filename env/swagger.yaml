@@ -410,7 +410,7 @@ paths:
   #         '401':
   #           description: Email already has an account!
 
-# friends endpoint
+  # friends endpoint
   /send_friend_request:
     post:
       operationId: app.send_friend_request
@@ -435,7 +435,7 @@ paths:
                 properties:
                   message:
                     type: string
-        '404':
+        "404":
           description: Friend does not exist
           content:
             application/json:
@@ -444,7 +444,7 @@ paths:
                 properties:
                   message:
                     type: string
-        '409':
+        "409":
           description: Request Pending / Already Friends
           content:
             application/json:
@@ -547,36 +547,6 @@ paths:
                       type: string
         "404":
           description: No friend requests found!
-  
-  /get_reports:
-    get:
-      operationId: app.get_reports
-      parameters:
-        - name: email
-          in: query
-          description: The email of the user to retrieve reports.
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Friend requests retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    user:
-                      type: string
-                    reportReason:
-                      type: string
-                    timestamp:
-                      type: string
-        "404":
-          description: No friend requests found!
-  
   /get_friends:
     get:
       operationId: app.get_friends
@@ -605,36 +575,6 @@ paths:
                       type: string
         "404":
           description: No friends found!
-
-  /get_blocked_users:
-    get:
-      operationId: app.get_blocked_users
-      parameters:
-        - name: email
-          in: query
-          description: The email of the user to retrieve blocked_users.
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Blocked successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    user:
-                      type: string
-                    blocked_users:
-                      type: string
-                    status:
-                      type: string
-        "404":
-          description: User not found!
-    
   /remove_friend:
     post:
       operationId: app.remove_friend
@@ -668,42 +608,6 @@ paths:
                 properties:
                   error:
                     type: string
-  /unblock_user:
-    post:
-      operationId: app.unblock_user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                blocked_user_email:
-                  type: string
-                blocked:
-                  type: boolean
-      responses:
-        "200":
-          description: Unblocked successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-        "401":
-          description: User not found!
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-
   /user_lookup:
     get:
       operationId: app.user_lookup
@@ -738,10 +642,6 @@ paths:
                       type: string
                     lastName:
                       type: string
-                    blocked:
-                      type: boolean
-                    blocked_users:
-                      type: array
         "404":
           description: No results found!
 
@@ -808,8 +708,6 @@ paths:
                   type: string
                 reportedUserEmail:
                   type: string
-                timestamp:
-                  type: string
       responses:
         "200":
           description: Reported Successfully
@@ -829,43 +727,6 @@ paths:
                 properties:
                   error:
                     type: string
-
-  /block_user:
-    post:
-      operationId: app.block_user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                blocker:
-                  type: string
-                blocked_users:
-                  type: string
-                blocked:
-                  type: boolean
-      responses:
-        "200":
-          description: Reported Successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-        "401":
-          description: Not reported
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-
 
   /delete_account:
     post:
@@ -950,5 +811,32 @@ paths:
                     type: integer
                   maxParticipants:
                     type: integer
+                  participants:
+                    type: array
+                    default: []
+                    items:
+                      type: string
         "404":
           description: Event not found
+
+  /join_event:
+    post:
+      summary: Join Event
+      description: Join an event.
+      operationId: app.join_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                username:
+                  type: string
+      responses:
+        "200":
+          description: Event joined successfully
+        "400":
+          description: Bad request, missing required parameters or event is full
