@@ -676,10 +676,31 @@ def get_event_details():
                 "sport": event["sport"],
                 "currentParticipants": event["currentParticipants"],
                 "maxParticipants": event["maxParticipants"],
+                "participants": event["participants"],
             }
             break
 
     return jsonify(event_info), 200
+
+def join_event():
+    data = request.get_json()
+    eventID = data.get("id")
+    username = data.get("username")
+    event_data = list(events.find())
+
+    for event in event_data:
+        if eventID == str(event["_id"]):  # Compare as strings
+            # Check if the event is open for joining
+            if event["currentParticipants"] < event["maxParticipants"]:
+                # Add the username to the participants array
+                event["participants"].append(username)
+                event["currentParticipants"] += 1
+                events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
+                return jsonify({"message": "Event joined successfully"}), 200
+            else:
+                return jsonify({"message": "The event is full. You cannot join at the moment."}), 400
+
+    return jsonify({"message": "Event not found."}), 404
 
 def submit_report():
     user = request.get_json()
