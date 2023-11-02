@@ -409,37 +409,8 @@ paths:
   #           description: User created successfully
   #         '401':
   #           description: Email already has an account!
-  # # friends endpoint
-  #   /retrieve_friends:
-  #     get:
-  #       summary: Retrieve Friends
-  #       description: Retrieve a list of friends for a specific user.
-  #       operationId: app.retrieve_friends
-  #       parameters:
-  #         - name: user_id
-  #           in: query
-  #           description: The user id for which to retrieve friends.
-  #           required: true
-  #           schema:
-  #             type: string
-  #       responses:
-  #         '200':
-  #           description: Successful response
-  #           content:
-  #             application/json:
-  #               schema:
-  #                 type: object
-  #                 properties:
-  #                   friends:
-  #                     type: array
-  #                     items:
-  #                       type: string
-  #         '400':
-  #           description: Bad Request
-  #         '500':
-  #           description: Internal Server Error
 
-  # friends endpoint
+# friends endpoint
   /send_friend_request:
     post:
       operationId: app.send_friend_request
@@ -464,14 +435,23 @@ paths:
                 properties:
                   message:
                     type: string
-        "204":
-          description: There is already a request pending between you and this user!
+        '404':
+          description: Friend does not exist
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
+                    type: string
+        '409':
+          description: Request Pending / Already Friends
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
                     type: string
   /accept_friend_request:
     post:

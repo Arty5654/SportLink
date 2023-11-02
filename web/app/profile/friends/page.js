@@ -79,11 +79,29 @@ const FriendsPage = () => {
         });
 
         r.then((response) => {
+          console.log("request responded");
+
           if (response.status === 200) {
             console.log("Friend request sent");
-          } else if (response.status === 204) {
-            // pop up saying that the user is already friends with this person
-            console.log("There is already a request pending between you and this user!");
+          }
+        }).catch((error) => {
+          //run this code always when status!==200
+          if (error.response) {
+            if (error.response.status === 404) {
+              // friend doesnt exist
+              console.log("This user does not exist!");
+              alert("This user does not exist! Tell them to sign up!");
+            } else if (error.response.status === 409) {
+              // pending request already exists or already friends
+              console.log("There might already be a request between you and this user, or you are already friends!");
+              alert("There might already be a request between you and this user, or you are already friends!\n\nClick the bell icon to see your pending requests, or wait till they accept your request");
+            }
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
           }
         });
       } catch (error) {
