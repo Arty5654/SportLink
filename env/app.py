@@ -13,7 +13,8 @@ import json # no install
 import pdb # python debugger, pip install pypdb
 from flask_socketio import SocketIO, send, join_room, emit
 
-Messaging
+
+
 load_dotenv()
 
 # Socket for messaging
@@ -24,12 +25,59 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["tempEvents"] # REMINDER: Change back to events
+events = db["events"]
 friends = db["friends"]
+stats = db["stats"]
+
 
 #sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
 
+def check_stats():
+    emails = request.json["friends"]
+
+    response_data = []
+
+    for email in emails:
+        user_stats = stats.find_one({"_id": email})
+        if not user_stats:
+            default_stats = {
+                "_id": email,
+                "wins": 0,
+                "losses": 0,
+                "elo": 0
+            }
+            stats.insert_one(default_stats)
+            response_data.append(default_stats)
+        else:
+            response_data.append(user_stats)
+
+    return jsonify(response_data), 200
+def create():
+    payload = request.json
+    events.insert_one(payload)
+    emails = payload['participants']
+
+    curr = emails[0]
+    msg = Message('Invite to SportLink', recipients=emails)
+    msg.html = f'<p>You have been invited by {curr} to play!</p>'
+    mail.send(msg)
+    return "Created"
+
+def fetch_friends():
+    obj = request.json
+
+    email = obj['email']
+    friend_requests = []
+
+    print("HERE")
+    for friend in friends.find({"user": email}):
+        # Convert ObjectId to string
+        friend['_id'] = str(friend['_id'])
+        friend_requests.append(friend)
+        print("HERE")
+
+    return jsonify({'friends': friend_requests}), 200
 
 def create_account():
     user = request.json

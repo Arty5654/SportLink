@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './board.css';
 import io from 'socket.io-client';
+import Friends from '../friends/page'
 const socket = io('http://localhost:5000');
 
 function Messages() {
@@ -9,8 +10,7 @@ function Messages() {
 
         socket.on('connect', () => {
             // Join a "room" corresponding to its own IP/port
-            console.log("HERE");
-            socket.emit('join', hostAddress); // or 'localhost:3001' for the other frontend
+            socket.emit('join', hostAddress);
         });
 
         socket.on('message', (data) => {
