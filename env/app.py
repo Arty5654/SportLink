@@ -11,6 +11,7 @@ from datetime import datetime, timedelta #pip install datetime
 import string # no install
 import json # no install
 import pdb # python debugger, pip install pypdb
+from bson.json_util import dumps
 load_dotenv()
 
 
@@ -519,6 +520,45 @@ def get_friends():
 
     return jsonify(curr_friends), 200
 
+def get_reports():
+    user_email = request.args.get('email')
+
+    # Fetch reports only for the specified user
+    user_reports = db.reports.find({'reported_user_email': user_email})
+
+    # Convert ObjectId to string for JSON serialization
+    user_reports_list = json.loads(dumps(list(user_reports)))
+
+    return jsonify(user_reports_list), 200
+
+
+
+
+def get_blocked_users():
+    email = request.args.get('email')
+    user = users.find_one({'email': email})
+    if user:
+        blocked_users = user.get('blocked_users', [])
+        return jsonify(blocked_users), 200
+    return jsonify([]), 404
+
+def unblock_user():
+    data = request.get_json()
+    blocker = data.get('blocker')
+    blocked_user = data.get('blocked_user')
+
+    # Update the blocked_users field in the user's document
+    user = users.find_one({'email': blocker})
+    if user:
+        blocked_users = user.get('blocked_users', [])
+        if blocked_user in blocked_users:
+            blocked_users.remove(blocked_user)
+            # Update the user's document in the database
+            users.update_one({'email': blocker}, {'$set': {'blocked_users': blocked_users}})
+            return jsonify({'message': f'{blocked_user} has been unblocked by {blocker}'}), 200
+
+    return jsonify({'error': 'Unable to unblock the user'}), 404
+
 def remove_friend():
     # Extracting data from request
     req = request.json
@@ -537,19 +577,43 @@ def remove_friend():
 
 def user_lookup():
     search_term = request.args.get('searchTerm')
+    searching_user_email = request.args.get('email')
     matching_users = []
-    for user in users.find({"$or": [{"username": search_term}, {"email": search_term}, {"phoneNumber": search_term}, {"firstName": search_term}, {"lastName": search_term}]}):
-        matching_users.append({
-            "id": str(user["_id"]),
-            "name": user.get("name"),
-            "username": user.get("username"),
-            "email": user.get("email"),
-            "phoneNumber": user.get("phoneNumber"),
-            "firstName": user.get("firstName"),
-            "lastName": user.get("lastName")
-        })
-    #print(f"Matching users: {matching_users}")
+
+    # Querying the users directly and iterating over the cursor
+    for user in users.find({
+        "$or": [
+            {"username": search_term},
+            {"email": search_term},
+            {"phoneNumber": search_term},
+            {"firstName": search_term},
+            {"lastName": search_term}
+        ],
+        "email": {"$nin": [searching_user_email]},
+        "username": {"$nin": [searching_user_email]},
+        "phoneNumber": {"$nin": [searching_user_email]},
+        "firstName": {"$nin": [searching_user_email]}, 
+        "lastName": {"$nin": [searching_user_email]} 
+    }):
+        # Check if the searched user is blocked by the user performing the search
+        is_blocked = searching_user_email in user.get("blocked_users", [])
+
+        if not is_blocked:  # Only append if the user is not blocked
+            matching_users.append({
+                "id": str(user["_id"]),
+                "name": user.get("name"),
+                "username": user.get("username"),
+                "email": user.get("email"),
+                "phoneNumber": user.get("phoneNumber"),
+                "firstName": user.get("firstName"),
+                "lastName": user.get("lastName"),
+                "blocked": is_blocked
+            })
+
     return jsonify(matching_users), 200
+
+
+
 
 def get_user_info():
     email = request.args.get('email')
@@ -589,32 +653,6 @@ def delete_account():
     users.delete_one({"email": email})
     return 200
 
-def get_user_info():
-    email = request.args.get('email')
-
-    # Query the database for the user based on email
-    user = users.find_one({"email": email})
-
-    if user:
-        # User found, return user information
-        user_info = {
-            "firstName": user.get("firstName"),
-            "lastName": user.get("lastName"),
-            "username": user.get("username"),
-            "email": user.get("email"),
-            "phoneNumber": user.get("phoneNumber"),
-            "address": user.get("address"),
-            "state": user.get("state"),
-            "country": user.get("country"),
-            "zipCode": user.get("zipCode"),
-            "city": user.get("city"),
-            "age": user.get("age")
-        }
-        return jsonify(user_info), 200
-    else:
-        # User not found
-        return jsonify({'message': 'User not found'}), 404
-
 def get_events():
     event_data = list(events.find())
 
@@ -650,12 +688,16 @@ def submit_report():
     email = user.get('email')
     reportReason = user.get('reportReason')
 
+    # Extracting month, day, and year from the current date
+    current_date = datetime.now()
+    formatted_timestamp = current_date.strftime("%m/%d/%Y")
+
     # Assuming you have a "reports" collection to store report reasons
     # Create a new document for each report
     report = {
         'reported_user_email': email,
         'report_reason': reportReason,
-        'timestamp': datetime.now()
+        'timestamp': formatted_timestamp
         # Add more details if needed
     }
 
@@ -663,6 +705,19 @@ def submit_report():
     db.reports.insert_one(report)
 
     return jsonify({'message': 'Report submitted successfully'}), 200
+
+def block_user():
+    user = request.get_json()
+    email = user.get('blocker')
+    blocked_user = user.get('blocked_users')
+
+    # Update the user's document to add the blocked user to the 'blocked_users' field
+    users.update_one(
+        {"email": email},
+        {"$addToSet": {"blocked_users": blocked_user}}
+    )
+
+    return jsonify({'message': 'User blocked successfully'}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

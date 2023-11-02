@@ -74,6 +74,23 @@ function UserProfilePage() {
     }
   };
 
+  const handleBlockUser = async (userEmail) => {
+    try {
+      const response = await axios.post("http://localhost:5000/block_user", {
+        blocker: loggedInUser.email, // Blocker's email
+        blocked_users: userProfile.email, // Email of the user to be blocked
+        blocked: true
+      });
+  
+      if (response.status === 200) {
+        alert("User successfully blocked");
+      }
+    } catch (error) {
+      console.error("Error blocking user", error);
+    }
+  };
+  
+
   return (
     <div className="w-full flex">
       <Sidebar active="search" />
@@ -117,6 +134,13 @@ function UserProfilePage() {
             <button onClick={handleReportSubmit}>Submit Report</button>
           </div>
         )}
+          <div className="flex gap-8 pb-8 border-b border-gray-200">
+            <button
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+            onClick={handleBlockUser}
+            > Block User
+            </button>
+          </div>
           <div className="text-base pb-4">
             <p className="pt-8 pb-4 text-xs text-gray-500">Contact Information</p>
             <div className="flex flex-col gap-4">

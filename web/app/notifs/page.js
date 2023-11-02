@@ -1,5 +1,5 @@
 /*
-Author: Yash Mehta
+Author: Yash Mehta and Arteom Avetissian
 Created: 10/10/2023
 @ymehta10, Purdue University
 This component represents the friends page, an extension of the profile page.
@@ -16,6 +16,7 @@ import User from "@app/User";
 const NotifsPage = () => {
     const [user, setUser] = useState(new User());
     const [friendRequests, setFriendRequests] = useState([]);
+    const [reportNotifications, setReportNotifications] = useState([]);
 
     useEffect(() => {
         const user1 = JSON.parse(sessionStorage.getItem("user"));
@@ -39,6 +40,51 @@ const NotifsPage = () => {
 
         fetchData(); // Call the async function here
     }, []);
+
+    useEffect(() => {
+      const user1 = JSON.parse(sessionStorage.getItem("user"));
+      setUser(user1);
+
+      const fetchData = async () => {
+        try {
+          var curr_email = user1.email;
+          //console.log("Getting friend requests for user:", curr_email)
+          const response = await axios.get(`http://localhost:5000/get_reports?email=${curr_email}`);
+
+
+
+          // only set friend requests if the data array is not empty
+          if (response.data.length > 0) {
+            setReportNotifications(response.data);
+            console.log("Report response:", response.data)
+          }
+        } catch (error) {
+          console.error('Error getting friend requests', error);
+        }
+      };
+
+      fetchData(); // Call the async function here
+  }, []);
+
+  const getFormattedDate = (timestamp) => {
+    if (typeof timestamp === 'string' && timestamp.includes('T')) {
+      const [dateString] = timestamp.split('T');
+      return dateString; // Return only the date part
+    }
+  
+    const date = new Date(timestamp);
+  
+    if (Object.prototype.toString.call(date)) {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${month}/${day}/${year}`;
+    }
+  
+    return 'Invalid Date';
+  };
+  
+  
 
     // infinite scroll, loading 5 more friends at a time
     const handleScroll = () => {
@@ -111,6 +157,19 @@ const NotifsPage = () => {
             {/* Use flex to align "Your Friends" and "Add Friends" */}
             <h1 className="font-base text-3xl">Notifications</h1>
           </div>
+          {reportNotifications && reportNotifications.length > 0 && (
+                <ul>
+                    {reportNotifications.map((report, index) => (
+                        <li key={index}>
+                            <p>{`You have been reported for: ${report.report_reason}`}</p>
+                            <p>{`Date: ${(report.timestamp)}`}</p>
+                        </li>
+                    ))}
+                </ul>
+            )}
+            {!reportNotifications || reportNotifications.length === 0 && (
+                <p>You have no reported notifications.</p>
+            )}
           {friendRequests && friendRequests.length > 0 && (
             <ul>
               {friendRequests
