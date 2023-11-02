@@ -6,28 +6,33 @@ import "@styles/global.css";
 import Image from "next/image";
 import ProfileImage from "@public/assets/default-profile.webp";
 import Link from 'next/link';
+import User from "@app/User";
 
 function UserLookupPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [loggedInUser, setLoggedInUser] = useState(new User());
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [visitedProfiles, setVisitedProfiles] = useState([]);
 
-  // Load visited profiles history from localStorage on component mount
   useEffect(() => {
-    const savedVisitedProfiles = localStorage.getItem('visitedProfiles');
+    // Fetch the logged-in user on component mount
+    const userFromSession = JSON.parse(sessionStorage.getItem("user"));
+    setLoggedInUser(userFromSession);
+
+    // Fetch the visited profiles history for the logged-in user
+    const savedVisitedProfiles = localStorage.getItem(`visitedProfiles_${userFromSession.email}`);
     if (savedVisitedProfiles) {
       setVisitedProfiles(JSON.parse(savedVisitedProfiles));
     }
   }, []);
 
-  // Save visited profile to history
   const saveVisitedProfileToHistory = (user) => {
     const updatedVisitedProfiles = [user, ...visitedProfiles];
-    setVisitedProfiles(updatedVisitedProfiles);
+    const trimmedVisitedProfiles = updatedVisitedProfiles.slice(0, 10); // Limit the history to 10 entries
 
-    // Save the updated history to localStorage
-    localStorage.setItem('visitedProfiles', JSON.stringify(updatedVisitedProfiles));
+    setVisitedProfiles(trimmedVisitedProfiles);
+    localStorage.setItem(`visitedProfiles_${loggedInUser.email}`, JSON.stringify(trimmedVisitedProfiles));
   };
 
   const handleSearchTermChange = async (e) => {
@@ -36,7 +41,6 @@ function UserLookupPage() {
 
     try {
       setLoading(true);
-      //clear search results when empty
       if (input.trim() === '') {
         setSearchResults([]);
       } else {
@@ -72,22 +76,24 @@ function UserLookupPage() {
         )}
 
         <div className="mt-4 space-y-4">
-          {searchResults.map((user) => (
-            <div key={user.id} className="bg-white shadow rounded-lg p-4">
-              <Link href={`/profile/userProfilePage?email=${user.email}`} onClick={() => saveVisitedProfileToHistory(user)}>
-                <img
-                  src={ProfileImage}
-                  alt="Profile"
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-                <div>
-                  <p className="text-gray-600">Name: {`${user.firstName} ${user.lastName}`}</p>
-                  <p className="text-gray-600">Username: {user.username}</p>
-                  <p className="text-gray-600">Email: {user.email}</p>
-                </div>
-              </Link>
-            </div>
-          ))}
+          {searchResults.length > 0 && (
+            searchResults.map((user) => (
+              <div key={user.id} className="bg-white shadow rounded-lg p-4">
+                <Link href={`/profile/userProfilePage?email=${user.email}`} onClick={() => saveVisitedProfileToHistory(user)}>
+                  <img
+                    src={ProfileImage}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-gray-600">Name: {`${user.firstName} ${user.lastName}`}</p>
+                    <p className="text-gray-600">Username: {user.username}</p>
+                    <p className="text-gray-600">Email: {user.email}</p>
+                  </div>
+                </Link>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="mt-8">

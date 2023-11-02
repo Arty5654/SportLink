@@ -9,6 +9,7 @@ import Link from 'next/link';
 
 function UserProfilePage() {
   const [userProfile, setUserProfile] = useState({});
+  const [loggedInUser, setLoggedInUser] = useState(new User());
   const [loading, setLoading] = useState(true);
   const [reportOptionsVisible, setReportOptionsVisible] = useState(false);
   const [reportReason, setReportReason] = useState('');
@@ -17,6 +18,9 @@ function UserProfilePage() {
     // Get the email query parameter from the URL
     const queryParams = new URLSearchParams(window.location.search);
     const userEmail = queryParams.get("email");
+
+    const user1 = JSON.parse(sessionStorage.getItem("user"));
+    setLoggedInUser(user1);
 
     axios
       .get(`http://localhost:5000/get_user_info?email=${userEmail}`)
@@ -49,6 +53,43 @@ function UserProfilePage() {
     });
   };
 
+  const handleSendFriendRequest = () => {
+    try {
+      console.log("sending friend request to " + userProfile.email + ", using POST");
+        const r = axios.post("http://localhost:5000/send_friend_request", {
+          email: loggedInUser.email,
+          friend_email: userProfile.email,
+        });
+
+        r.then((response) => {
+          if (response.status === 200) {
+            console.log("Friend request sent");
+          } else if (response.status === 204) {
+            // pop up saying that the user is already friends with this person
+            console.log("There is already a request pending between you and this user!");
+          }
+        });
+    } catch (error) {
+      console.log("Error adding friend", error);
+    }
+  };
+
+  const handleBlockUser = async (userEmail) => {
+    try {
+      const response = await axios.post("http://localhost:5000/block_user", {
+        blocker: loggedInUser.email, // Blocker's email
+        blocked_users: userProfile.email, // Email of the user to be blocked
+        blocked: true
+      });
+  
+      if (response.status === 200) {
+        alert("User successfully blocked");
+      }
+    } catch (error) {
+      console.error("Error blocking user", error);
+    }
+  };
+  
 
   return (
     <div className="w-full flex">
@@ -67,12 +108,12 @@ function UserProfilePage() {
             {/* You can add the Friends and Messages links here */}
           </div>
           <div className="flex gap-8 pb-8 border-b border-gray-200">
-          <Link
-            href="http://localhost:3000/profile/friends"
+          <button
             className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+            onClick={handleSendFriendRequest}
           >
             Send Friend Request
-          </Link>
+          </button>
           </div>
           <div className="flex gap-8 pb-8 border-b border-gray-200">
             <button
@@ -93,6 +134,13 @@ function UserProfilePage() {
             <button onClick={handleReportSubmit}>Submit Report</button>
           </div>
         )}
+          <div className="flex gap-8 pb-8 border-b border-gray-200">
+            <button
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+            onClick={handleBlockUser}
+            > Block User
+            </button>
+          </div>
           <div className="text-base pb-4">
             <p className="pt-8 pb-4 text-xs text-gray-500">Contact Information</p>
             <div className="flex flex-col gap-4">
@@ -107,9 +155,14 @@ function UserProfilePage() {
               <p className="items-end">
                 Email: <span className="text-blue-500 text-sm"> {userProfile.email}</span>
               </p>
-              <p className="items-end">
-                Address: <span className="text-sm text-blue-500">{userProfile.city}</span>
-              </p>
+              {userProfile.displayLocation !== "true" && (
+                <p className="items-end">
+                  Location:{" "}
+                  <span className="text-blue-500 text-sm">
+                    {userProfile.city}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
           <div>
@@ -121,9 +174,14 @@ function UserProfilePage() {
               <p className="items-end">
                 Gender: <span className="text-sm text-blue-500">{userProfile.gender}</span>
               </p>
-              <p className="items-end">
-                Age: <span className="text-sm text-blue-500">{userProfile.age}</span>
-              </p>
+              {userProfile.displayAge !== "true" && (
+                <p className="items-end">
+                  Age:{" "}
+                  <span className="text-blue-500 text-sm">
+                    {userProfile.age}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
         </div>

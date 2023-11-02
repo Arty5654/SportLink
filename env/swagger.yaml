@@ -400,6 +400,8 @@ paths:
                   type: string
                 birthday:
                   type: string
+                profileImage:
+                  type: object
       responses:
         "200":
           description: Profile updated successfully
@@ -469,35 +471,6 @@ paths:
   #           description: User created successfully
   #         '401':
   #           description: Email already has an account!
-  # # friends endpoint
-  #   /retrieve_friends:
-  #     get:
-  #       summary: Retrieve Friends
-  #       description: Retrieve a list of friends for a specific user.
-  #       operationId: app.retrieve_friends
-  #       parameters:
-  #         - name: user_id
-  #           in: query
-  #           description: The user id for which to retrieve friends.
-  #           required: true
-  #           schema:
-  #             type: string
-  #       responses:
-  #         '200':
-  #           description: Successful response
-  #           content:
-  #             application/json:
-  #               schema:
-  #                 type: object
-  #                 properties:
-  #                   friends:
-  #                     type: array
-  #                     items:
-  #                       type: string
-  #         '400':
-  #           description: Bad Request
-  #         '500':
-  #           description: Internal Server Error
 
   # friends endpoint
   /send_friend_request:
@@ -524,14 +497,23 @@ paths:
                 properties:
                   message:
                     type: string
-        "204":
-          description: There is already a request pending between you and this user!
+        "404":
+          description: Friend does not exist
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
+                    type: string
+        "409":
+          description: Request Pending / Already Friends
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
                     type: string
   /accept_friend_request:
     post:
@@ -838,6 +820,8 @@ paths:
                 items:
                   type: object
                   properties:
+                    objectID:
+                      type: string
                     title:
                       type: string
                     sport:
@@ -854,3 +838,67 @@ paths:
                       type: integer
         "404":
           description: Event not found
+
+  /get_event_details:
+    get:
+      summary: Get Event Details
+      description: Retrieve detailed information about a specific event.
+      operationId: app.get_event_details
+      parameters:
+        - name: id
+          in: query
+          description: The ID of the event to retrieve details for.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  sport:
+                    type: string
+                  city:
+                    type: string
+                  desc:
+                    type: string
+                  open:
+                    type: boolean
+                  currentParticipants:
+                    type: integer
+                  maxParticipants:
+                    type: integer
+                  participants:
+                    type: array
+                    default: []
+                    items:
+                      type: string
+        "404":
+          description: Event not found
+
+  /join_event:
+    post:
+      summary: Join Event
+      description: Join an event.
+      operationId: app.join_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                username:
+                  type: string
+      responses:
+        "200":
+          description: Event joined successfully
+        "400":
+          description: Bad request, missing required parameters or event is full
