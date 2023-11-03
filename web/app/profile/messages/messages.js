@@ -1,118 +1,152 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import './board.css';
 import io from 'socket.io-client';
 import Friends from '../friends/page'
-const socket = io('http://localhost:5000');
+import axios from "@node_modules/axios/index";
+import User from "@app/User";
+
+const socket = io('http://localhost:5000', {reconnect: true})
 
 function Messages() {
+    const [user, setUser] = useState(new User());
+    const [friends, setFriends] = useState([]);
+    const [currentChats, setCurrentChats] = useState([]);
+    const [selectedChat, setSelectedChat] = useState(null);
+    const [inputMessage, setInputMessage] = useState('');
+
+    const [currentKeys, setCurrentKeys] = useState([])
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const hostAddress = user.email;
 
     useEffect(() => {
+        const currentUser = JSON.parse(sessionStorage.getItem("user"));
+        setUser(currentUser);
+    }, []);
 
+    useEffect(() => {
+        if (user['email'] !== undefined) {
+            axios.post('http://localhost:5000/fetch_friends', {
+                email: user['email']
+            })
+                .then(response => {
+                    setFriends(response.data.friends.map(friendObj => friendObj["friend"]));
+
+                })
+                .catch(error => {
+                    console.error('Error making the API call:', error);
+                });
+
+
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (friends.length && user['email'] !== undefined) {
+            axios.post('http://localhost:5000/messages', {
+                email: user['email'],
+                friends: friends
+            })
+                .then(response => {
+                    setCurrentChats(prevChats => [...prevChats, ...response.data.chats]);
+                    setCurrentKeys(prevKeys => [...prevKeys, ...response.data.chat_keys]);
+                })
+                .catch(error => {
+                    console.error('Error making the API call:', error);
+                });
+        }
+    }, [friends]);
+
+    useEffect(() => {
         socket.on('connect', () => {
-            // Join a "room" corresponding to its own IP/port
             socket.emit('join', hostAddress);
+            console.log("Joined Server:" + hostAddress)
         });
 
         socket.on('message', (data) => {
-            console.log(data);  // Handle the received message here
+            console.log(data);
         });
 
-        socket.on('message_response', (data) => {
-            const { name, content, IP_FROM } = data;
-
-            setCurrentChats(prevChats => {
-                if (prevChats[name]) {
-                    // If the chat with the given name already exists, append the new message
-                    return {
-                        ...prevChats,
-                        [name]: [...prevChats[name], content]
-                    };
-                } else {
-                    // If the chat with the given name doesn't exist, create it and initialize with the new message
-                    return {
-                        ...prevChats,
-                        [name]: [content]
-                    };
-                }
+        socket.on('message_response', async (data) => {
+            console.log("Received Response");
+            const chatKey = data.key;
+            console.log(chatKey);
+            await axios.post("http://localhost:5000/refresh_msg", {
+                chat_key: chatKey
+            }).then(response => {
+                console.log("Received Updates");
+                setCurrentChats(response.data);
+            }).catch(error => {
+                console.error('Error making the API call:', error);
             });
-            if (!chatIPs[name]) {
-                setChatIPs(prevIPs => ({
-                    ...prevIPs,
-                    [name]: IP_FROM
-                }));
-            }
+
+            return () => {
+                socket.off('message_response');
+            };
         });
-
-    }, []);
-    const [currentChats, setCurrentChats] = useState({
-        'Alice': ['Hello!', 'How are you?'],
-        'Bob': ['Hey!', 'Long time no see.'],
-        'Charlie': ['Yo!', 'Whats up?']
-    });
-    const hostAddress = `${window.location.hostname}:${window.location.port}`;
-
-    const [chatIPs, setChatIPs] = useState({});
-    const [selectedChat, setSelectedChat] = useState(null);
-    const [inputMessage, setInputMessage] = useState('');
-    const [newChatName, setNewChatName] = useState('');
-    const [newChatIP, setNewChatIP] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    }, [selectedChat, hostAddress]);
 
     const sendMessage = () => {
-        // Gather required data for API call
+
+        let to;
+        const users = selectedChat.split(':');
+        const user1 = users[0];
+        const user2 = users[1];
+
+        if (user1 === hostAddress) {
+
+            to = user2
+        } else {
+            to = user1
+        }
+
         const data = {
             IP_FROM: hostAddress,
-            IP_TO: chatIPs[selectedChat],
-            name: selectedChat,
+            IP_TO: to,
             content: inputMessage
         };
 
-        // Make an API call
         socket.emit('new_message', data);
 
-        setCurrentChats(prevChats => ({
-            ...prevChats,
-            [selectedChat]: [...prevChats[selectedChat], inputMessage]
-        }));
+        let chatKey = selectedChat;
+        const updatedChats = currentChats.map(chat => {
+            if (chat[chatKey]) {
+                console.log("Adding Locally!")
+                return {
+                    ...chat,
+                    [chatKey]: [...chat[chatKey], {'content': inputMessage}]
+                };
+            }
+            return chat;
+        });
+
+        setCurrentChats(updatedChats);
         setInputMessage('');
-
-    };
-
-    const addNewChat = () => {
-        if (newChatName && newChatIP) {
-            setCurrentChats(prevChats => ({
-                ...prevChats,
-                [newChatName]: []
-            }));
-            setChatIPs(prevIPs => ({
-                ...prevIPs,
-                [newChatName]: newChatIP
-            }));
-            setNewChatName('');
-            setNewChatIP('');
-            setIsModalOpen(false);
-        }
     };
 
     return (
         <div className="App">
             <div className="chat-list">
-                {Object.keys(currentChats).map(name => (
-                    <button
-                        key={name}
-                        onClick={() => setSelectedChat(name)}
-                        className="chat-button">
-                        {name}
-                    </button>
-                ))}
+                {currentKeys.map(keyObject => {
+
+                    return (
+                        <button
+                            key={keyObject}
+                            onClick={() => setSelectedChat(keyObject)}
+                            className="chat-button">
+                            {keyObject}
+                        </button>
+                    );
+                })}
                 <button onClick={() => setIsModalOpen(true)}>New Chat</button>
             </div>
             <div className="chat-content">
-                <div className="messages-container">
-                    {selectedChat && currentChats[selectedChat].map((message, index) => (
-                        <div key={index}>{message}</div>
-                    ))}
-                </div>
+
+                {selectedChat && (
+                    currentChats.find(chat => chat.hasOwnProperty(selectedChat))?.[selectedChat]?.map((message, index) => (
+                        <div key={index}>{message.content}</div>
+                    ))
+                )}
                 {selectedChat && (
                     <div className="input-container">
                         <input
@@ -124,28 +158,6 @@ function Messages() {
                     </div>
                 )}
             </div>
-
-            {isModalOpen && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <h2>Add a New Chat</h2>
-                        <input
-                            placeholder="Name"
-                            value={newChatName}
-                            onChange={e => setNewChatName(e.target.value)}
-                        />
-                        <input
-                            placeholder="IP Address"
-                            value={newChatIP}
-                            onChange={e => setNewChatIP(e.target.value)}
-                        />
-                        <div className="modal-buttons">
-                            <button onClick={addNewChat}>Add</button>
-                            <button onClick={() => setIsModalOpen(false)}>Close</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
