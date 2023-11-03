@@ -25,7 +25,15 @@ const profileSidebar = ({ active }) => {
             Edit Profile
           </p>
         </Link>
-        <p>Notification Settings</p>
+        <Link href="/profile/notif_pref">
+          <p
+            className={`cursor-pointer ${
+              active === "notif_pref" ? "border-l-4 border-blue-500 pl-1" : ""
+            }`}
+          >
+            Notification Preferences
+          </p>
+        </Link>
         <Link href="/profile/privacy">
           <p
             className={`cursor-pointer ${
