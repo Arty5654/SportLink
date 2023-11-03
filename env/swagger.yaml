@@ -884,7 +884,7 @@ paths:
           description: Event joined successfully
         "400":
           description: Bad request, missing required parameters or event is full
-  
+
   /get_reports:
     get:
       operationId: app.get_reports
@@ -913,7 +913,7 @@ paths:
                       type: string
         "404":
           description: No friend requests found!
-  
+
   /block_user:
     post:
       operationId: app.block_user
@@ -951,7 +951,7 @@ paths:
                     type: string
 
   /get_blocked_users:
-     get:
+    get:
       operationId: app.get_blocked_users
       parameters:
         - name: email
@@ -978,7 +978,7 @@ paths:
                       type: boolean
         "404":
           description: User not found!
-  
+
   /unblock_user:
     post:
       operationId: app.unblock_user
@@ -1015,7 +1015,7 @@ paths:
                   error:
                     type: string
   /get_all_events:
-     get:
+    get:
       operationId: app.get_all_events
       parameters:
         - name: email
@@ -1059,17 +1059,17 @@ paths:
                       type: string
         "404":
           description: User not found!
-# notification preferences
+  # notification preferences
   /get_user_notifs_settings:
     get:
       operationId: app.get_user_notifs_settings
       parameters:
-      - name: email
-        in: query
-        description: The email of the user to retrieve notification settings.
-        required: true
-        schema:
-          type: string
+        - name: email
+          in: query
+          description: The email of the user to retrieve notification settings.
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Notification settings retrieved successfully
@@ -1114,3 +1114,86 @@ paths:
                     type: string
         "404":
           description: User not found
+
+  /add_event_history:
+    post:
+      summary: Add event to history
+      description: Add event to history
+      operationId: app.add_event_history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                event:
+                  type: string
+      responses:
+        "200":
+          description: Event added to history
+        "400":
+          description: Bad request, missing required parameters or event is full
+
+  /delete_event_history:
+    post:
+      summary: Delete event to history
+      description: Delete event to history
+      operationId: app.delete_event_history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                event:
+                  type: string
+      responses:
+        "200":
+          description: Event added to history
+        "400":
+          description: Bad request, missing required parameters or event is full
+
+  /get_event_history:
+    get:
+      summary: Get Event History
+      description: Retrieve event history for a specific user.
+      operationId: app.get_event_history
+      responses:
+        200:
+          description: Event history retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+                    participants:
+                      type: array
+                      default: []
+                      items:
+                        type: string
+        404:
+          description: User not found or no event history available.

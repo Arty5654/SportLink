@@ -33,7 +33,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["events"] # REMINDER: Change back to events
+events = db["tempEvents"] # REMINDER: Change back to events
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
@@ -917,6 +917,20 @@ def get_user_notifs_settings():
     }
 
     return jsonify(settings), 200
+
+def delete_event_history():
+    data = request.get_json()
+    event = data.get("event")
+    user = data.get("user")
+
+    event_entry = {
+        "user": user,
+        "event": event,
+    }
+
+    history.delete_one(event_entry) 
+
+    return jsonify({'message': 'Added to History'}), 200
 
 def set_user_notifs_settings():
     user = request.get_json()
