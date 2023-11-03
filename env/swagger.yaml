@@ -1245,48 +1245,50 @@ paths:
       responses:
         "200":
           description: "Refreshed Messages"
-  /messages:
-    post:
-      operationId: app.init_messages
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                friends:
-                  type: array
-      responses:
-        "200":
-          description: "Checked Messages"
-  /stats:
-    post:
-      operationId: app.check_stats
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: array
-      responses:
-        "200":
-          description: "Checked Stats"
 
-  /fetch_friends:
-    post:
-      operationId: app.fetch_friends
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-      responses:
-        "200":
-          description: "Created Request"
+  # /messages:
+  #   post:
+  #     operationId: app.init_messages
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #               friends:
+  #                 type: array
+  #     responses:
+  #       "200":
+  #         description: "Checked Messages"
+
+  # /stats:
+  #   post:
+  #     operationId: app.check_stats
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: array
+  #     responses:
+  #       "200":
+  #         description: "Checked Stats"
+
+  # /fetch_friends:
+  #   post:
+  #     operationId: app.fetch_friends
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #     responses:
+  #       "200":
+  #         description: "Created Request"
