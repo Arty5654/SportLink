@@ -1312,6 +1312,65 @@ paths:
           description: 'Invalid request'
         '500':
           description: 'Internal server error'
+
+  /get_user_info2:
+    get:
+      summary: Get User Information
+      description: Retrieve user information from the database.
+      operationId: app.get_user_info2
+      parameters:
+        - name: username
+          in: query
+          description: The username of the user to retrieve information.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  phoneNumber:
+                    type: string
+                  address:
+                    type: string
+                  state:
+                    type: string
+                  country:
+                    type: string
+                  zipCode:
+                    type: string
+                  city:
+                    type: string
+                  age:
+                    type: string
+                  birthday:
+                    type: string
+                  gender:
+                    type: string
+                  imageData:
+                    type: string
+                  profileImage:
+                    type: string
+                  blocked:
+                    type: boolean
+                  blocker:
+                    type: string
+                  blocked_users:
+                    type: array
+        "404":
+          description: User not found
   # /refresh_msg:
   #   post:
   #     operationId: app.refresh_msg
@@ -1373,3 +1432,4 @@ paths:
   #     responses:
   #       "200":
   #         description: "Created Request"
+

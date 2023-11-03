@@ -805,6 +805,55 @@ def get_user_info():
     else:
         # User not found
         return jsonify({'message': 'User not found'}), 404
+    
+def get_user_info2():
+    username = request.args.get('username')
+    blocker_email = request.args.get('blocker_email')
+   
+
+    # Query the database for the user based on email
+    user = users.find_one({"username": username})
+    if user:
+        # Fetch user privacy settings
+        display_phone_number = user.get("displayPhoneNumber")
+        display_age = user.get("displayAge")
+        display_location = user.get("displayLocation")
+
+        # Prepare user information based on privacy settings
+        user_info = {
+            "firstName": user.get("firstName"),
+            "lastName": user.get("lastName"),
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "gender": user.get("gender"),
+            "birthday": user.get("birthday"),
+            "profileImage": user.get("profileImage"),
+            "imageData": user.get("imageData"),
+            "blocked_users": user.get("blocked_users"),
+            "blocker": user.get("blocker"),
+            "blocked": user.get("blocked")
+        }
+
+        # Add fields conditionally based on privacy settings
+        if display_phone_number != "private":
+            user_info["phoneNumber"] = user.get("phoneNumber")
+        else:
+            user_info["phoneNumber"] = "This information is set on private by the user."
+
+        if not display_age:
+            user_info["age"] = user.get("age")
+        else:
+            user_info["age"] = "This information is set on private by the user."
+
+        if not display_location:
+            user_info["city"] = user.get("city")
+        else:
+            user_info["city"] = "This information is set on private by the user."
+
+        return jsonify(user_info), 200
+    else:
+        # User not found
+        return jsonify({'message': 'User not found'}), 404
 
 
 def delete_account():
