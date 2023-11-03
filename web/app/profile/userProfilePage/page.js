@@ -19,30 +19,43 @@ function UserProfilePage() {
   
 
   useEffect(() => {
-    // Get the email query parameter from the URL
     const queryParams = new URLSearchParams(window.location.search);
     const userEmail = queryParams.get("email");
-
     const user1 = JSON.parse(sessionStorage.getItem("user"));
     setLoggedInUser(user1);
-
+  
+    // Fetch user info based on the email
     axios
       .get(`http://localhost:5000/get_user_info?email=${userEmail}`)
       .then((response) => {
         setUserProfile(response.data);
         setLoading(false);
-        console.log("User data:", user1.email);
-        console.log("blocked?:", response.data);
-
+        console.log("User data:", userEmail);
+        console.log("User profile:", response.data);
+  
+        // Check if the logged-in user has blocked the viewed user
         axios.get(`http://localhost:5000/get_blocked_users?email=${user1.email}`)
           .then((blockedUsersResponse) => {
             const blockedUsers = blockedUsersResponse.data;
-            if (blockedUsers.includes(response.data.email)) {
+            if (blockedUsers.includes(userEmail)) {
               router.push("/profile/unblock"); // Redirect to the unblock page
             }
+  
+            // Check if the viewed user has blocked the logged-in user
+            axios.get(`http://localhost:5000/get_blocked_users?email=${userEmail}`)
+              .then((blockedUsersResponse) => {
+                const blockedUsers = blockedUsersResponse.data;
+                if (blockedUsers.includes(user1.email)) {
+                  router.push("/profile/search"); // Redirect to the unblock page
+                }
+              })
+              .catch((blockedUsersError) => {
+                console.error('Error fetching user profile', blockedUsersError);
+                setLoading(false);
+              });
           })
-          .catch((blockedUsersError) => {
-            console.error('Error fetching user profile', blockedUsersError);
+          .catch((error) => {
+            console.error('Error fetching user profile', error);
             setLoading(false);
           });
       })
@@ -51,6 +64,7 @@ function UserProfilePage() {
         setLoading(false);
       });
   }, [router]);
+  
 
   const handleReportClick = () => {
     setReportOptionsVisible(true);
