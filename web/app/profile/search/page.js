@@ -45,6 +45,8 @@ function UserLookupPage() {
         setSearchResults([]);
       } else {
         const response = await axios.get(`http://localhost:5000/user_lookup?searchTerm=${input}`);
+        //sessionStorage.removeItem("user");
+        //sessionStorage.setItem("user", JSON.stringify(user));
         setSearchResults(response.data);
       }
     } catch (error) {

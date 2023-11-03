@@ -709,6 +709,12 @@ paths:
                     type: string
                   profileImage:
                     type: string
+                  blocked:
+                    type: boolean
+                  blocker:
+                    type: string
+                  blocked_users:
+                    type: array
         "404":
           description: User not found
 
@@ -862,3 +868,178 @@ paths:
           description: Event joined successfully
         "400":
           description: Bad request, missing required parameters or event is full
+  
+  /get_reports:
+    get:
+      operationId: app.get_reports
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve reports.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Friend requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                    reportReason:
+                      type: string
+                    timestamp:
+                      type: string
+        "404":
+          description: No friend requests found!
+  
+  /block_user:
+    post:
+      operationId: app.block_user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blocker:
+                  type: string
+                blocked_users:
+                  type: string
+                blocked:
+                  type: boolean
+      responses:
+        "200":
+          description: Blocked Successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Not Blocked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /get_blocked_users:
+     get:
+      operationId: app.get_blocked_users
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve blocked_users.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blocked successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                    blocked_users:
+                      type: array
+                    blocked:
+                      type: boolean
+        "404":
+          description: User not found!
+  
+  /unblock_user:
+    post:
+      operationId: app.unblock_user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blocker:
+                  type: string
+                blocked_user:
+                  type: string
+                blocked:
+                  type: boolean
+      responses:
+        "200":
+          description: Unblocked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: User not found!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /get_all_events:
+     get:
+      operationId: app.get_all_events
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve blocked_users.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blocked successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+                    participants:
+                      type: array
+                      default: []
+                    items:
+                      type: string
+        "404":
+          description: User not found!

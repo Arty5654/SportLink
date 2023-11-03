@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "@components/profileSidebar";
+import { Button } from "@mui/material";
 
 const UnblockPage = () => {
   const [user, setUser] = useState(null);
@@ -13,32 +14,45 @@ const UnblockPage = () => {
     setUser(userFromSession);
 
     // Fetch the list of blocked users
-    fetchBlockedUsers(userFromSession.email);
+    //fetchBlockedUsers(userFromSession.email);
   }, []);
 
-  const fetchBlockedUsers = async (email) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/get_blocked_users?email=${email}`);
-      setBlockedUsers(response.data);
-    } catch (error) {
-      console.error("Error fetching blocked users", error);
-    }
-  };
+  useEffect(() => {
+    const user1 = JSON.parse(sessionStorage.getItem("user"));
+    setUser(user1);
 
-  const handleUnblockUser = (blockedUserEmail) => {
+    const fetchData = async () => {
+      try {
+        var curr_email = user1.email;
+        //console.log("Getting friend requests for user:", curr_email)
+        const response = await axios.get(`http://localhost:5000/get_blocked_users?email=${curr_email}`);
+
+
+
+        // only set friend requests if the data array is not empty
+        if (response.data.length > 0) {
+          setBlockedUsers(response.data);
+          console.log("Blocked Users", response.data)
+        }
+      } catch (error) {
+        console.error('Error getting friend requests', error);
+      }
+    };
+
+    fetchData(); // Call the async function here
+}, []);
+
+  const handleUnblockUser = async (blockedUserEmail) => {
     try {
       // Perform an action to unblock the user
-      const response = axios.post("http://localhost:5000/unblock_user", {
+      await axios.post("http://localhost:5000/unblock_user", {
         blocker: user.email,
         blocked_user: blockedUserEmail,
         blocked: false
       });
 
-      response.then(() => {
-        // Update the state to remove the unblocked user
-        const updatedBlockedUsers = blockedUsers.filter((email) => email !== blockedUserEmail);
-        setBlockedUsers(updatedBlockedUsers);
-      });
+      setBlockedUsers(blockedUsers.filter((user) => user !== blockedUserEmail));
+
     } catch (error) {
       console.error("Error unblocking user", error);
     }
@@ -50,25 +64,27 @@ const UnblockPage = () => {
       <div className="ml-8 w-96">
         <h1 className="text-2xl font-bold mb-4">Blocked Users</h1>
         <ul className="space-y-4">
-          {blockedUsers.map((blockedUserEmail) => (
-            <li
-              key={blockedUserEmail}
-              className="flex items-center justify-between bg-white p-4 rounded-md shadow-md"
-            >
-              <span className="text-lg">{blockedUserEmail}</span>
-              <button
-                onClick={() => handleUnblockUser(blockedUserEmail)}
-                variant="contained"
-                color="primary"
-              >
-                Unblock
-              </button>
-            </li>
-          ))}
+          {blockedUsers.length > 0 ? (
+            <ul>
+              {blockedUsers.map((block, index) => (
+                <li key={index} className="flex items-center justify-between bg-gray-100 p-3 rounded-md mb-3">
+                  <p>{block}</p>
+                  <Button
+                    onClick={() => handleUnblockUser(block)}
+                    variant="contained"
+                    color="primary"
+                  >
+                    Unblock
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No users are currently blocked.</p>
+          )}
         </ul>
       </div>
     </div>
   );
 };
-
 export default UnblockPage;

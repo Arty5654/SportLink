@@ -29,7 +29,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["tempEvents"] # REMINDER: Change back to events
+events = db["events"] # REMINDER: Change back to events
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
@@ -145,7 +145,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker"]
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -189,7 +189,7 @@ def google_signin():
                 'friends': []
             }
 
-            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData']
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker"]
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -573,29 +573,40 @@ def get_reports():
     return jsonify(user_reports_list), 200
 
 def get_blocked_users():
-    email = request.args.get('email')
-    user = users.find_one({'email': email})
+    email = request.args.get('email')  # Get the email from the request
+    user = db.blocks.find_one({'email': email})  # Find the document with the provided email
+
     if user:
         blocked_users = user.get('blocked_users', [])
         return jsonify(blocked_users), 200
-    return jsonify([]), 404
+    else:
+        return jsonify([]), 404  # Return an empty list with a 404 status if the user is not found or has no blocked users
 
 def unblock_user():
     data = request.get_json()
-    blocker = data.get('blocker')
-    blocked_user = data.get('blocked_user')
+    blocker_email = data.get('blocker')
+    blocked_user_email = data.get('blocked_user')
 
-    # Update the blocked_users field in the user's document
-    user = users.find_one({'email': blocker})
+    # Find the user who has blocked someone
+    user = db.blocks.find_one({'email': blocker_email})
+
     if user:
         blocked_users = user.get('blocked_users', [])
-        if blocked_user in blocked_users:
-            blocked_users.remove(blocked_user)
-            # Update the user's document in the database
-            users.update_one({'email': blocker}, {'$set': {'blocked_users': blocked_users}})
-            return jsonify({'message': f'{blocked_user} has been unblocked by {blocker}'}), 200
+        if blocked_user_email in blocked_users:
+            # Remove the blocked user from the list
+            blocked_users.remove(blocked_user_email)
 
-    return jsonify({'error': 'Unable to unblock the user'}), 404
+            # Update the blocked_users array for the user who blocked
+            db.blocks.update_one(
+                {'email': blocker_email},
+                {'$set': {'blocked_users': blocked_users}}
+            )
+
+            return jsonify({'message': f'{blocked_user_email} unblocked successfully'}), 200
+
+    return jsonify({'message': 'User not found or unblock failed'}), 404
+
+
 
 def remove_friend():
     # Extracting data from request
@@ -643,18 +654,13 @@ def user_lookup():
             {"phoneNumber": regex},
             {"firstName": regex},
             {"lastName": regex},
-            {"profileImage": regex},
-            {"imageData": regex}
         ]
     }):
         
         # Check if the searched user is blocked by the user performing the search
-        is_blocked = searching_user_email in user.get("blocked_users", [])
+        #is_blocked = searching_user_email in user.get("blocked_users", [])
         
-        if not is_blocked:
-            image_data = None
-            if 'profileImage' in user: 
-                file_doc, image_data = get_image_from_gridfs(user['profileImage'])
+    #if not is_blocked:
         matching_users.append({
                 "id": str(user["_id"]),
                 "name": user.get("name"),
@@ -664,7 +670,7 @@ def user_lookup():
                 "firstName": user.get("firstName"),
                 "lastName": user.get("lastName"),
                 "profileImage": user.get("profileImage"),
-                "blocked": is_blocked,
+                #"blocked": is_blocked,
                 "imageData": user.get("imageData")
             })
 
@@ -672,10 +678,11 @@ def user_lookup():
 
 def get_user_info():
     email = request.args.get('email')
+    blocker_email = request.args.get('blocker_email')
+   
 
     # Query the database for the user based on email
     user = users.find_one({"email": email})
-
     if user:
         # Fetch user privacy settings
         display_phone_number = user.get("displayPhoneNumber")
@@ -691,7 +698,10 @@ def get_user_info():
             "gender": user.get("gender"),
             "birthday": user.get("birthday"),
             "profileImage": user.get("profileImage"),
-            "imageData": user.get("imageData")
+            "imageData": user.get("imageData"),
+            "blocked_users": user.get("blocked_users"),
+            "blocker": user.get("blocker"),
+            "blocked": user.get("blocked")
         }
 
         # Add fields conditionally based on privacy settings
@@ -758,6 +768,31 @@ def get_event_details():
 
     return jsonify(event_info), 200
 
+def get_all_events():
+    # Get the email from the query parameters
+    email = request.args.get('email')
+
+    # Filter events based on the user's email
+    user_events = [
+        {
+            "title": event['title'],
+            "sport": event['sport'],
+            "city": event['city'],
+            "desc": event['desc'],
+            "level": event['level'],
+            "open": event['open'],
+            "currentParticipants": event['currentParticipants'],
+            "maxParticipants": event['maxParticipants'],
+            "participants": event['participants']
+        }
+        #for event in events if email in event.get('participants', [])
+    ]
+
+    if user_events:
+        return jsonify(user_events), 200
+    else:
+        return "User not found or no events for this user!", 404
+
 def join_event():
     data = request.get_json()
     eventID = data.get("id")
@@ -801,19 +836,21 @@ def submit_report():
 
     return jsonify({'message': 'Report submitted successfully'}), 200
 
-
 def block_user():
     user = request.get_json()
     email = user.get('blocker')
     blocked_user = user.get('blocked_users')
+    blocked = user.get('blocked')
 
-    # Update the user's document to add the blocked user to the 'blocked_users' field
-    users.update_one(
+    # Update the user's document to add the blocked user to the 'blocked_users' array field
+    db.blocks.update_one(
         {"email": email},
-        {"$addToSet": {"blocked_users": blocked_user}}
+        {"$addToSet": {"blocked_users": blocked_user}},
+        upsert=True  # If the document doesn't exist, create it
     )
 
     return jsonify({'message': 'User blocked successfully'}), 200
+
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
