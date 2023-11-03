@@ -1197,3 +1197,96 @@ paths:
                         type: string
         404:
           description: User not found or no event history available.
+
+  /create:
+    post:
+      operationId: app.create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                city:
+                  type: string
+                open:
+                  type: boolean
+                sport:
+                  type: string
+                currentParticipants:
+                  type: integer
+                maxParticipants:
+                  type: string
+                type:
+                  type: string
+                participants:
+                  type: array
+                skill:
+                  type: string
+      responses:
+        "200":
+          description: "Created Request"
+
+  /refresh_msg:
+    post:
+      operationId: app.refresh_msg
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat_key:
+                  type: string
+      responses:
+        "200":
+          description: "Refreshed Messages"
+  /messages:
+    post:
+      operationId: app.init_messages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                friends:
+                  type: array
+      responses:
+        "200":
+          description: "Checked Messages"
+  /stats:
+    post:
+      operationId: app.check_stats
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: array
+      responses:
+        "200":
+          description: "Checked Stats"
+
+  /fetch_friends:
+    post:
+      operationId: app.fetch_friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: "Created Request"
