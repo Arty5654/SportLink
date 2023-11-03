@@ -133,6 +133,10 @@ paths:
                     default: []
                     items:
                       type: string
+                  profileImage:
+                    type: string
+                  imageData:
+                    type: string
                 required:
                   - username
         "401":
@@ -210,6 +214,10 @@ paths:
                   displayPhoneNumber:
                     type: string
                     description: "Toggle phone number visibility"
+                  profileImage:
+                    type: string
+                  imageData:
+                    type: string
                 required:
                   - email
                   - username
@@ -339,7 +347,9 @@ paths:
                 birthday:
                   type: string
                 profileImage:
-                  type: object
+                  type: string
+                imageData:
+                  type: string
       responses:
         "200":
           description: Profile updated successfully
@@ -642,6 +652,10 @@ paths:
                       type: string
                     lastName:
                       type: string
+                    profileImage:
+                      type: string
+                    imageData:
+                      type: string
         "404":
           description: No results found!
 
@@ -690,6 +704,10 @@ paths:
                   birthday:
                     type: string
                   gender:
+                    type: string
+                  imageData:
+                    type: string
+                  profileImage:
                     type: string
         "404":
           description: User not found

@@ -17,8 +17,10 @@ import ProfileImage from "@public/assets/default-profile.webp";
 import "@styles/global.css";
 
 export default function EditProfile() {
-  const [user, setUser] = useState(new User());
-  const [profileImage, setProfileImage] = useState(ProfileImage);
+  const [user, setUser] = useState({
+    // ...other user details,
+    profileImage: null, // Holds the base64 encoded image string
+  });
   const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
   const router = useRouter();
 
@@ -100,25 +102,21 @@ export default function EditProfile() {
       .catch((error) => {
         console.error("Error updating profile", error);
       });
-    router.push("/profile");
+    //router.push("/profile");
   };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       if (file.size > maxFileSize) {
-        alert(
-          "Selected file exceeds the maximum allowed size (5MB). Please choose a smaller file."
-        );
-        event.target.value = null; // Clear the input field
+        // Handle large file size error
       } else {
         const reader = new FileReader();
         reader.onload = (e) => {
-          setProfileImage(e.target.result);
-          // setUser((prev) => ({
-          //   ...prev,
-          //   profileImage: profileImage,
-          // }));
+          setUser((prev) => ({
+            ...prev,
+            profileImage: e.target.result, // Set the base64 string in state
+          }));
         };
         reader.readAsDataURL(file);
       }
@@ -183,7 +181,7 @@ export default function EditProfile() {
               {/* ITEM: Profile Pic */}
               <div className="w-1/5 pr-16">
                 <img
-                  src={profileImage}
+                  src={user.profileImage || ProfileImage}
                   alt="Profile Image"
                   style={{ width: "100px", height: "100px" }}
                 />

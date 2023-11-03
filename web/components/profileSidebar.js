@@ -44,6 +44,15 @@ const profileSidebar = ({ active }) => {
               User Look Up
               </p>
         </Link>
+        <Link href="/profile/userPlayerHistory">
+          <p
+            className={`cursor-pointer ${
+              active === "userPlayerHistory" ? "border-l-4 border-blue-500 pl-1" : ""
+            } ` }
+            >
+              User Player History
+              </p>
+        </Link>
         <p>Settings</p>
       </div>
     </div>
