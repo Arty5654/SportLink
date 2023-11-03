@@ -102,7 +102,7 @@ export default function EditProfile() {
       .catch((error) => {
         console.error("Error updating profile", error);
       });
-    //router.push("/profile");
+    router.push("/profile");
   };
 
   const handleImageUpload = (event) => {

@@ -22,6 +22,7 @@ class User {
     this.profileImage;
     this.blocked_users;
     this.profileImage;
+    this.blocked;
   }
 
   // adds new field to a user - username, age etc.
