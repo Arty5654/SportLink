@@ -24,7 +24,7 @@ const HistoryBar = () => {
   }, []);
 
   return (
-    <div className="border border-gray-400 rounded-xl px-4 pt-6 pb-96">
+    <div className="border border-gray-400 rounded-xl px-4 pt-6 pb-96 shadow-lg">
       <h1 className="font-base text-xl pb-8">Event History</h1>
       <div>
         {eventHistory.map((event, index) => (
@@ -44,7 +44,7 @@ const EventCard = ({ event }) => {
   };
 
   return (
-    <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64">
+    <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64 shadow-lg">
       <h1 className="font-semibold cursor-pointer" onClick={handleEventClick}>
         {event.title}
       </h1>
