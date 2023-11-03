@@ -1,8 +1,49 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import axios from "axios";
 import User from "@app/User";
+
+const HistoryCard = ({ event }) => {
+  const [user, setUser] = useState(new User());
+  const router = useRouter();
+
+  useEffect(() => {
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
+  }, []);
+
+  const handleEventClick = () => {
+    router.push(`/events?id=${event._id}`);
+  };
+
+  const deleteEventHistory = () => {
+    axios
+      .post("http://localhost:5000/delete_event_history", {
+        user: user.username,
+        event: event._id,
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          alert("You have deleted an event from histoy");
+          window.location.reload();
+        }
+      })
+      .catch((error) => {
+        console.error("Error joining event: ", error);
+      });
+  };
+
+  return (
+    <div className="border-l border-gray-500 pl-2 flex justify-between items-center">
+      <p className="text-sm cursor-pointer py-1" onClick={handleEventClick}>
+        {event.title}
+      </p>
+      <p className="text-sm text-red-500 cursor-pointer" onClick={deleteEventHistory}>
+        x
+      </p>
+    </div>
+  );
+};
 
 const HistoryBar = () => {
   const [user, setUser] = useState(new User());
@@ -27,9 +68,13 @@ const HistoryBar = () => {
     <div className="border border-gray-400 rounded-xl px-4 pt-6 pb-96 shadow-lg">
       <h1 className="font-base text-xl pb-8">Event History</h1>
       <div>
-        {eventHistory.map((event, index) => (
-          <li key={index}>{event.title}</li>
-        ))}
+        {eventHistory.length === 0 ? (
+          <p className="text-sm text-gray-600">You havent participated in any events.</p>
+        ) : (
+          eventHistory.map((event, index) => (
+            <HistoryCard key={index} event={event} {...event} />
+          ))
+        )}
       </div>
     </div>
   );
