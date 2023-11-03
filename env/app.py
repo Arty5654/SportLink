@@ -44,6 +44,25 @@ messages = db["messages"]
 #sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
 
+def update_stats():
+    data = request.json
+    user = data['user']
+    wins = data['wins']
+    losses = data['losses']
+    elo = data['elo']
+
+    # Find the document and update
+    result = stats.update_one(
+        {'_id' : user},
+        {'$set': {'wins': wins, 'losses': losses, 'elo': elo}},
+        upsert=True  # This creates a new document if one doesn't exist
+    )
+
+    if result.matched_count > 0 or result.upserted_id is not None:
+        return jsonify({'message': 'Statistics updated successfully'}), 200
+    else:
+        return jsonify({'message': 'No matching document found'}), 400
+
 def refresh_msg():
 
     payload = request.json
@@ -97,13 +116,15 @@ def generate_user_key(user1, user2):
 def check_stats():
     emails = request.json["friends"]
 
+    print(emails)
     response_data = []
 
     for email in emails:
-        user_stats = stats.find_one({"_id": email})
+        friend = email['friend']
+        user_stats = stats.find_one({"_id": friend})
         if not user_stats:
             default_stats = {
-                "_id": email,
+                "_id": friend,
                 "wins": 0,
                 "losses": 0,
                 "elo": 0

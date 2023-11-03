@@ -1288,7 +1288,30 @@ paths:
         404:
           description: User not found or no event history available.
 
-
+  /update_stats:
+    post:
+      summary: "Update user's statistics"
+      operationId: app.update_stats
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                user:
+                  type: string
+                wins:
+                  type: integer
+                losses:
+                  type: integer
+                elo:
+                  type: integer
+      responses:
+        '200':
+          description: 'Statistics updated successfully'
+        '400':
+          description: 'Invalid request'
+        '500':
+          description: 'Internal server error'
   # /refresh_msg:
   #   post:
   #     operationId: app.refresh_msg

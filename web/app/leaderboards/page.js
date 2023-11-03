@@ -2,7 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import './leadercss.css';
 import Leaderboard from './leaderboard';
-import axios from "@node_modules/axios/index";
+import axios from 'axios';
 import User from "@app/User";
 
 function App() {
@@ -51,7 +51,7 @@ function App() {
 
     return (
         <div className="App">
-            <Leaderboard scores={scores} mode={mode} setMode={setMode} />
+            <Leaderboard scores={scores} mode={mode} setMode={setMode} friends={friends} setScores={setScores}/>
         </div>
     );
 }
