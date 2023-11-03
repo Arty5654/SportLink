@@ -59,7 +59,7 @@ const NotifsPage = () => {
             console.log("Report response:", response.data)
           }
         } catch (error) {
-          console.error('Error getting friend requests', error);
+          console.error('Error getting potential reports', error);
         }
       };
 
@@ -71,20 +71,19 @@ const NotifsPage = () => {
       const [dateString] = timestamp.split('T');
       return dateString; // Return only the date part
     }
-  
+
     const date = new Date(timestamp);
-  
+
     if (Object.prototype.toString.call(date)) {
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
       return `${month}/${day}/${year}`;
     }
-  
+
     return 'Invalid Date';
   };
-  
-  
+
 
     // infinite scroll, loading 5 more friends at a time
     const handleScroll = () => {

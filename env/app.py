@@ -15,6 +15,10 @@ from flask_socketio import SocketIO, send, join_room, emit
 import base64
 from gridfs import GridFS
 from bson import ObjectId
+from flask_socketio import SocketIO, send, join_room, emit
+import base64
+from gridfs import GridFS
+from bson import ObjectId
 from bson.json_util import dumps
 from bson.regex import Regex
 import re
@@ -479,6 +483,12 @@ def send_friend_request():
 
     # send email to friend
     print(f"Want to send email to {friend_email}, from {email}")
+
+    # check if friend doesnt have sendEmails set to False
+    if users.find_one({'email': friend_email, 'sendEmail': False}):
+        print("no email to this user")
+        return jsonify({"message": "Friend Request Sent"}), 200
+
     msg = Message('New Friend Request!', recipients=[friend_email])
     msg.html = '<p>Hello! You have a friend request waiting for you! Sign in <a href="http://localhost:3000/signin">here</a> and click the bell in the top right to view.</p>'
     mail.send(msg)
@@ -885,6 +895,44 @@ def block_user():
 
     return jsonify({'message': 'User blocked successfully'}), 200
 
+def get_user_notifs_settings():
+    curr_email = request.args.get('email')
+
+    # Fetch the user's notification settings
+    curr_user = users.find_one({'email': curr_email})
+
+    if curr_user:
+        # check if they have sendEmail and showInApp fields
+        if 'sendEmail' in curr_user and 'showInApp' in curr_user:
+            settings = {
+                'sendEmail': curr_user['sendEmail'],
+                'showInApp': curr_user['showInApp']
+            }
+            return jsonify(settings), 200
+
+    # create a dummy array of sendEmail and showInApp as true
+    settings = {
+        'sendEmail': True,
+        'showInApp': True
+    }
+
+    return jsonify(settings), 200
+
+def set_user_notifs_settings():
+    user = request.get_json()
+    email = user.get('email')
+    sendEmail = user.get('sendEmail')
+    showInApp = user.get('showInApp')
+
+    # Update the user's notification settings in the database
+    update_query = {}
+    if sendEmail is not None:
+        update_query['sendEmail'] = sendEmail
+    if showInApp is not None:
+        update_query['showInApp'] = showInApp
+
+    users.update_one({"email": email}, {"$set": update_query})
+    return jsonify({'message': 'Notification settings updated successfully'}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
