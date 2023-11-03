@@ -862,3 +862,42 @@ paths:
           description: Event joined successfully
         "400":
           description: Bad request, missing required parameters or event is full
+
+  /get_event_history:
+    get:
+      summary: Get Event History
+      description: Retrieve event history for a specific user.
+      operationId: app.get_event_history
+      responses:
+        200:
+          description: Event history retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+                    participants:
+                      type: array
+                      default: []
+                      items:
+                        type: string
+        404:
+          description: User not found or no event history available.

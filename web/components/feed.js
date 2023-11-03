@@ -2,13 +2,35 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
+import User from "@app/User";
 
 const HistoryBar = () => {
-  // REMINDER: Change padding for outline component
+  const [user, setUser] = useState(new User());
+  const [eventHistory, setEventHistory] = useState([]);
+
+  useEffect(() => {
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
+
+    // Fetch event history for the user
+    if (currentUser) {
+      axios
+        .get(`http://localhost:5000/get_event_history?username=${currentUser.username}`)
+        .then((response) => {
+          console.log(response.data);
+          setEventHistory(response.data);
+        });
+    }
+  }, []);
+
   return (
     <div className="border border-gray-400 rounded-xl px-4 pt-6 pb-96">
       <h1 className="font-base text-xl pb-8">Event History</h1>
-      <p>none</p>
+      <div>
+        {eventHistory.map((event, index) => (
+          <li key={index}>{event.title}</li>
+        ))}
+      </div>
     </div>
   );
 };
