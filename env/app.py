@@ -33,6 +33,7 @@ events = db["tempEvents"] # REMINDER: Change back to events
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
+history = db["eventHistory"]
 
 
 #sendgridtemplates
@@ -736,7 +737,6 @@ def get_events():
     # Return the modified event data as JSON
     return jsonify(event_data), 200
 
-# @app.route("/get_event_details", methods=["GET"])
 def get_event_details():
     eventID = request.args.get("id")
     event_data = list(events.find())
@@ -777,6 +777,26 @@ def join_event():
                 return jsonify({"message": "The event is full. You cannot join at the moment."}), 400
 
     return jsonify({"message": "Event not found."}), 404
+
+def get_event_history():
+    username = request.args.get("username")  
+    event_history = list(history.find())
+    event_data = list(events.find())
+    user_event_history = []
+    user_events = []
+
+    for record in event_history:
+        if record["user"] == username:
+            user_event_history.append(record["event"])
+
+    for event in event_data:
+        event_dict = dict(event)  # Convert the PyMongo document to a dictionary
+        event_dict['_id'] = str(event['_id'])  # Convert ObjectId to string in the dictionary
+        if str(event['_id']) in user_event_history:
+            user_events.append(event_dict)
+
+    return(jsonify(user_events)), 200
+
 
 def submit_report():
     user = request.get_json()
