@@ -81,10 +81,10 @@ function UserLookupPage() {
               <div key={user.id} className="bg-white shadow rounded-lg p-4">
                 <Link href={`/profile/userProfilePage?email=${user.email}`} onClick={() => saveVisitedProfileToHistory(user)}>
                   <img
-                    src={ProfileImage}
-                    alt="Profile"
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
+                    src={`data:image/png;base64,${user.imageData}`}
+                    alt="Profile Image"
+                    style={{ width: "100px", height: "100px" }}
+                    />
                   <div>
                     <p className="text-gray-600">Name: {`${user.firstName} ${user.lastName}`}</p>
                     <p className="text-gray-600">Username: {user.username}</p>

@@ -12,12 +12,13 @@ import string # no install
 import json # no install
 import pdb # python debugger, pip install pypdb
 from flask_socketio import SocketIO, send, join_room, emit
-
-
-
+import base64
+from gridfs import GridFS
+from bson import ObjectId
 from bson.json_util import dumps
 from bson.regex import Regex
 import re
+
 load_dotenv()
 
 # Socket for messaging
@@ -31,6 +32,7 @@ teams = db["teams"]
 events = db["events"]
 friends = db["friends"]
 stats = db["stats"]
+fs = GridFS(db)
 
 
 #sendgridtemplates
@@ -142,7 +144,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -186,7 +188,7 @@ def google_signin():
                 'friends': []
             }
 
-            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -291,50 +293,36 @@ def change_password():
 def update_user_profile():
     user = request.get_json()
     email = user.get('email')
-    phoneNumber = user.get('phoneNumber')
-    firstName = user.get('firstName')
-    lastName = user.get('lastName')
-    username = user.get('username')
-    address = user.get('address')
-    state = user.get('state')
-    country = user.get('country')
-    zipCode = user.get('zipCode')
-    city = user.get('city')
-    age = user.get('age')
-    gender = user.get('gender')
-    birthday = user.get('birthday')
-    profileImage = user.get('profileImage')
 
-    # udpate the user's phone number in the data base
     update_query = {}
-    if firstName is not None:
-        update_query['firstName'] = firstName
-    if lastName is not None:
-        update_query['lastName'] = lastName
-    if username is not None:
-        update_query['username'] = username
-    if phoneNumber is not None:
-        update_query['phoneNumber'] = phoneNumber
-    if address is not None:
-        update_query['address'] = address 
-    if state is not None:
-        update_query['state'] = state
-    if country is not None:
-        update_query['country'] = country
-    if zipCode is not None:
-        update_query['zipCode'] = zipCode
-    if city is not None:
-        update_query['city'] = city
-    if age is not None:
-        update_query['age'] = age
-    if birthday is not None:
-        update_query['birthday'] = birthday
-    if gender is not None:
-        update_query['gender'] = gender
-    if profileImage is not None:
-        update_query['profileImage'] = profileImage
+    for field in ['firstName', 'lastName', 'username', 'phoneNumber', 'address', 'state', 'country', 'zipCode', 'city', 'age', 'gender', 'birthday']:
+        if field in user:
+            update_query[field] = user.get(field)
 
+    if 'profileImage' in user:
+        profile_image = user.get('profileImage')
+
+        # Check if the string starts with the correct prefix 'data:image/jpeg;base64,' or any other format
+        if profile_image.startswith('data:image/jpeg;base64,'):
+            profile_image = profile_image.replace('data:image/jpeg;base64,', '')  # Remove the prefix
+        elif profile_image.startswith('data:image/png;base64,'):
+            profile_image = profile_image.replace('data:image/png;base64,', '')  # Remove the prefix
+
+        try:
+            image_data = base64.b64decode(profile_image)
+            fs.put(image_data, filename=email + '_profile_image')  # Use email as a unique identifier
+
+            # Save a reference to the image in the user's profile
+            update_query['profileImage'] = email + '_profile_image'
+            update_query['imageData'] = base64.b64encode(image_data).decode('utf-8')
+        except Exception as e:
+            # Handle base64 decoding error
+            return jsonify({'error': 'Base64 decoding error', 'message': str(e)}), 400
+
+
+    users = db.users  # Assuming your collection name is 'users'
     users.update_one({"email": email}, {"$set": update_query})
+
     return jsonify({'message': 'Profile updated successfully'}), 200
 
 def update_user_privacy():
@@ -628,6 +616,16 @@ def preprocess_phone_number(phone_number):
     # Remove non-digit characters from the phone number
     return re.sub(r'\D', '', phone_number)
 
+def get_image_from_gridfs(image_id):
+    file_doc = fs.find_one({"filename": image_id})
+    image_data = None
+    if file_doc:
+        chunks = fs.find({"files_id": file_doc._id})
+        image_data = b''.join(chunk.read() for chunk in chunks)
+        image_data = base64.b64encode(image_data).decode('utf-8')
+    return file_doc, image_data
+
+
 def user_lookup():
     search_term = request.args.get('searchTerm')
     searching_user_email = request.args.get('email')
@@ -643,14 +641,20 @@ def user_lookup():
             {"email": regex},
             {"phoneNumber": regex},
             {"firstName": regex},
-            {"lastName": regex}
+            {"lastName": regex},
+            {"profileImage": regex},
+            {"imageData": regex}
         ]
     }):
+        
         # Check if the searched user is blocked by the user performing the search
         is_blocked = searching_user_email in user.get("blocked_users", [])
-
-        if not is_blocked:  # Only append if the user is not blocked
-            matching_users.append({
+        
+        if not is_blocked:
+            image_data = None
+            if 'profileImage' in user: 
+                file_doc, image_data = get_image_from_gridfs(user['profileImage'])
+        matching_users.append({
                 "id": str(user["_id"]),
                 "name": user.get("name"),
                 "username": user.get("username"),
@@ -658,13 +662,12 @@ def user_lookup():
                 "phoneNumber": user.get("phoneNumber"),
                 "firstName": user.get("firstName"),
                 "lastName": user.get("lastName"),
-                "blocked": is_blocked
+                "profileImage": user.get("profileImage"),
+                "blocked": is_blocked,
+                "imageData": user.get("imageData")
             })
 
     return jsonify(matching_users), 200
-
-
-
 
 def get_user_info():
     email = request.args.get('email')
@@ -685,7 +688,9 @@ def get_user_info():
             "username": user.get("username"),
             "email": user.get("email"),
             "gender": user.get("gender"),
-            "birthday": user.get("birthday")
+            "birthday": user.get("birthday"),
+            "profileImage": user.get("profileImage"),
+            "imageData": user.get("imageData")
         }
 
         # Add fields conditionally based on privacy settings

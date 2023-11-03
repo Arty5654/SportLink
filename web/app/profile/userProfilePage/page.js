@@ -102,7 +102,13 @@ function UserProfilePage() {
             <h1 className="font-base text-3xl">
               {userProfile.firstName} {userProfile.lastName}
             </h1>
-            <p className="text-gray-500 pb-8">{userProfile.username}</p>
+            <p className="text-gray-500 pb-8 text-1xl">Username: {userProfile.username}</p>
+            <img
+                    src={`data:image/png;base64,${userProfile.imageData}`}
+                    alt="Profile Image"
+                    style={{ width: "100px", height: "100px" }}
+                    />
+            
           </div>
           <div className="flex gap-8 pb-8 border-b border-gray-200">
             {/* You can add the Friends and Messages links here */}
