@@ -86,8 +86,6 @@ paths:
                   type: integer
                 maxParticipants:
                   type: integer
-                type:
-                  type: string
                 participants:
                   type: array
                 level:
@@ -1290,38 +1288,6 @@ paths:
         404:
           description: User not found or no event history available.
 
-  /create:
-    post:
-      operationId: app.create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                description:
-                  type: string
-                city:
-                  type: string
-                open:
-                  type: boolean
-                sport:
-                  type: string
-                currentParticipants:
-                  type: integer
-                maxParticipants:
-                  type: string
-                type:
-                  type: string
-                participants:
-                  type: array
-                skill:
-                  type: string
-      responses:
-        "200":
-          description: "Created Request"
 
   # /refresh_msg:
   #   post:

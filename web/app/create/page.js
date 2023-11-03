@@ -88,11 +88,11 @@ const createPage = () => {
         console.log(teamData);
         axios.post('http://localhost:5000/create', {
             title: teamData['title'],
-            description: teamData['desc'],
+            desc: teamData['desc'],
             city: teamData['city'],
             open: teamData['open'],
             sport: teamData['sport'],
-            currentParticipants: currentParticipants,
+            currentParticipants: parseInt(currentParticipants),
             maxParticipants: parseInt(teamData['maxParticipants']),
             type: selected,
             participants: participants,
