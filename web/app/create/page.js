@@ -54,13 +54,18 @@ const createPage = () => {
         const { name, value } = e.target;
         setTeamData(prevState => ({ ...prevState, [name]: value }));
     }
+    const [skillLevel, setSkillLevel] = useState('Any');
+
+    const handleSkill = (event) => {
+        setSkillLevel(event.target.value);
+    }
+
     const [teamData, setTeamData] = useState({
         title: "",
         desc: "",
         city: "",
         open: true,
         sport: "",
-        currentParticipants: currentParticipants,
         maxParticipants: 0,
     });
     const handleCheckboxChange = (friendId, friendEmail) => {
@@ -83,15 +88,15 @@ const createPage = () => {
         console.log(teamData);
         axios.post('http://localhost:5000/create', {
             title: teamData['title'],
-            description: teamData['description'],
+            description: teamData['desc'],
             city: teamData['city'],
             open: teamData['open'],
             sport: teamData['sport'],
-            currentParticipants: teamData['currentPartipants'],
-            maxParticipants: teamData['maxParticipants'],
+            currentParticipants: currentParticipants,
+            maxParticipants: parseInt(teamData['maxParticipants']),
             type: selected,
             participants: participants,
-            skill: value
+            level: skillLevel
         })
             .then(response => {
                 console.log('Data received:', response.data);
@@ -147,15 +152,14 @@ const createPage = () => {
                  </div>
                  <input type="number" name="maxParticipants" placeholder="Max Participants" onChange={handleChange} />
                  <div>
-                     <input
-                         type="range"
-                         min="1"
-                         max="1000"
-                         value={value}
-                         onChange={(e) => setValue(e.target.value)}
-                     />
-                     <p>Skill Cap: {value}</p>
-                </div>
+                     <label htmlFor="skill-level">Skill Level:</label>
+                     <select id="skill-level" value={skillLevel} onChange={handleSkill}>
+                         <option value="Any">Any</option>
+                         <option value="Beginner">Beginner</option>
+                         <option value="Intermediate">Intermediate</option>
+                         <option value="Advanced">Advanced</option>
+                     </select>
+                 </div>
                  <button onClick={handleSubmit}>Create Team</button>
              </div>
          </div>
