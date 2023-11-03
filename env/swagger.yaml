@@ -901,3 +901,25 @@ paths:
                         type: string
         404:
           description: User not found or no event history available.
+
+  /add_event_history:
+    post:
+      summary: Add event to history
+      description: Add event to history
+      operationId: app.add_event_history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                event:
+                  type: string
+      responses:
+        "200":
+          description: Event added to history
+        "400":
+          description: Bad request, missing required parameters or event is full
