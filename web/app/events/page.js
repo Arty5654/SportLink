@@ -61,6 +61,7 @@ const EventDetails = () => {
         router.push("/signin");
         return;
       } else {
+        // join event
         axios
           .post("http://localhost:5000/join_event", {
             id: eventID,
@@ -75,22 +76,34 @@ const EventDetails = () => {
           .catch((error) => {
             console.error("Error joining event: ", error);
           });
+        // add to eventhistory
+        axios
+          .post("http://localhost:5000/add_event_history", {
+            event: eventID,
+            user: user.username,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              console.log("Added to History");
+            }
+          });
       }
     } else {
       alert("The event is full. You cannot join at the moment.");
     }
   };
 
-  console.log(event);
-
   return (
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
       <div className="w-4/5">
-        <h1 className="text-3xl font-semibold">{event.title}</h1>
-        <p className="text-gray-600 border-b border-gray-300 pb-4">
-          {event.city} • {event.sport}
-        </p>
+        <h1 className="text-3xl font-semibold">
+          {event.title}{" "}
+          <span className="text-gray-600 pb-4 font-base text-sm">
+            {event.city} • {event.sport}
+          </span>
+        </h1>
+        <p className="text-blue-500 border-b border-gray-300 pb-4">{event.level}</p>
         <p className="pt-4">{event.desc}</p>
       </div>
       {/* ITEM: Right Bar*/}
@@ -114,7 +127,7 @@ const EventDetails = () => {
           </p>
           <button
             onClick={handleJoinEvent}
-            className="w-full bg-green-500 text-white font-semibold text-lg ho rounded-xl py-2 mb-4"
+            className="w-full bg-green-500 hover:bg-green-600 hover:ease-in duration-100 text-white font-semibold text-lg ho rounded-xl py-2 mb-4"
           >
             Join Event
           </button>
