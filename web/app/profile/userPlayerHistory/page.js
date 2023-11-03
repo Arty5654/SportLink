@@ -1,25 +1,25 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import Sidebar from '@components/profileSidebar';
-import axios from 'axios';
+"use client";
+import React, { useState, useEffect } from "react";
+import Sidebar from "@components/profileSidebar";
+import axios from "axios";
 import User from "@app/User";
 
 const HistoryPage = () => {
-  const [history, setHistory] = useState([]);
-  const [loggedInUser, setLoggedInUser] = useState(new User());
+  const [user, setUser] = useState(new User());
+  const [eventHistory, setEventHistory] = useState([]);
+  const [playerHistory, setPlayerHistory] = useState([]);
 
   useEffect(() => {
-    // Fetch the user from session storage
-    const userFromSession = JSON.parse(sessionStorage.getItem("user"));
-    setLoggedInUser(userFromSession);
-    // Check if user exists and fetch history based on the user's email
-    if (userFromSession && userFromSession.email) {
-      axios.get(`http://localhost:5000/get_all_events?email=${userFromSession.email}`)
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
+
+    // Fetch event history for the user
+    if (currentUser) {
+      axios
+        .get(`http://localhost:5000/get_event_history?username=${currentUser.username}`)
         .then((response) => {
-          setHistory(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching user history", error);
+          console.log(response.data);
+          setEventHistory(response.data);
         });
     }
   }, []);
@@ -27,20 +27,29 @@ const HistoryPage = () => {
   return (
     <div>
       <div className="flex h-screen">
-        <Sidebar active="userPlayerHistory" />
         <div>
-          <h1>History of Games</h1>
-          {/* Display historical game data */}
-          <ul>
-            {history.map((game) => (
-              <li key={game.id}>
-                <p>Game Type: {game.sport}</p>
-                <p>Date and Time: [Mock Date and Time]</p>
-                <p>Notes: {game.desc}</p>
-                <button>View Players</button>
-              </li>
-            ))}
-          </ul>
+          <Sidebar active="userPlayerHistory" />
+        </div>
+        <div className="pl-16">
+          <h1 className="text-xl font-semibold pb-4">Player History</h1>
+          <div className="flex gap-8">
+            {eventHistory.length === 0 ? (
+              <p className="text-sm text-gray-600">You havent participated in any events.</p>
+            ) : (
+              eventHistory.map((event, index) => (
+                <div>
+                  <p className="text-base pb-4" key={index} event={event} {...event}>
+                    {event.title}
+                  </p>
+                  <p key={index} event={event} {...event}>
+                    {event.participants.map((player, index) => (
+                      <p className="text-sm text-gray-600">{player}</p>
+                    ))}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
