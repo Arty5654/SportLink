@@ -1231,20 +1231,20 @@ paths:
         "200":
           description: "Created Request"
 
-  /refresh_msg:
-    post:
-      operationId: app.refresh_msg
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                chat_key:
-                  type: string
-      responses:
-        "200":
-          description: "Refreshed Messages"
+  # /refresh_msg:
+  #   post:
+  #     operationId: app.refresh_msg
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               chat_key:
+  #                 type: string
+  #     responses:
+  #       "200":
+  #         description: "Refreshed Messages"
 
   # /messages:
   #   post:
