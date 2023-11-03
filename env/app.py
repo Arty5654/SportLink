@@ -29,7 +29,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["events"]
+events = db["tempEvents"] # REMINDER: Change back to events
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
@@ -83,6 +83,7 @@ def fetch_friends():
         print("HERE")
 
     return jsonify({'friends': friend_requests}), 200
+
 
 def create_account():
     user = request.json
@@ -748,6 +749,7 @@ def get_event_details():
                 "city": event["city"],
                 "open": event["open"],
                 "sport": event["sport"],
+                "level": event["level"],
                 "currentParticipants": event["currentParticipants"],
                 "maxParticipants": event["maxParticipants"],
                 "participants": event["participants"],
