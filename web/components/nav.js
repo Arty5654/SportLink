@@ -21,20 +21,32 @@ const Nav = () => {
           const fetchData = async () => {
             try {
               var curr_email = user1.email;
-              const response = await axios.get(`http://localhost:5000/get_friend_requests?email=${curr_email}`);
+              const r = await axios.get(`http://localhost:5000/get_user_notifs_settings?email=${curr_email}`);
 
-              // only set friend requests if the data array is not empty
-              if (response.data.length > 0) {
-                for (var i = 0; i < response.data.length; i++) {
-                  if (response.data[i].status == "pending") {
-                    console.log("Pending friend requests found for", curr_email)
-                    setPendingRequests(true);
-                    break;
+              if (r.data) {
+                if (r.data.showInApp) {
+                  try {
+                    const response = await axios.get(`http://localhost:5000/get_friend_requests?email=${curr_email}`);
+
+                    // only set friend requests if the data array is not empty
+                    if (response.data.length > 0) {
+                      for (var i = 0; i < response.data.length; i++) {
+                        if (response.data[i].status == "pending") {
+                          console.log("Pending friend requests found for", curr_email)
+                          setPendingRequests(true);
+                          break;
+                        }
+                      }
+                    }
+                  } catch (error) {
+                    console.error('Error getting user notifs settings', error);
                   }
+                } else {
+                  console.log("User has notifs turned off");
                 }
               }
             } catch (error) {
-              console.error('Error getting friend requests', error);
+              console.error('Error checking notif prefs', error);
             }
           };
 
