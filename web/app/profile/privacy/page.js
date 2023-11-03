@@ -20,26 +20,33 @@ import Sidebar from "@components/profileSidebar";
 import "@styles/global.css";
 import Switch from "react-switch";
 import { userAgent } from 'next/server';
+import Link from "next/link";
+
 
 const UserProfile = () => {
 
-  const isSessionStorageAvailable = typeof sessionStorage !== 'undefined';
+  const isLocalStorageAvailable = typeof localStorage !== 'undefined';
 
-  // Initialize toggle states from sessionStorage or default to true
-   const [displayAge, setDisplayAge] = useState(() => {
-    const storedDisplayAge = isSessionStorageAvailable ? sessionStorage.getItem("displayAge") : null;
-    return storedDisplayAge ? JSON.parse(storedDisplayAge) : true;
-  });
+// Restoring settings from localStorage or defaulting to initial values
+const [displayAge, setDisplayAge] = useState(() => {
+  const storedDisplayAge = isLocalStorageAvailable ? localStorage.getItem("displayAge") : null;
+  return storedDisplayAge ? JSON.parse(storedDisplayAge) : true;
+});
 
-  const [displayLocation, setDisplayLocation] = useState(() => {
-    const storedDisplayLocation = isSessionStorageAvailable ? sessionStorage.getItem("displayLocation") : null;
-    return storedDisplayLocation ? JSON.parse(storedDisplayLocation) : true;
-  });
+const [displayLocation, setDisplayLocation] = useState(() => {
+  const storedDisplayLocation = isLocalStorageAvailable ? localStorage.getItem("displayLocation") : null;
+  return storedDisplayLocation ? JSON.parse(storedDisplayLocation) : true;
+});
 
-  const [accountPrivacy, setAccountPrivacy] = useState(() => {
-    const storedAccountPrivacy = isSessionStorageAvailable ? sessionStorage.getItem("accountPrivacy") : null;
-    return storedAccountPrivacy ? JSON.parse(storedAccountPrivacy) : true;
-  });
+const [accountPrivacy, setAccountPrivacy] = useState(() => {
+  const storedAccountPrivacy = isLocalStorageAvailable ? localStorage.getItem("accountPrivacy") : null;
+  return storedAccountPrivacy ? JSON.parse(storedAccountPrivacy) : true;
+});
+
+const [displayPhoneNumber, setPhoneNumberPrivacy] = useState(() => {
+  const storedDisplayPhoneNumber = isLocalStorageAvailable ? localStorage.getItem("displayPhoneNumber") : null;
+  return storedDisplayPhoneNumber ? JSON.parse(storedDisplayPhoneNumber) : 'private';
+});
   /*
   const [displayPhoneNumber, setPhoneNumberPrivacy] = useState(() => {
     const storedDisplayPhoneNumber = isSessionStorageAvailable ? sessionStorage.getItem("displayPhoneNumber") : null;
@@ -47,7 +54,7 @@ const UserProfile = () => {
   });
   */
 
-  const [displayPhoneNumber, setPhoneNumberPrivacy] = useState('private');
+  //const [displayPhoneNumber, setPhoneNumberPrivacy] = useState('private');
 
   useEffect(() => {
     const storedAccountPrivacy = sessionStorage.getItem('accountPrivacy');
@@ -91,10 +98,10 @@ const UserProfile = () => {
     };
 
     
-    sessionStorage.setItem('displayAge', JSON.stringify(displayAge));
-    sessionStorage.setItem('displayLocation', JSON.stringify(displayLocation));
-    sessionStorage.setItem('accountPrivacy', JSON.stringify(accountPrivacy));
-    sessionStorage.setItem('displayPhoneNumber', JSON.stringify(displayPhoneNumber));
+    localStorage.setItem('displayAge', JSON.stringify(displayAge));
+    localStorage.setItem('displayLocation', JSON.stringify(displayLocation));
+    localStorage.setItem('accountPrivacy', JSON.stringify(accountPrivacy));
+    localStorage.setItem('displayPhoneNumber', JSON.stringify(displayPhoneNumber));
 
     axios.post('http://localhost:5000/privacy', updatedUserData)
       .then((response)=> {
@@ -116,7 +123,7 @@ const UserProfile = () => {
       <div className="w-3/4 pl-8">
         {/* Toggle age visibility */}
         <div className="pb-4">
-          <p>Toggle Age Visibility:</p>
+          <p>Toggle Age Visibility: (green means private)</p>
           <Switch
             checked={accountPrivacy ? true : displayAge}
             onChange={(checked) => {
@@ -127,7 +134,7 @@ const UserProfile = () => {
 
         {/* Toggle location visibility */}
         <div className="pb-4">
-          <p>Toggle Location Visibility:</p>
+          <p>Toggle Location Visibility: (green means private)</p>
           <Switch
             checked={accountPrivacy ? true : displayLocation}
             onChange={(checked) => {
@@ -138,7 +145,7 @@ const UserProfile = () => {
 
         {/* Toggle account privacy */}
         <div className="pb-4">
-          <p>Toggle Account Privacy:</p>
+          <p>Toggle Account Privacy: (green means private)</p>
           <Switch
             checked={accountPrivacy}
             onChange={(checked) => handleAccountPrivacyToggle(checked)}
@@ -164,6 +171,12 @@ const UserProfile = () => {
           >
             Connect Instagram
           </button>
+          <Link
+            href="/profile/unblock"
+            className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+          >
+            Blocked List
+          </Link>
         <div className="mt-2">
         <button
               onClick={handleSaveProfile}
