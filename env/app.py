@@ -28,11 +28,61 @@ teams = db["teams"]
 events = db["events"]
 friends = db["friends"]
 stats = db["stats"]
-
+messages = db["messages"]
 
 #sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
 
+def refresh_msg():
+
+    payload = request.json
+    print(payload)
+
+    key = payload['chat_key']
+    all_chats = []
+
+    chat = messages.find_one({"_id": key})
+    all_chats.append({chat["_id"]: chat["messages"]})
+
+
+    return jsonify(all_chats)
+
+def init_messages():
+
+    payload = request.json
+
+    print(payload)
+
+
+
+    user = payload['email']
+    friends = payload['friends']
+
+    chat_keys = []
+    all_chats = []
+
+    for friend in friends:
+
+        chat_key = generate_user_key(user, friend)
+        chat = messages.find_one({"_id": chat_key})
+
+        # 3. If neither combination exists, create a new entry
+        if not chat:
+
+            messages.insert_one({"_id": chat_key, "messages": []})
+            all_chats.append({chat_key: []})
+        else:
+            all_chats.append({chat["_id"]: chat["messages"]})
+
+        chat_keys.append(chat_key)
+
+    return jsonify({"chats": all_chats, "chat_keys": chat_keys})
+
+def generate_user_key(user1, user2):
+    # Sort the user IDs to ensure consistency
+    sorted_users = sorted([user1, user2])
+    # Join the sorted user IDs with a delimiter to form a unique key
+    return ':'.join(sorted_users)
 def check_stats():
     emails = request.json["friends"]
 
@@ -70,12 +120,10 @@ def fetch_friends():
     email = obj['email']
     friend_requests = []
 
-    print("HERE")
     for friend in friends.find({"user": email}):
         # Convert ObjectId to string
         friend['_id'] = str(friend['_id'])
         friend_requests.append(friend)
-        print("HERE")
 
     return jsonify({'friends': friend_requests}), 200
 
@@ -725,24 +773,38 @@ def handle_disconnect():
 
 @socketIo.on('join')
 def handle_join(obj):
-    print(obj)
+    print("Client Joined")
     join_room(obj)
     send(f"{request.sid} has entered the room.", room=obj)
 
 @socketIo.on('new_message')
 def handle_new_message(data):
-    IP_TO = data['IP_TO']
-    name = data['name']
-    content = data['content']
-    IP_FROM = data['IP_FROM']
 
-    # Handle the message, possibly broadcasting it or storing it, etc.
+    print("Handling Messages")
+    IP_TO = data['IP_TO']
+    IP_FROM = data['IP_FROM']
+    content = data['content']
+
+    chat_key = generate_user_key(IP_TO, IP_FROM)
+
+    chat = messages.find_one({"_id": chat_key})
+
+    if chat:
+        # Append the new message to the existing messages array
+        new_message = {"content": content}
+        messages.update_one({"_id": chat["_id"]}, {"$push": {"messages": new_message}})
+    else:
+        # If chat doesn't exist, create it (assuming IP_FROM is the user initiating the chat)
+        messages.insert_one({"_id": chat_key, "messages": [{"content": content}]})
+
+    # Broadcast or emit the message as needed
+    emit('message_response', {'key': chat_key}, room=IP_TO)
+    print(content)
     print(IP_FROM)
     print(IP_TO)
-    print(name)
-    print(content)
-    # Optionally, you can send an acknowledgment or response back to the client
-    emit('message_response', {'name': name, 'content': content, 'IP_FROM': IP_FROM}, room=IP_TO)
+    print("Message Sent")
+
+
 
 
 if __name__ == '__main__':

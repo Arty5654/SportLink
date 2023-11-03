@@ -4,6 +4,36 @@ info:
   version: "1.0"
 
 paths:
+  /refresh_msg:
+    post:
+      operationId: app.refresh_msg
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat_key:
+                  type: string
+      responses:
+        "200":
+          description: "Refreshed Messages"
+  /messages:
+    post:
+      operationId: app.init_messages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                friends:
+                  type: array
+      responses:
+        "200":
+          description: "Checked Messages"
   /stats:
     post:
       operationId: app.check_stats
