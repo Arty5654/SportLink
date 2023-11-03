@@ -29,7 +29,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["events"] # REMINDER: Change back to events
+events = db["tempEvents"] # REMINDER: Change back to events
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
@@ -519,7 +519,7 @@ def deny_friend_request():
     if not friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
         return jsonify({'info': 'Request does not exist!'}), 401
 
-    # delete friend request
+    # friend request
     friends.delete_one({'user': friend_email, 'friend': email, 'status': 'pending'})
 
     return jsonify({"message": "Friend Request Denied"}), 200
@@ -820,6 +820,7 @@ def get_event_history():
     user_event_history = []
     user_events = []
 
+    print("Ran")
     for record in event_history:
         if record["user"] == username:
             user_event_history.append(record["event"])
@@ -829,6 +830,7 @@ def get_event_history():
         event_dict['_id'] = str(event['_id'])  # Convert ObjectId to string in the dictionary
         if str(event['_id']) in user_event_history:
             user_events.append(event_dict)
+
 
     return(jsonify(user_events)), 200
 
@@ -843,6 +845,20 @@ def add_event_history():
     }
 
     history.insert_one(event_entry)
+
+    return jsonify({'message': 'Added to History'}), 200
+
+def delete_event_history():
+    data = request.get_json()
+    event = data.get("event")
+    user = data.get("user")
+
+    event_entry = {
+        "user": user,
+        "event": event,
+    }
+
+    history.delete_one(event_entry) 
 
     return jsonify({'message': 'Added to History'}), 200
 
