@@ -797,6 +797,20 @@ def get_event_history():
 
     return(jsonify(user_events)), 200
 
+def add_event_history():
+    data = request.get_json()
+    event = data.get("event")
+    user = data.get("user")
+
+    event_entry = {
+        "user": user,
+        "event": event,
+    }
+
+    history.insert_one(event_entry)
+
+    return jsonify({'message': 'Added to History'}), 200
+
 
 def submit_report():
     user = request.get_json()

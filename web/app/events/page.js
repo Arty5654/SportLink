@@ -61,6 +61,7 @@ const EventDetails = () => {
         router.push("/signin");
         return;
       } else {
+        // join event
         axios
           .post("http://localhost:5000/join_event", {
             id: eventID,
@@ -75,13 +76,22 @@ const EventDetails = () => {
           .catch((error) => {
             console.error("Error joining event: ", error);
           });
+        // add to eventhistory
+        axios
+          .post("http://localhost:5000/add_event_history", {
+            event: eventID,
+            user: user.username,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              console.log("Added to History");
+            }
+          });
       }
     } else {
       alert("The event is full. You cannot join at the moment.");
     }
   };
-
-  console.log(event);
 
   return (
     <div className="w-full flex gap-8">
