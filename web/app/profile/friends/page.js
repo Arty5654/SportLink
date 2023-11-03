@@ -83,6 +83,7 @@ const FriendsPage = () => {
 
           if (response.status === 200) {
             console.log("Friend request sent");
+            alert("Friend request sent!")
           }
         }).catch((error) => {
           //run this code always when status!==200

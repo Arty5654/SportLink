@@ -67,9 +67,12 @@ const ProfilePage = () => {
           >
             Friends
           </Link>
-          <p className="border border-black bg-black text-white px-8 py-2 rounded-xl">
+          <Link
+              href="/profile/messages"
+              className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+          >
             Messages
-          </p>
+          </Link>
         </div>
 
         {/* ITEM: Contact Info */}
