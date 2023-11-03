@@ -74,7 +74,7 @@ paths:
               properties:
                 title:
                   type: string
-                description:
+                desc:
                   type: string
                 city:
                   type: string
@@ -85,12 +85,12 @@ paths:
                 currentParticipants:
                   type: integer
                 maxParticipants:
-                  type: string
+                  type: integer
                 type:
                   type: string
                 participants:
                   type: array
-                skill:
+                level:
                   type: string
       responses:
         "200":
