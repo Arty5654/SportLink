@@ -15,6 +15,10 @@ from flask_socketio import SocketIO, send, join_room, emit
 import base64
 from gridfs import GridFS
 from bson import ObjectId
+from flask_socketio import SocketIO, send, join_room, emit
+import base64
+from gridfs import GridFS
+from bson import ObjectId
 from bson.json_util import dumps
 from bson.regex import Regex
 import re
