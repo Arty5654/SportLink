@@ -23,6 +23,9 @@ from bson.json_util import dumps
 from bson.regex import Regex
 import re
 
+# import files
+from events import get_history, add_history, delete_history, join, get_details, get_all
+
 load_dotenv()
 
 # Socket for messaging
@@ -33,7 +36,7 @@ client = MongoClient(MONGO_URI)
 db = client['group21']
 users = db["users"]
 teams = db["teams"]
-events = db["events"] # REMINDER: Change back to events
+events = db["events"]
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
@@ -877,103 +880,25 @@ def get_events():
     return jsonify(event_data), 200
 
 def get_event_details():
-    eventID = request.args.get("id")
-    event_data = list(events.find())
-
-    for event in event_data:
-        if str(eventID) == str(event["_id"]):
-            event_info = {
-                "title": event["title"],
-                "desc": event["desc"],
-                "city": event["city"],
-                "open": event["open"],
-                "sport": event["sport"],
-                "level": event["level"],
-                "currentParticipants": event["currentParticipants"],
-                "maxParticipants": event["maxParticipants"],
-                "participants": event["participants"],
-            }
-            break
-
-    return jsonify(event_info), 200
+    return get_details(request.args.get("id"), list(events.find()))
 
 def get_all_events():
-    # Get the email from the query parameters
-    email = request.args.get('email')
-
-    # Filter events based on the user's email
-    user_events = [
-        {
-            "title": event['title'],
-            "sport": event['sport'],
-            "city": event['city'],
-            "desc": event['desc'],
-            "level": event['level'],
-            "open": event['open'],
-            "currentParticipants": event['currentParticipants'],
-            "maxParticipants": event['maxParticipants'],
-            "participants": event['participants']
-        }
-        #for event in events if email in event.get('participants', [])
-    ]
-
-    if user_events:
-        return jsonify(user_events), 200
-    else:
-        return "User not found or no events for this user!", 404
+    return get_all(request.args.get('email'))
 
 def join_event():
     data = request.get_json()
-    eventID = data.get("id")
-    username = data.get("username")
-    event_data = list(events.find())
-
-    for event in event_data:
-        if eventID == str(event["_id"]):  # Compare as strings
-            # Check if the event is open for joining
-            if event["currentParticipants"] < event["maxParticipants"]:
-                # Add the username to the participants array
-                event["participants"].append(username)
-                event["currentParticipants"] += 1
-                events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
-                return jsonify({"message": "Event joined successfully"}), 200
-            else:
-                return jsonify({"message": "The event is full. You cannot join at the moment."}), 400
-
-    return jsonify({"message": "Event not found."}), 404
+    return join(data.get("id"), data.get("username"), list(events.find()))
 
 def get_event_history():
-    username = request.args.get("username")  
-    event_history = list(history.find())
-    event_data = list(events.find())
-    user_event_history = []
-    user_events = []
-
-    for record in event_history:
-        if record["user"] == username:
-            user_event_history.append(record["event"])
-
-    for event in event_data:
-        event_dict = dict(event)  # Convert the PyMongo document to a dictionary
-        event_dict['_id'] = str(event['_id'])  # Convert ObjectId to string in the dictionary
-        if str(event['_id']) in user_event_history:
-            user_events.append(event_dict)
-
-    return(jsonify(user_events)), 200
+    return get_history(request.args.get("username"), list(history.find()), list(events.find()))
 
 def add_event_history():
     data = request.get_json()
-    event = data.get("event")
-    user = data.get("user")
+    return add_history(data.get("event"), data.get("user"))
 
-    event_entry = {
-        "user": user,
-        "event": event,
-    }
-
-    history.insert_one(event_entry)
-
-    return jsonify({'message': 'Added to History'}), 200
+def delete_event_history():
+    data = request.get_json()
+    return delete_history(data.get("event"), data.get("user"))
 
 
 def submit_report():
@@ -1037,19 +962,6 @@ def get_user_notifs_settings():
 
     return jsonify(settings), 200
 
-def delete_event_history():
-    data = request.get_json()
-    event = data.get("event")
-    user = data.get("user")
-
-    event_entry = {
-        "user": user,
-        "event": event,
-    }
-
-    history.delete_one(event_entry) 
-
-    return jsonify({'message': 'Added to History'}), 200
 
 def set_user_notifs_settings():
     user = request.get_json()
