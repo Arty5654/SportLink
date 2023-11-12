@@ -889,6 +889,43 @@ def set_user_notifs_settings():
     users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Notification settings updated successfully'}), 200
 
+def clear_notifications():
+    data = request.json
+    user_email = data.get("email")
+
+    if not user_email:
+        print("Error: Email is required in the request body")  # Log for debugging
+        return jsonify({"error": "Email is required"}), 400
+
+    # Check for pending friend requests
+    try:
+        pending_requests = db.friends.count_documents(
+            {"friend": user_email, "status": "pending"}
+        )
+    except Exception as e:
+        print(f"Database error: {e}")  # Log for debugging
+        return jsonify({"error": "Database error"}), 500
+
+    if pending_requests > 0:
+        print(f"Error: Cannot clear notifications with pending friend requests for {user_email}")  # Log for debugging
+        return jsonify({"error": "Cannot clear notifications with pending friend requests"}), 400
+
+    # Delete 'friends' status notifications
+    try:
+        db.friends.delete_many({"friend": user_email, "status": "friends"})
+    except Exception as e:
+        print(f"Database error during friends deletion: {e}")  # Log for debugging
+        return jsonify({"error": "Database error during friends deletion"}), 500
+
+    # Clear report notifications
+    try:
+        db.reports.delete_many({"reported_user_email": user_email})
+    except Exception as e:
+        print(f"Database error during reports deletion: {e}")  # Log for debugging
+        return jsonify({"error": "Database error during reports deletion"}), 500
+
+    return jsonify({"message": "Notifications cleared"}), 200
+
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
