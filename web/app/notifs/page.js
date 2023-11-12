@@ -148,12 +148,37 @@ const NotifsPage = () => {
         });
     }
 
+  const clearNotifications = async () => {
+    try {
+        var curr_email = user.email;
+        await axios.post("http://localhost:5000/clear_notifications", { 
+          "email": curr_email 
+        })
+        setReportNotifications([]); 
+        setFriendRequests([]); 
+        console.log("Notifications cleared");
+      } catch (error) {
+        alert("Can not clear notifcations with pending friend requests!");
+        console.error('Error clearing notifications', error);
+      }
+  };
+
+  const hasPendingFriendRequests = friendRequests.some(request => request.status !== "friends");
+
     return (
         <div>
           <div className="pb-4 flex justify-between items-center">
             {" "}
             {/* Use flex to align "Your Friends" and "Add Friends" */}
             <h1 className="font-base text-3xl">Notifications</h1>
+            
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                        onClick={clearNotifications}
+                    >
+                        Clear Notifications
+                    </button>
+                
           </div>
           {reportNotifications && reportNotifications.length > 0 && (
                 <ul>

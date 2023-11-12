@@ -1371,6 +1371,26 @@ paths:
                     type: array
         "404":
           description: User not found
+  
+  /clear_notifications:
+    post:
+      summary: "Clear Notifcations"
+      operationId: app.clear_notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: 'Cleared Notifications Successfully'
+        '400':
+          description: 'Invalid request'
+        '500':
+          description: 'Internal server error'
   # /refresh_msg:
   #   post:
   #     operationId: app.refresh_msg
