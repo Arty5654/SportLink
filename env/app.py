@@ -25,6 +25,7 @@ import re
 
 # import files
 from events import get_history, add_history, delete_history, join, get_details, get_all
+from friends import send_request, accept_request, deny_request, get_requests, get_my_friends, remove_one
 
 load_dotenv()
 
@@ -524,126 +525,53 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
+# Send a friend request to another user
 def send_friend_request():
     # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
 
-    # check if friend exists
-    if not users.find_one({'email': friend_email}):
-        return jsonify({'message': 'Friend does not exist!'}), 404
+    return send_request(email, friend_email)
 
-    # check if friend request already exists
-    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'pending'}):
-        return jsonify({'message': 'There is already a request pending between you and this user!'}), 409
-    elif friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
-        return jsonify({'message': 'There is already a request pending between you and this user!'}), 409
-
-    # check if already friends
-    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
-        return jsonify({'message': 'Already Friends!'}), 409
-
-    # setup request data
-    requestData = {
-        'user': email,
-        'friend': friend_email,
-        'status': 'pending'
-    }
-
-    # insert friend request into db
-    friends.insert_one(requestData)
-
-    # send email to friend
-    print(f"Want to send email to {friend_email}, from {email}")
-
-    # check if friend doesnt have sendEmails set to False
-    if users.find_one({'email': friend_email, 'sendEmail': False}):
-        print("no email to this user")
-        return jsonify({"message": "Friend Request Sent"}), 200
-
-    msg = Message('New Friend Request!', recipients=[friend_email])
-    msg.html = '<p>Hello! You have a friend request waiting for you! Sign in <a href="http://localhost:3000/signin">here</a> and click the bell in the top right to view.</p>'
-    mail.send(msg)
-
-    return jsonify({"message": "Friend Request Sent"}), 200
-
-# should be called when a user accepts a friend request
-# user is presented all the requests where they are the friend email
+# Accept a friend request from another user
 def accept_friend_request():
     # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
 
-    # check if already friends
-    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}) or friends.find_one({'user': friend_email, 'friend': email, 'status': 'friends'}):
-        return jsonify({'info': 'Already Friends!'}), 401
+    return accept_request(email, friend_email)
 
-    # update friend request status to friends
-    # print(f"updating the request where the user is {friend_email} and the friend is {email}")
-    friends.update_one({'user': friend_email, 'friend': email, 'status': 'pending'}, {'$set': {'status': 'friends'}})
-
-    # add a new entry for the other user
-    # print(f"inserting a new entry where the user is {email} and the friend is {friend_email}")
-    friends.insert_one({'user': email, 'friend': friend_email, 'status': 'friends'})
-
-    return jsonify({"message": "Friend Request Accepted"}), 200
-
-# should be called when a user denies a friend request
-# user is presented all the requests where they are the friend email
+# Deny a friend request from another user
 def deny_friend_request():
     # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
 
-    # check that the request exists
-    if not friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
-        return jsonify({'info': 'Request does not exist!'}), 401
-
-    # delete friend request
-    friends.delete_one({'user': friend_email, 'friend': email, 'status': 'pending'})
-
-    return jsonify({"message": "Friend Request Denied"}), 200
+    return deny_request(email, friend_email)
 
 
 def get_friend_requests():
     # Extracting data from request
-    # pdb.set_trace()
     curr_email = request.args.get('email')
 
-    # get all friend requests for the user
-    friend_requests = []
-
-    for freq in friends.find({'friend': curr_email}):
-    # for freq in friends.find({'friend': curr_email, 'status': 'pending'}):
-        friend_requests.append({
-            'user': freq['user'],
-            'friend': freq['friend'],
-            'status': freq['status']
-        })
-
-    return jsonify(friend_requests), 200
+    return get_requests(curr_email)
 
 def get_friends():
-    # # Extracting data from request
-    # req = request.json
-    # email = req['email']
-    # print(email)
+    # xtracting data from request
     curr_email = request.args.get('email')
 
-    curr_friends = []
+    return get_my_friends(curr_email)
 
-    for relation in friends.find({'user': curr_email, 'status': 'friends'}):
-        print(relation)
-        curr_friends.append({
-            'user': relation['user'],
-            'friend': relation['friend'],
-            'status': relation['status']
-        })
+def remove_friend():
+    # Extracting data from request
+    req = request.json
+    email = req['email']
+    friend_email = req['friend_email']
 
-    return jsonify(curr_friends), 200
+    return remove_one(email, friend_email)
 
 def get_reports():
     user_email = request.args.get('email')
@@ -689,24 +617,6 @@ def unblock_user():
             return jsonify({'message': f'{blocked_user_email} unblocked successfully'}), 200
 
     return jsonify({'message': 'User not found or unblock failed'}), 404
-
-
-
-def remove_friend():
-    # Extracting data from request
-    req = request.json
-    email = req['email']
-    friend_email = req['friend_email']
-
-    # check that the friendship exists
-    if not friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
-        return jsonify({'info': 'Friendship does not exist!'}), 401
-
-    # delete friendship, from both ends
-    friends.delete_one({'user': email, 'friend': friend_email, 'status': 'friends'})
-    friends.delete_one({'user': friend_email, 'friend': email, 'status': 'friends'})
-
-    return jsonify({"message": "Friend Removed"}), 200
 
 def preprocess_phone_number(phone_number):
     # Remove non-digit characters from the phone number
