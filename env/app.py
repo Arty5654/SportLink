@@ -24,7 +24,7 @@ from bson.regex import Regex
 import re
 
 # import files
-from events import get_history, add_history, delete_history, join, get_details, get_all
+from events import get_history, add_history, delete_history, join, get_details, get_all, leave
 from friends import send_request, accept_request, deny_request, get_requests, get_my_friends, remove_one
 
 load_dotenv()
@@ -798,6 +798,10 @@ def get_all_events():
 def join_event():
     data = request.get_json()
     return join(data.get("id"), data.get("username"), list(events.find()))
+
+def leave_event():
+    data = request.get_json()
+    return leave(data.get("id"), data.get("username"), list(events.find()))
 
 def get_event_history():
     return get_history(request.args.get("username"), list(history.find()), list(events.find()))

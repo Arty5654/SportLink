@@ -17,6 +17,8 @@ friends = db["friends"]
 stats = db["stats"]
 history = db["eventHistory"]
 
+
+# Route to get event details 
 def join (eventID, username, event_data):
   for event in event_data:
     if eventID == str(event["_id"]):  # Compare as strings
@@ -30,8 +32,19 @@ def join (eventID, username, event_data):
       else:
         return jsonify({"message": "The event is full. You cannot join at the moment."}), 400
 
-    return jsonify({"message": "Event not found."}), 404
+    # return jsonify({"message": "Event not found."}), 404
 
+# Route to leave an event if the user has joined it
+def leave(eventID, username, event_data):
+  for event in event_data:
+    if eventID == str(event["_id"]):  # Compare as strings
+      event["participants"].remove(username)
+      event["currentParticipants"] -= 1
+      events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
+      return jsonify({'message': 'Deleted User from event'}), 200
+
+
+# Route to get all events associated with a user
 def get_details(eventID, event_data):
   for event in event_data:
     if str(eventID) == str(event["_id"]):
@@ -50,6 +63,7 @@ def get_details(eventID, event_data):
 
   return jsonify(event_info), 200
 
+# Route to join a user to an event
 def get_all(email):
   # Get the email from the query parameters
   email = request.args.get('email')
@@ -75,6 +89,7 @@ def get_all(email):
     return "User not found or no events for this user!", 404
 
 
+# Route to get the event history of a user
 def get_history(username, event_history, event_data):
   user_event_history = []
   user_events = []
@@ -91,6 +106,7 @@ def get_history(username, event_history, event_data):
 
   return jsonify(user_events), 200
 
+# Route to add an event to the user's history
 def add_history(event, user):
   event_entry = {
       "user": user,
@@ -100,6 +116,7 @@ def add_history(event, user):
 
   return jsonify({'message': 'Added to History'}), 200
 
+# Route to delete an event from the user's history
 def delete_history(event, user):    
   event_entry = {
       "user": user,
@@ -108,3 +125,4 @@ def delete_history(event, user):
   history.delete_one(event_entry) 
 
   return jsonify({'message': 'Deleted History'}), 200
+
