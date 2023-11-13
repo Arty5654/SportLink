@@ -75,7 +75,7 @@ const EventDetails = () => {
           updatedUser.numSoccer = (updatedUser.numSoccer || 0) + 1;
         }
         setUser(updatedUser);
-        sessionStorage.setItem('user', user);
+        sessionStorage.setItem('user', JSON.stringify(user));
 
         axios
           .post("http://localhost:5000/join_event", {
