@@ -20,6 +20,7 @@ const EventDetails = () => {
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
+  const isUserParticipant = event.participants.includes(user?.username);
   const searchParams = useSearchParams();
   const router = useRouter();
   const eventID = searchParams.get("id");
@@ -53,14 +54,78 @@ const EventDetails = () => {
     getEventDetails();
   }, [eventID]);
 
+  // const handleJoinEvent = () => {
+  //   if (event.currentParticipants < event.maxParticipants) {
+  //     if (!user) {
+  //       // If no user session
+  //       console.log("User not logged in...");
+  //       router.push("/signin");
+  //       return;
+  //     } else {
+  //       if (isUserParticipant) {
+  //         // leave event
+  //         axios
+  //           .post("http://localhost:5000/leave_event", {
+  //             id: eventID,
+  //             username: user.username,
+  //           })
+  //           .then((response) => {
+  //             if (response.status === 200) {
+  //               alert("You have successfully left the event");
+  //               window.location.reload();
+  //             }
+  //           });
+  //       } else {
+  //         // join event
+  //         axios
+  //           .post("http://localhost:5000/join_event", {
+  //             id: eventID,
+  //             username: user.username,
+  //           })
+  //           .then((response) => {
+  //             if (response.status === 200) {
+  //               alert("You have successfully joined the event!");
+  //               window.location.reload();
+  //             }
+  //           })
+  //           .catch((error) => {
+  //             console.error("Error joining event: ", error);
+  //           });
+  //         // add to event history
+  //         axios
+  //           .post("http://localhost:5000/add_event_history", {
+  //             event: eventID,
+  //             user: user.username,
+  //           })
+  //           .then((response) => {
+  //             if (response.status === 200) {
+  //               console.log("Added to History");
+  //             }
+  //           });
+  //       }
+  //     }
+  //   } else {
+  //     alert("The event is full. You cannot join at the moment.");
+  //   }
+  // };
+
   const handleJoinEvent = () => {
-    if (event.currentParticipants < event.maxParticipants) {
-      if (!user) {
-        // If no user session
-        console.log("User not logged in...");
-        router.push("/signin");
-        return;
-      } else {
+    if (isUserParticipant) {
+      // user is registered for event
+      axios
+        .post("http://localhost:5000/leave_event", {
+          id: eventID,
+          username: user.username,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            alert("You have successfully left the event");
+            window.location.reload();
+          }
+        });
+    } else {
+      // user isnt registered for event
+      if (event.currentParticipants < event.maxParticipants) {
         // join event
 
         let updatedUser = { ...user };
@@ -95,7 +160,7 @@ const EventDetails = () => {
           .catch((error) => {
             console.error("Error joining event: ", error);
           });
-        // add to eventhistory
+        // add to event history
         axios
           .post("http://localhost:5000/add_event_history", {
             event: eventID,
@@ -106,9 +171,9 @@ const EventDetails = () => {
               console.log("Added to History");
             }
           });
+      } else {
+        alert("The event is full. You cannot join at the moment.");
       }
-    } else {
-      alert("The event is full. You cannot join at the moment.");
     }
   };
 
@@ -146,9 +211,17 @@ const EventDetails = () => {
           </p>
           <button
             onClick={handleJoinEvent}
-            className="w-full bg-green-500 hover:bg-green-600 hover:ease-in duration-100 text-white font-semibold text-lg ho rounded-xl py-2 mb-4"
+            className={
+              status === "Open"
+                ? `w-full ${
+                    isUserParticipant ? "bg-red-500" : "bg-green-500"
+                  } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
+                : isUserParticipant
+                ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+                : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+            }
           >
-            Join Event
+            {isUserParticipant ? "Leave Event" : "Join Event"}
           </button>
           <div>
             <h2 className="pb-2">Currently Registered</h2>
