@@ -23,6 +23,10 @@ class User {
     this.blocked_users;
     this.profileImage;
     this.blocked;
+    this.numBasketball;
+    this.numTennis;
+    this.numSoccer;
+    this.numWeights;
   }
 
   // adds new field to a user - username, age etc.

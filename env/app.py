@@ -189,7 +189,12 @@ def create_account():
         'email': email,
         'password': hashWord.decode('utf-8'), #store hashed pass as a string
         'username': username,
-        'friends': []
+        'friends': [],
+        'numTennis': 0,
+        'numBasketball': 0,
+        'numSoccer': 0,
+        'numWeights': 0
+
     }
     users.insert_one(userData)
 
@@ -224,7 +229,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker"]
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -268,7 +273,7 @@ def google_signin():
                 'friends': []
             }
 
-            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker"]
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -297,7 +302,11 @@ def google_signin():
             'username': username,
             'firstName': firstName,
             'lastName': lastName,
-            'friends': []
+            'friends': [],
+            'numTennis': 0,
+            'numBasketball': 0,
+            'numSoccer': 0,
+            'numWeights': 0
         }
 
         users.insert_one(userData)
@@ -797,6 +806,13 @@ def get_all_events():
 
 def join_event():
     data = request.get_json()
+
+    bball = data.get("numBasketball")
+    tennis = data.get("numTennis")
+    soccer = data.get("numSoccer")
+    weights = data.get("numWeights")
+    users.update_one({"username": data.get('username')}, {"$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
+
     return join(data.get("id"), data.get("username"), list(events.find()))
 
 def get_event_history():
