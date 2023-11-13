@@ -18,7 +18,25 @@ const createPage = () => {
         setUser(currentUser);
 
     }, []);
-
+    const [teamSelection, setTeamSelection] = useState({
+        userTeam: 'team1', // Default team for the user
+        friendsTeams: {}   // Teams for friends
+    });
+    const handleUserTeamChange = (team) => {
+        setTeamSelection(prevState => ({
+            ...prevState,
+            userTeam: team
+        }));
+    };
+    const handleFriendTeamChange = (friendId, team) => {
+        setTeamSelection(prevState => ({
+            ...prevState,
+            friendsTeams: {
+                ...prevState.friendsTeams,
+                [friendId]: team
+            }
+        }));
+    };
 
     useEffect( () => {
         if (user['email'] !== undefined) {
@@ -92,6 +110,7 @@ const createPage = () => {
             city: teamData['city'],
             open: teamData['open'],
             sport: teamData['sport'],
+            teamSelection: teamSelection,
             currentParticipants: parseInt(currentParticipants),
             maxParticipants: parseInt(teamData['maxParticipants']),
             type: selected,
@@ -162,6 +181,48 @@ const createPage = () => {
                  </div>
                  <button onClick={handleSubmit}>Create Team</button>
              </div>
+         </div>
+         <div>
+             <label>Your Team: </label>
+             <input
+                 type="range"
+                 min="1"
+                 max="2"
+                 value={teamSelection.userTeam === 'team1' ? 1 : 2}
+                 onChange={(e) => handleUserTeamChange(e.target.value === '1' ? 'team1' : 'team2')}
+             />
+             <span>{teamSelection.userTeam === 'team1' ? 'Team 1' : 'Team 2'}</span>
+         </div>
+
+         {/* ... (existing code for team-container and other components) */}
+
+         {/* Friends list with team selection */}
+         <div>
+             <h2>Friends List</h2>
+             <ul>
+                 {friends.map(friend => (
+                     <li key={friend._id}>
+                         {/* ... (existing display for friend) */}
+                         {/* Team selection for friends */}
+                         <label>
+                             Team 1
+                             <input
+                                 type="radio"
+                                 checked={teamSelection.friendsTeams[friend._id] === 'team1'}
+                                 onChange={() => handleFriendTeamChange(friend._id, 'team1')}
+                             />
+                         </label>
+                         <label>
+                             Team 2
+                             <input
+                                 type="radio"
+                                 checked={teamSelection.friendsTeams[friend._id] === 'team2'}
+                                 onChange={() => handleFriendTeamChange(friend._id, 'team2')}
+                             />
+                         </label>
+                     </li>
+                 ))}
+             </ul>
          </div>
      </div>
 

@@ -15,7 +15,6 @@ function Messages() {
     const [inputMessage, setInputMessage] = useState('');
 
     const [currentKeys, setCurrentKeys] = useState([])
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const hostAddress = user.email;
 
@@ -31,7 +30,6 @@ function Messages() {
             })
                 .then(response => {
                     setFriends(response.data.friends.map(friendObj => friendObj["friend"]));
-
                 })
                 .catch(error => {
                     console.error('Error making the API call:', error);
@@ -50,6 +48,8 @@ function Messages() {
                 .then(response => {
                     setCurrentChats(prevChats => [...prevChats, ...response.data.chats]);
                     setCurrentKeys(prevKeys => [...prevKeys, ...response.data.chat_keys]);
+
+                    console.log(friends)
                 })
                 .catch(error => {
                     console.error('Error making the API call:', error);
@@ -127,18 +127,21 @@ function Messages() {
     return (
         <div className="App">
             <div className="chat-list">
-                {currentKeys.map(keyObject => {
+
+                <div className="blocky-text">Friends</div>
+                {currentKeys.map((keyObject, index) => {
 
                     return (
                         <button
                             key={keyObject}
                             onClick={() => setSelectedChat(keyObject)}
                             className="chat-button">
-                            {keyObject}
+                            {friends[index]}
                         </button>
                     );
                 })}
-                <button onClick={() => setIsModalOpen(true)}>New Chat</button>
+
+                <div className="blocky-text">GroupChats</div>
             </div>
             <div className="chat-content">
 
