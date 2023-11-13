@@ -235,6 +235,14 @@ paths:
                     type: string
                   imageData:
                     type: string
+                  numBasketball:
+                    type: integer
+                  numTennis:
+                    type: integer
+                  numWeights:
+                    type: integer
+                  numSoccer:
+                    type: integer
                 required:
                   - username
         "401":
@@ -324,6 +332,14 @@ paths:
                     type: boolean
                     default: true
                     description: "Toggle in-app notifications"
+                  numBasketball:
+                    type: integer
+                  numTennis:
+                    type: integer
+                  numWeights:
+                    type: integer
+                  numSoccer:
+                    type: integer
                 required:
                   - email
                   - username
@@ -969,6 +985,14 @@ paths:
                   type: string
                 username:
                   type: string
+                numBasketball:
+                  type: integer
+                numTennis:
+                  type: integer
+                numSoccer:
+                  type: integer
+                numWeights:
+                  type: integer
       responses:
         "200":
           description: Event joined successfully

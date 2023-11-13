@@ -110,6 +110,22 @@ export default function SignIn() {
                     user.gender = resp.gender;
                 }
 
+                if (resp.numTennis) {
+                    user.numTennis = resp.numTennis;
+                }
+
+                if (resp.numBasketball) {
+                    user.numBasketball = resp.numBasketball;
+                }
+
+                if (resp.numWeights) {
+                    user.numWeights = resp.numWeights;
+                }
+
+                if (resp.numSoccer) {
+                    user.numSoccer = resp.numSoccer;
+                }
+
                 sessionStorage.setItem('user', JSON.stringify(user));
 
                 console.log(user);

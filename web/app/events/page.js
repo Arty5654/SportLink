@@ -62,10 +62,29 @@ const EventDetails = () => {
         return;
       } else {
         // join event
+
+        let updatedUser = { ...user };
+      
+        if (event.sport === 'Tennis') {
+          updatedUser.numTennis = (updatedUser.numTennis || 0) + 1;
+        } else if (event.sport === 'Weightlifting') {
+          updatedUser.numWeights = (updatedUser.numWeights || 0) + 1;
+        } else if (event.sport === 'Basketball') {
+          updatedUser.numBasketball = (updatedUser.numBasketball || 0) + 1;
+        } else if (event.sport === 'Soccer') {
+          updatedUser.numSoccer = (updatedUser.numSoccer || 0) + 1;
+        }
+        setUser(updatedUser);
+        sessionStorage.setItem('user', user);
+
         axios
           .post("http://localhost:5000/join_event", {
             id: eventID,
             username: user.username,
+            numBasketball: updatedUser.numBasketball,
+            numTennis: updatedUser.numTennis,
+            numSoccer: updatedUser.numSoccer,
+            numWeights: updatedUser.numWeights
           })
           .then((response) => {
             if (response.status === 200) {
