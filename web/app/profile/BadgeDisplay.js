@@ -28,7 +28,6 @@ import masterBadge from '../badgeImages/masterBadge.png';
 export default function BadgeDisplay({ numTennis, numBasketball, numSoccer, numWeights }) {
 
 
-
     const getBadge = (num, sport, bronze, silver, gold) => {
         if (num >= 75) {
             return gold;

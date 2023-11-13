@@ -139,8 +139,16 @@ const EventDetails = () => {
         } else if (event.sport === 'Soccer') {
           updatedUser.numSoccer = (updatedUser.numSoccer || 0) + 1;
         }
+
+        console.log(updatedUser.numBasketball);
+        console.log(updatedUser.numWeights);
+        console.log(updatedUser.numTennis);
+        console.log(updatedUser.numSoccer);
+
+
         setUser(updatedUser);
-        sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.removeItem('user');
+        sessionStorage.setItem('user', JSON.stringify(updatedUser));
 
         axios
           .post("http://localhost:5000/join_event", {

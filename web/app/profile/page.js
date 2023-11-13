@@ -23,7 +23,7 @@ const ProfilePage = () => {
     }
 
     setUser(currentUser);
-  }, []);
+  }, [, user.numBasketball, user.numSoccer, user.numTennis, user.numWeights]);
 
   return (
     <div className="w-full flex">
