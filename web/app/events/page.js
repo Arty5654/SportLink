@@ -54,61 +54,6 @@ const EventDetails = () => {
     getEventDetails();
   }, [eventID]);
 
-  // const handleJoinEvent = () => {
-  //   if (event.currentParticipants < event.maxParticipants) {
-  //     if (!user) {
-  //       // If no user session
-  //       console.log("User not logged in...");
-  //       router.push("/signin");
-  //       return;
-  //     } else {
-  //       if (isUserParticipant) {
-  //         // leave event
-  //         axios
-  //           .post("http://localhost:5000/leave_event", {
-  //             id: eventID,
-  //             username: user.username,
-  //           })
-  //           .then((response) => {
-  //             if (response.status === 200) {
-  //               alert("You have successfully left the event");
-  //               window.location.reload();
-  //             }
-  //           });
-  //       } else {
-  //         // join event
-  //         axios
-  //           .post("http://localhost:5000/join_event", {
-  //             id: eventID,
-  //             username: user.username,
-  //           })
-  //           .then((response) => {
-  //             if (response.status === 200) {
-  //               alert("You have successfully joined the event!");
-  //               window.location.reload();
-  //             }
-  //           })
-  //           .catch((error) => {
-  //             console.error("Error joining event: ", error);
-  //           });
-  //         // add to event history
-  //         axios
-  //           .post("http://localhost:5000/add_event_history", {
-  //             event: eventID,
-  //             user: user.username,
-  //           })
-  //           .then((response) => {
-  //             if (response.status === 200) {
-  //               console.log("Added to History");
-  //             }
-  //           });
-  //       }
-  //     }
-  //   } else {
-  //     alert("The event is full. You cannot join at the moment.");
-  //   }
-  // };
-
   const handleJoinEvent = () => {
     if (isUserParticipant) {
       // user is registered for event
@@ -129,14 +74,14 @@ const EventDetails = () => {
         // join event
 
         let updatedUser = { ...user };
-      
-        if (event.sport === 'Tennis') {
+
+        if (event.sport === "Tennis") {
           updatedUser.numTennis = (updatedUser.numTennis || 0) + 1;
-        } else if (event.sport === 'Weightlifting') {
+        } else if (event.sport === "Weightlifting") {
           updatedUser.numWeights = (updatedUser.numWeights || 0) + 1;
-        } else if (event.sport === 'Basketball') {
+        } else if (event.sport === "Basketball") {
           updatedUser.numBasketball = (updatedUser.numBasketball || 0) + 1;
-        } else if (event.sport === 'Soccer') {
+        } else if (event.sport === "Soccer") {
           updatedUser.numSoccer = (updatedUser.numSoccer || 0) + 1;
         }
 
@@ -145,10 +90,9 @@ const EventDetails = () => {
         console.log(updatedUser.numTennis);
         console.log(updatedUser.numSoccer);
 
-
         setUser(updatedUser);
-        sessionStorage.removeItem('user');
-        sessionStorage.setItem('user', JSON.stringify(updatedUser));
+        sessionStorage.removeItem("user");
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
         axios
           .post("http://localhost:5000/join_event", {
@@ -157,7 +101,7 @@ const EventDetails = () => {
             numBasketball: updatedUser.numBasketball,
             numTennis: updatedUser.numTennis,
             numSoccer: updatedUser.numSoccer,
-            numWeights: updatedUser.numWeights
+            numWeights: updatedUser.numWeights,
           })
           .then((response) => {
             if (response.status === 200) {
