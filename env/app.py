@@ -25,7 +25,8 @@ import re
 
 # import files
 from events import get_history, add_history, delete_history, join, get_details, get_all, leave
-from friends import send_request, accept_request, deny_request, get_requests, get_my_friends, remove_one
+from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
+from teams import create_a_team, get_users_teams
 
 load_dotenv()
 
@@ -541,7 +542,43 @@ def send_friend_request():
     email = req['email']
     friend_email = req['friend_email']
 
-    return send_request(email, friend_email)
+        # check if friend exists
+    if not users.find_one({'email': friend_email}):
+        return jsonify({'message': 'Friend does not exist!'}), 404
+
+    # check if friend request already exists
+    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'pending'}):
+        return jsonify({'message': 'There is already a request pending between you and this user!'}), 409
+    elif friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
+        return jsonify({'message': 'There is already a request pending between you and this user!'}), 409
+
+    # check if already friends
+    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
+        return jsonify({'message': 'Already Friends!'}), 409
+
+    # setup request data
+    requestData = {
+        'user': email,
+        'friend': friend_email,
+        'status': 'pending'
+    }
+
+    # insert friend request into db
+    friends.insert_one(requestData)
+
+    # send email to friend
+    print(f"Want to send email to {friend_email}, from {email}")
+
+    # check if friend doesnt have sendEmails set to False
+    if users.find_one({'email': friend_email, 'sendEmail': False}):
+        print("no email to this user")
+        return jsonify({"message": "Friend Request Sent"}), 200
+
+    msg = Message('New Friend Request!', recipients=[friend_email])
+    msg.html = '<p>Hello! You have a friend request waiting for you! Sign in <a href="http://localhost:3000/signin">here</a> and click the bell in the top right to view.</p>'
+    mail.send(msg)
+
+    return jsonify({"message": "Friend Request Sent"}), 200
 
 # Accept a friend request from another user
 def accept_friend_request():
@@ -945,6 +982,21 @@ def clear_notifications():
         return jsonify({"error": "Database error during reports deletion"}), 500
 
     return jsonify({"message": "Notifications cleared"}), 200
+
+def create_team():
+    req = request.get_json()
+    team_name = req['name']
+    team_leader = req['leader']
+    teammates = req['members']
+
+    return create_a_team(team_name, team_leader, teammates)
+
+def get_teams():
+    curr_email = request.args.get('email')
+
+    list_of_teams = get_users_teams(curr_email)
+
+    return jsonify(list_of_teams), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
