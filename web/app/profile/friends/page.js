@@ -145,7 +145,7 @@ const FriendsPage = () => {
           {" "}
           {/* Use flex to align "Your Friends" and "Add Friends" */}
           <h1 className="font-base text-3xl">Your Friends</h1>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg" onClick={handleAddFriendClick}>
+          <button className="bg-blue-500 text-white px-4 py-2 m-4 rounded-lg" onClick={handleAddFriendClick}>
             Add Friends
           </button>
         </div>
@@ -191,11 +191,11 @@ const FriendsPage = () => {
               </div>
               <div className="flex flex-col items-stretch ml-4">
                 <Link href={`/profile/userProfilePage?email=${relationship.friend}`}>
-                  <button className="bg-black text-white px-4 py-2 rounded-lg mb-2 flex justify-center items-center flex-grow">
+                  <button className="bg-black text-white px-4 py-2 w-full rounded-lg mb-2 flex justify-center items-center flex-grow">
                     View Profile
                   </button>
                 </Link>
-                <button className="bg-red-500 text-white px-4 py-2 rounded-lg mb-2 flex justify-center items-center flex-grow" onClick={() => handleRemoveFriend(relationship)}>
+                <button className="bg-red-500 text-white px-4 py-2 w-full rounded-lg mb-2 flex justify-center items-center flex-grow" onClick={() => handleRemoveFriend(relationship)}>
                   Remove Friend
                 </button>
               </div>
@@ -214,4 +214,3 @@ const FriendsPage = () => {
 };
 
 export default FriendsPage;
-

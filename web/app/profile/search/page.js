@@ -57,10 +57,12 @@ function UserLookupPage() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="w-full flex pb-64">
+      <div className="w-1/4">
       <Sidebar active="search" />
+      </div>
 
-      <div className="w-3/4 p-8">
+      <div className="w-3/4 text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
         <h1 className="text-2xl font-semibold mb-4">User Lookup</h1>
 
         <div className="mb-4">
