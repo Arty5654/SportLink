@@ -867,6 +867,21 @@ def delete_event_history():
     data = request.get_json()
     return delete_history(data.get("event"), data.get("user"))
 
+def get_my_events():
+    event_data = list(events.find())
+    username = request.args.get("username")
+
+    user_events = []
+
+    for event in event_data:
+        event['_id'] = str(event['_id'])
+
+    for event in event_data:
+        if username in event["participants"]:
+            user_events.append(event)
+
+    # Return the modified event data as JSON
+    return jsonify(user_events), 200
 
 def submit_report():
     user = request.get_json()

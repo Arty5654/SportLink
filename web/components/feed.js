@@ -58,7 +58,7 @@ const HistoryBar = () => {
       axios
         .get(`http://localhost:5000/get_event_history?username=${currentUser.username}`)
         .then((response) => {
-          console.log(response.data);
+          console.log("History - Response Data: ", response.data);
           setEventHistory(response.data);
         });
     }
@@ -69,7 +69,7 @@ const HistoryBar = () => {
       <h1 className="font-base text-xl pb-8">Event History</h1>
       <div>
         {eventHistory.length === 0 ? (
-          <p className="text-sm text-gray-600">You havent participated in any events.</p>
+          <p className="text-sm text-gray-600">You have no events in your history.</p>
         ) : (
           eventHistory.map((event, index) => (
             <HistoryCard key={index} event={event} {...event} />
@@ -120,6 +120,7 @@ const Feed = () => {
 
   useEffect(() => {
     axios.get("http://localhost:5000/get_events").then((response) => {
+      console.log("Feed - Response Data: ", response.data);
       setEvents(response.data);
     });
   }, []);

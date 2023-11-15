@@ -143,7 +143,7 @@ const EventDetails = () => {
         <p className="pt-4">{event.desc}</p>
       </div>
       {/* ITEM: Right Bar*/}
-      <div className="w-1/3 border border-gray-300 rounded-xl h-96 shadow-lg">
+      <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">
           <h1 className="text-xl font-semibold">
             Status:{" "}
@@ -176,10 +176,28 @@ const EventDetails = () => {
             {isUserParticipant ? "Leave Event" : "Join Event"}
           </button>
           <div>
-            <h2 className="pb-2">Currently Registered</h2>
-            <div className="grid grid-cols-2">
+            <h2 className="pb-4 text-lg pt-2">Participants</h2>
+            <div className="flex flex-col gap-2">
               {event.participants.map((event, index) => (
-                <p className="text-sm">{event}</p>
+                <p className="text-sm border-l border-gray-400 px-2 relative">
+                  {event}
+                  <span className="absolute right-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="gray"
+                      class="w-5 h-5"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </span>
+                </p>
               ))}
             </div>
           </div>
