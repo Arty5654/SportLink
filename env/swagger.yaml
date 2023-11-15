@@ -925,6 +925,42 @@ paths:
         "404":
           description: Event not found
 
+  /get_my_events:
+    get:
+      summary: Get Event Information that user is part of
+      description: Retrieve event information from the database.
+      operationId: app.get_my_events
+      responses:
+        "200":
+          description: Event information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    objectID:
+                      type: string
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+        "404":
+          description: Event not found
+
   /get_event_details:
     get:
       summary: Get Event Details
@@ -1499,7 +1535,7 @@ paths:
   #       "200":
   #         description: "Created Request"
 
-# teams endpoint
+  # teams endpoint
   /create_team:
     post:
       operationId: app.create_team
@@ -1527,12 +1563,12 @@ paths:
     get:
       operationId: app.get_teams
       parameters:
-      - name: email
-        in: query
-        description: The email of the user to retrieve teams.
-        required: true
-        schema:
-          type: string
+        - name: email
+          in: query
+          description: The email of the user to retrieve teams.
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: "Teams Retrieved"
