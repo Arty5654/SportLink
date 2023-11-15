@@ -124,8 +124,10 @@ function UserProfilePage() {
   
 
   return (
-    <div className="w-full flex">
-      <Sidebar active="search" />
+    <div className="w-full flex pb-64">
+      <div className="w-1/4">
+        <Sidebar active="search" />
+      </div>
       {loading ? (
         <p>Loading...</p>
         ) : loggedInUser.blocked ? (
