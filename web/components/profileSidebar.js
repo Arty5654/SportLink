@@ -25,24 +25,59 @@ const profileSidebar = ({ active }) => {
             Edit Profile
           </p>
         </Link>
-        <p>Notification Settings</p>
+        <Link href="/profile/notif_pref">
+          <p
+            className={`cursor-pointer ${
+              active === "notif_pref" ? "border-l-4 border-blue-500 pl-1" : ""
+            }`}
+          >
+            Notification Preferences
+          </p>
+        </Link>
         <Link href="/profile/privacy">
           <p
             className={`cursor-pointer ${
               active === "privacy" ? "border-l-4 border-blue-500 pl-1" : ""
-            } ` }
-            >
-              Privacy
-              </p>
+            } `}
+          >
+            Privacy
+          </p>
         </Link>
         <Link href="/profile/search">
           <p
             className={`cursor-pointer ${
               active === "search" ? "border-l-4 border-blue-500 pl-1" : ""
+            } `}
+          >
+            User Look Up
+          </p>
+        </Link>
+        <Link href="/profile/teams_and_tourneys">
+          <p
+            className={`cursor-pointer ${
+              active === "teams_and_tourneys" ? "border-l-4 border-blue-500 pl-1" : ""
             } ` }
             >
-              User Look Up
+              My Teams & Tournaments
               </p>
+        </Link>
+        <Link href="/profile/userPlayerHistory">
+          <p
+            className={`cursor-pointer ${
+              active === "userPlayerHistory" ? "border-l-4 border-blue-500 pl-1" : ""
+            } `}
+          >
+            User Player History
+          </p>
+        </Link>
+        <Link href="/profile/myEvents">
+          <p
+            className={`cursor-pointer ${
+              active === "myEvents" ? "border-l-4 border-blue-500 pl-1" : ""
+            }`}
+          >
+            My Events
+          </p>
         </Link>
         <p>Settings</p>
       </div>

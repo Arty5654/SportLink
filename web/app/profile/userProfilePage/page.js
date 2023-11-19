@@ -6,6 +6,7 @@ import "@styles/global.css";
 import User from "@app/User";
 import ProfileImage from "@public/assets/default-profile.webp";
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
 
 function UserProfilePage() {
   const [userProfile, setUserProfile] = useState({});
@@ -13,26 +14,57 @@ function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [reportOptionsVisible, setReportOptionsVisible] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const router = useRouter();
+
+  
 
   useEffect(() => {
-    // Get the email query parameter from the URL
     const queryParams = new URLSearchParams(window.location.search);
     const userEmail = queryParams.get("email");
-
     const user1 = JSON.parse(sessionStorage.getItem("user"));
     setLoggedInUser(user1);
-
+  
+    // Fetch user info based on the email
     axios
       .get(`http://localhost:5000/get_user_info?email=${userEmail}`)
       .then((response) => {
         setUserProfile(response.data);
         setLoading(false);
+        console.log("User data:", userEmail);
+        console.log("User profile:", response.data);
+  
+        // Check if the logged-in user has blocked the viewed user
+        axios.get(`http://localhost:5000/get_blocked_users?email=${user1.email}`)
+          .then((blockedUsersResponse) => {
+            const blockedUsers = blockedUsersResponse.data;
+            if (blockedUsers.includes(userEmail)) {
+              router.push("/profile/unblock"); // Redirect to the unblock page
+            }
+  
+            // Check if the viewed user has blocked the logged-in user
+            axios.get(`http://localhost:5000/get_blocked_users?email=${userEmail}`)
+              .then((blockedUsersResponse) => {
+                const blockedUsers = blockedUsersResponse.data;
+                if (blockedUsers.includes(user1.email)) {
+                  router.push("/profile/search"); // Redirect to the unblock page
+                }
+              })
+              .catch((blockedUsersError) => {
+                console.error('Error fetching user profile', blockedUsersError);
+                setLoading(false);
+              });
+          })
+          .catch((error) => {
+            console.error('Error fetching user profile', error);
+            setLoading(false);
+          });
       })
       .catch((error) => {
         console.error('Error fetching user profile', error);
         setLoading(false);
       });
-  }, []);
+  }, [router]);
+  
 
   const handleReportClick = () => {
     setReportOptionsVisible(true);
@@ -92,22 +124,31 @@ function UserProfilePage() {
   
 
   return (
-    <div className="w-full flex">
-      <Sidebar active="search" />
+    <div className="w-full flex pb-64">
+      <div className="w-1/4">
+        <Sidebar active="search" />
+      </div>
       {loading ? (
         <p>Loading...</p>
-      ) : (
+        ) : loggedInUser.blocked ? (
+          <p>Unblock this user before you can view their profile</p>
+        ) : (
         <div className="w-3/4 text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
           <div className="pb-8">
             <h1 className="font-base text-3xl">
               {userProfile.firstName} {userProfile.lastName}
             </h1>
-            <p className="text-gray-500 pb-8">{userProfile.username}</p>
+            <p className="text-gray-500 pb-8 text-1xl">Username: {userProfile.username}</p>
+            <img
+              src={`data:image/png;base64,${userProfile.imageData}`}
+              alt="Profile Image"
+              style={{ width: "100px", height: "100px" }} // Fix is here
+            />
           </div>
-          <div className="flex gap-8 pb-8 border-b border-gray-200">
+          <div className="flex gap-8 pb-8">
             {/* You can add the Friends and Messages links here */}
           </div>
-          <div className="flex gap-8 pb-8 border-b border-gray-200">
+          <div className="flex gap-8 pb-8">
           <button
             className="border border-black bg-black text-white px-8 py-2 rounded-xl"
             onClick={handleSendFriendRequest}
@@ -115,12 +156,21 @@ function UserProfilePage() {
             Send Friend Request
           </button>
           </div>
-          <div className="flex gap-8 pb-8 border-b border-gray-200">
+          <div className="flex gap-8 pb-8">
             <button
             className="border border-black bg-black text-white px-8 py-2 rounded-xl"
             onClick={handleReportClick}
             > Report User
             </button>
+          </div>
+          <div className="flex gap-8 pb-8">
+          <Link href="/profile/messages">
+            <p 
+              className="border border-black bg-black text-white px-8 py-2 rounded-xl"
+              >
+                Message
+            </p>
+          </Link>
           </div>
           {reportOptionsVisible && (
           <div>
@@ -134,7 +184,7 @@ function UserProfilePage() {
             <button onClick={handleReportSubmit}>Submit Report</button>
           </div>
         )}
-          <div className="flex gap-8 pb-8 border-b border-gray-200">
+          <div className="flex gap-8 pb-8">
             <button
             className="border border-black bg-black text-white px-8 py-2 rounded-xl"
             onClick={handleBlockUser}

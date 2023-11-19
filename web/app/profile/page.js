@@ -6,6 +6,8 @@ import Link from "next/link";
 import Sidebar from "@components/profileSidebar";
 import User from "@app/User";
 import DeleteAccount from "./DeleteAccount";
+import BadgeDisplay from "./BadgeDisplay";
+
 
 const ProfilePage = () => {
   const [user, setUser] = useState(new User());
@@ -21,7 +23,7 @@ const ProfilePage = () => {
     }
 
     setUser(currentUser);
-  }, []);
+  }, [, user.numBasketball, user.numSoccer, user.numTennis, user.numWeights]);
 
   return (
     <div className="w-full flex">
@@ -106,6 +108,17 @@ const ProfilePage = () => {
               Age: <span className="text-sm text-blue-500">{user.age}</span>
             </p>
           </div>
+        </div>
+        {/* ITEM: Badges */}
+        <div>
+          
+          <BadgeDisplay 
+            numTennis={user.numTennis} 
+            numBasketball={user.numBasketball} 
+            numSoccer={user.numSoccer} 
+            numWeights={user.numWeights} 
+          />
+
         </div>
         {/* ITEM: Account deletion */}
         <div>

@@ -12,6 +12,7 @@ const EventDetails = () => {
     desc: "",
     city: "",
     sport: "",
+    level: "",
     open: false,
     currentParticipants: 0,
     maxParticipants: 0,
@@ -19,6 +20,7 @@ const EventDetails = () => {
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
+  const isUserParticipant = event.participants.includes(user?.username);
   const searchParams = useSearchParams();
   const router = useRouter();
   const eventID = searchParams.get("id");
@@ -38,6 +40,7 @@ const EventDetails = () => {
             desc: data.desc,
             city: data.city,
             sport: data.sport,
+            level: data.level,
             open: data.open,
             currentParticipants: data.currentParticipants,
             maxParticipants: data.maxParticipants,
@@ -52,17 +55,53 @@ const EventDetails = () => {
   }, [eventID]);
 
   const handleJoinEvent = () => {
-    if (event.currentParticipants < event.maxParticipants) {
-      if (!user) {
-        // If no user session
-        console.log("User not logged in...");
-        router.push("/signin");
-        return;
-      } else {
+    if (isUserParticipant) {
+      // user is registered for event
+      axios
+        .post("http://localhost:5000/leave_event", {
+          id: eventID,
+          username: user.username,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            alert("You have successfully left the event");
+            window.location.reload();
+          }
+        });
+    } else {
+      // user isnt registered for event
+      if (event.currentParticipants < event.maxParticipants) {
+        // join event
+
+        let updatedUser = { ...user };
+
+        if (event.sport === "Tennis") {
+          updatedUser.numTennis = (updatedUser.numTennis || 0) + 1;
+        } else if (event.sport === "Weightlifting") {
+          updatedUser.numWeights = (updatedUser.numWeights || 0) + 1;
+        } else if (event.sport === "Basketball") {
+          updatedUser.numBasketball = (updatedUser.numBasketball || 0) + 1;
+        } else if (event.sport === "Soccer") {
+          updatedUser.numSoccer = (updatedUser.numSoccer || 0) + 1;
+        }
+
+        console.log(updatedUser.numBasketball);
+        console.log(updatedUser.numWeights);
+        console.log(updatedUser.numTennis);
+        console.log(updatedUser.numSoccer);
+
+        setUser(updatedUser);
+        sessionStorage.removeItem("user");
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
         axios
           .post("http://localhost:5000/join_event", {
             id: eventID,
             username: user.username,
+            numBasketball: updatedUser.numBasketball,
+            numTennis: updatedUser.numTennis,
+            numSoccer: updatedUser.numSoccer,
+            numWeights: updatedUser.numWeights,
           })
           .then((response) => {
             if (response.status === 200) {
@@ -73,26 +112,38 @@ const EventDetails = () => {
           .catch((error) => {
             console.error("Error joining event: ", error);
           });
+        // add to event history
+        axios
+          .post("http://localhost:5000/add_event_history", {
+            event: eventID,
+            user: user.username,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              console.log("Added to History");
+            }
+          });
+      } else {
+        alert("The event is full. You cannot join at the moment.");
       }
-    } else {
-      alert("The event is full. You cannot join at the moment.");
     }
   };
-
-  console.log(event);
 
   return (
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
       <div className="w-4/5">
-        <h1 className="text-3xl font-semibold">{event.title}</h1>
-        <p className="text-gray-600 border-b border-gray-300 pb-4">
-          {event.city} • {event.sport}
-        </p>
+        <h1 className="text-3xl font-semibold">
+          {event.title}{" "}
+          <span className="text-gray-600 pb-4 font-base text-sm">
+            {event.city} • {event.sport}
+          </span>
+        </h1>
+        <p className="text-blue-500 border-b border-gray-300 pb-4">{event.level}</p>
         <p className="pt-4">{event.desc}</p>
       </div>
       {/* ITEM: Right Bar*/}
-      <div className="w-1/3 border border-gray-300 rounded-xl h-96 shadow-lg">
+      <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">
           <h1 className="text-xl font-semibold">
             Status:{" "}
@@ -112,15 +163,41 @@ const EventDetails = () => {
           </p>
           <button
             onClick={handleJoinEvent}
-            className="w-full bg-green-500 text-white font-semibold text-lg ho rounded-xl py-2 mb-4"
+            className={
+              status === "Open"
+                ? `w-full ${
+                    isUserParticipant ? "bg-red-500" : "bg-green-500"
+                  } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
+                : isUserParticipant
+                ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+                : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+            }
           >
-            Join Event
+            {isUserParticipant ? "Leave Event" : "Join Event"}
           </button>
           <div>
-            <h2 className="pb-2">Currently Registered</h2>
-            <div className="grid grid-cols-2">
+            <h2 className="pb-4 text-lg pt-2">Participants</h2>
+            <div className="flex flex-col gap-2">
               {event.participants.map((event, index) => (
-                <p className="text-sm">{event}</p>
+                <p className="text-sm border-l border-gray-400 px-2 relative">
+                  {event}
+                  <span className="absolute right-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="gray"
+                      class="w-5 h-5"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </span>
+                </p>
               ))}
             </div>
           </div>

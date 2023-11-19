@@ -83,16 +83,21 @@ const createPage = () => {
             setParticipants(participants.filter(email => email !== friendEmail));
         }
     };
+    
     const handleSubmit = () => {
-        // Logic to handle data submission (e.g., API call) can go here
+
+        if (teamData['sport'] === "") {
+            return;
+        }
+
         console.log(teamData);
         axios.post('http://localhost:5000/create', {
             title: teamData['title'],
-            description: teamData['desc'],
+            desc: teamData['desc'],
             city: teamData['city'],
             open: teamData['open'],
             sport: teamData['sport'],
-            currentParticipants: currentParticipants,
+            currentParticipants: parseInt(currentParticipants),
             maxParticipants: parseInt(teamData['maxParticipants']),
             type: selected,
             participants: participants,
@@ -105,6 +110,7 @@ const createPage = () => {
                 console.error('Error making the API call:', error);
             });
     }
+
     return (
      <div>
         <div className={`switch-container ${selected === 'team' ? 'team-selected' : 'event-selected'}`}>
@@ -146,7 +152,15 @@ const createPage = () => {
                      Open:
                      <input type="checkbox" name="open" checked={teamData.open} onChange={() => setTeamData(prevState => ({ ...prevState, open: !prevState.open }))} />
                  </label>
-                 <input type="text" name="sport" placeholder="Sport" onChange={handleChange} />
+
+                 <select name="sport" onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="">Select a sport</option>
+                    <option value="Soccer">Soccer</option>
+                    <option value="Tennis">Tennis</option>
+                    <option value="Basketball">Basketball</option>
+                    <option value="Weightlifting">Weightlifting</option>
+                </select>
+
                  <div>
                      Current Participants: {currentParticipants}
                  </div>

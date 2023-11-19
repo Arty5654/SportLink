@@ -20,7 +20,13 @@ class User {
     this.birthday;
     this.reportReason;
     this.profileImage;
-    this.blocked_users
+    this.blocked_users;
+    this.profileImage;
+    this.blocked;
+    this.numBasketball;
+    this.numTennis;
+    this.numSoccer;
+    this.numWeights;
   }
 
   // adds new field to a user - username, age etc.

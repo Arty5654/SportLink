@@ -86,8 +86,6 @@ paths:
                   type: integer
                 maxParticipants:
                   type: integer
-                type:
-                  type: string
                 participants:
                   type: array
                 level:
@@ -220,11 +218,31 @@ paths:
                   displayPhoneNumber:
                     type: string
                     description: "Toggle phone number visibility"
+                  sendEmails:
+                    type: boolean
+                    default: true
+                    description: "Toggle email notifications"
+                  showInApp:
+                    type: boolean
+                    default: true
+                    description: "Toggle in-app notifications"
                   friends:
                     type: array
                     default: []
                     items:
                       type: string
+                  profileImage:
+                    type: string
+                  imageData:
+                    type: string
+                  numBasketball:
+                    type: integer
+                  numTennis:
+                    type: integer
+                  numWeights:
+                    type: integer
+                  numSoccer:
+                    type: integer
                 required:
                   - username
         "401":
@@ -302,6 +320,26 @@ paths:
                   displayPhoneNumber:
                     type: string
                     description: "Toggle phone number visibility"
+                  profileImage:
+                    type: string
+                  imageData:
+                    type: string
+                  sendEmails:
+                    type: boolean
+                    default: true
+                    description: "Toggle email notifications"
+                  showInApp:
+                    type: boolean
+                    default: true
+                    description: "Toggle in-app notifications"
+                  numBasketball:
+                    type: integer
+                  numTennis:
+                    type: integer
+                  numWeights:
+                    type: integer
+                  numSoccer:
+                    type: integer
                 required:
                   - email
                   - username
@@ -431,7 +469,9 @@ paths:
                 birthday:
                   type: string
                 profileImage:
-                  type: object
+                  type: string
+                imageData:
+                  type: string
       responses:
         "200":
           description: Profile updated successfully
@@ -734,6 +774,10 @@ paths:
                       type: string
                     lastName:
                       type: string
+                    profileImage:
+                      type: string
+                    imageData:
+                      type: string
         "404":
           description: No results found!
 
@@ -783,6 +827,16 @@ paths:
                     type: string
                   gender:
                     type: string
+                  imageData:
+                    type: string
+                  profileImage:
+                    type: string
+                  blocked:
+                    type: boolean
+                  blocker:
+                    type: string
+                  blocked_users:
+                    type: array
         "404":
           description: User not found
 
@@ -860,6 +914,44 @@ paths:
                       type: string
                     desc:
                       type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+        "404":
+          description: Event not found
+
+  /get_my_events:
+    get:
+      summary: Get Event Information that user is part of
+      description: Retrieve event information from the database.
+      operationId: app.get_my_events
+      responses:
+        "200":
+          description: Event information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    objectID:
+                      type: string
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
                     open:
                       type: boolean
                     currentParticipants:
@@ -897,6 +989,8 @@ paths:
                     type: string
                   desc:
                     type: string
+                  level:
+                    type: string
                   open:
                     type: boolean
                   currentParticipants:
@@ -927,8 +1021,570 @@ paths:
                   type: string
                 username:
                   type: string
+                numBasketball:
+                  type: integer
+                numTennis:
+                  type: integer
+                numSoccer:
+                  type: integer
+                numWeights:
+                  type: integer
       responses:
         "200":
           description: Event joined successfully
         "400":
           description: Bad request, missing required parameters or event is full
+
+  /leave_event:
+    post:
+      summary: Leave Event
+      description: Leave an event.
+      operationId: app.leave_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                username:
+                  type: string
+      responses:
+        "200":
+          description: Event left successfully
+        "400":
+          description: Bad request
+
+  /get_reports:
+    get:
+      operationId: app.get_reports
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve reports.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Friend requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                    reportReason:
+                      type: string
+                    timestamp:
+                      type: string
+        "404":
+          description: No friend requests found!
+
+  /block_user:
+    post:
+      operationId: app.block_user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blocker:
+                  type: string
+                blocked_users:
+                  type: string
+                blocked:
+                  type: boolean
+      responses:
+        "200":
+          description: Blocked Successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Not Blocked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /get_blocked_users:
+    get:
+      operationId: app.get_blocked_users
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve blocked_users.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blocked successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                    blocked_users:
+                      type: array
+                    blocked:
+                      type: boolean
+        "404":
+          description: User not found!
+
+  /unblock_user:
+    post:
+      operationId: app.unblock_user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                blocker:
+                  type: string
+                blocked_user:
+                  type: string
+                blocked:
+                  type: boolean
+      responses:
+        "200":
+          description: Unblocked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: User not found!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /get_all_events:
+    get:
+      operationId: app.get_all_events
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve blocked_users.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blocked successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+                    participants:
+                      type: array
+                      default: []
+                    items:
+                      type: string
+        "404":
+          description: User not found!
+  # notification preferences
+  /get_user_notifs_settings:
+    get:
+      operationId: app.get_user_notifs_settings
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve notification settings.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notification settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    sendEmails:
+                      type: boolean
+                    showInApp:
+                      type: boolean
+        "404":
+          description: User not found
+  /set_user_notifs_settings:
+    post:
+      operationId: app.set_user_notifs_settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                sendEmails:
+                  type: boolean
+                showInApp:
+                  type: boolean
+      responses:
+        "200":
+          description: Notification settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "404":
+          description: User not found
+
+  /add_event_history:
+    post:
+      summary: Add event to history
+      description: Add event to history
+      operationId: app.add_event_history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                event:
+                  type: string
+      responses:
+        "200":
+          description: Event added to history
+        "400":
+          description: Bad request, missing required parameters or event is full
+
+  /delete_event_history:
+    post:
+      summary: Delete event to history
+      description: Delete event to history
+      operationId: app.delete_event_history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                event:
+                  type: string
+      responses:
+        "200":
+          description: Event added to history
+        "400":
+          description: Bad request, missing required parameters or event is full
+
+  /get_event_history:
+    get:
+      summary: Get Event History
+      description: Retrieve event history for a specific user.
+      operationId: app.get_event_history
+      responses:
+        200:
+          description: Event history retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+                    participants:
+                      type: array
+                      default: []
+                      items:
+                        type: string
+        404:
+          description: User not found or no event history available.
+
+  /update_stats:
+    post:
+      summary: "Update user's statistics"
+      operationId: app.update_stats
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                user:
+                  type: string
+                wins:
+                  type: integer
+                losses:
+                  type: integer
+                elo:
+                  type: integer
+      responses:
+        "200":
+          description: "Statistics updated successfully"
+        "400":
+          description: "Invalid request"
+        "500":
+          description: "Internal server error"
+
+  /get_user_info2:
+    get:
+      summary: Get User Information
+      description: Retrieve user information from the database.
+      operationId: app.get_user_info2
+      parameters:
+        - name: username
+          in: query
+          description: The username of the user to retrieve information.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  phoneNumber:
+                    type: string
+                  address:
+                    type: string
+                  state:
+                    type: string
+                  country:
+                    type: string
+                  zipCode:
+                    type: string
+                  city:
+                    type: string
+                  age:
+                    type: string
+                  birthday:
+                    type: string
+                  gender:
+                    type: string
+                  imageData:
+                    type: string
+                  profileImage:
+                    type: string
+                  blocked:
+                    type: boolean
+                  blocker:
+                    type: string
+                  blocked_users:
+                    type: array
+        "404":
+          description: User not found
+
+  /clear_notifications:
+    post:
+      summary: "Clear Notifcations"
+      operationId: app.clear_notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: "Cleared Notifications Successfully"
+        "400":
+          description: "Invalid request"
+        "500":
+          description: "Internal server error"
+  # /refresh_msg:
+  #   post:
+  #     operationId: app.refresh_msg
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               chat_key:
+  #                 type: string
+  #     responses:
+  #       "200":
+  #         description: "Refreshed Messages"
+
+  # /messages:
+  #   post:
+  #     operationId: app.init_messages
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #               friends:
+  #                 type: array
+  #     responses:
+  #       "200":
+  #         description: "Checked Messages"
+
+  # /stats:
+  #   post:
+  #     operationId: app.check_stats
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: array
+  #     responses:
+  #       "200":
+  #         description: "Checked Stats"
+
+  # /fetch_friends:
+  #   post:
+  #     operationId: app.fetch_friends
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #     responses:
+  #       "200":
+  #         description: "Created Request"
+
+  # teams endpoint
+  /create_team:
+    post:
+      operationId: app.create_team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                leader:
+                  type: string
+                members:
+                  type: array
+                  default: []
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: "Team Created"
+
+  /get_teams:
+    get:
+      operationId: app.get_teams
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve teams.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Teams Retrieved"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    leader:
+                      type: string
+                    members:
+                      type: array
+                      default: []
+                      items:
+                        type: string

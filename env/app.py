@@ -12,12 +12,22 @@ import string # no install
 import json # no install
 import pdb # python debugger, pip install pypdb
 from flask_socketio import SocketIO, send, join_room, emit
-
-
-
+import base64
+from gridfs import GridFS
+from bson import ObjectId
+from flask_socketio import SocketIO, send, join_room, emit
+import base64
+from gridfs import GridFS
+from bson import ObjectId
 from bson.json_util import dumps
 from bson.regex import Regex
 import re
+
+# import files
+from events import get_history, add_history, delete_history, join, get_details, get_all, leave
+from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
+from teams import create_a_team, get_users_teams
+
 load_dotenv()
 
 # Socket for messaging
@@ -31,10 +41,32 @@ teams = db["teams"]
 events = db["events"]
 friends = db["friends"]
 stats = db["stats"]
+fs = GridFS(db)
+history = db["eventHistory"]
+
 messages = db["messages"]
 
 #sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
+
+def update_stats():
+    data = request.json
+    user = data['user']
+    wins = data['wins']
+    losses = data['losses']
+    elo = data['elo']
+
+    # Find the document and update
+    result = stats.update_one(
+        {'_id' : user},
+        {'$set': {'wins': wins, 'losses': losses, 'elo': elo}},
+        upsert=True  # This creates a new document if one doesn't exist
+    )
+
+    if result.matched_count > 0 or result.upserted_id is not None:
+        return jsonify({'message': 'Statistics updated successfully'}), 200
+    else:
+        return jsonify({'message': 'No matching document found'}), 400
 
 def refresh_msg():
 
@@ -89,13 +121,15 @@ def generate_user_key(user1, user2):
 def check_stats():
     emails = request.json["friends"]
 
+    print(emails)
     response_data = []
 
     for email in emails:
-        user_stats = stats.find_one({"_id": email})
+        friend = email['friend']
+        user_stats = stats.find_one({"_id": friend})
         if not user_stats:
             default_stats = {
-                "_id": email,
+                "_id": friend,
                 "wins": 0,
                 "losses": 0,
                 "elo": 0
@@ -130,6 +164,7 @@ def fetch_friends():
 
     return jsonify({'friends': friend_requests}), 200
 
+
 def create_account():
     user = request.json
 
@@ -155,7 +190,12 @@ def create_account():
         'email': email,
         'password': hashWord.decode('utf-8'), #store hashed pass as a string
         'username': username,
-        'friends': []
+        'friends': [],
+        'numTennis': 0,
+        'numBasketball': 0,
+        'numSoccer': 0,
+        'numWeights': 0
+
     }
     users.insert_one(userData)
 
@@ -190,7 +230,7 @@ def login():
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -234,7 +274,7 @@ def google_signin():
                 'friends': []
             }
 
-            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber']
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -263,7 +303,11 @@ def google_signin():
             'username': username,
             'firstName': firstName,
             'lastName': lastName,
-            'friends': []
+            'friends': [],
+            'numTennis': 0,
+            'numBasketball': 0,
+            'numSoccer': 0,
+            'numWeights': 0
         }
 
         users.insert_one(userData)
@@ -339,50 +383,36 @@ def change_password():
 def update_user_profile():
     user = request.get_json()
     email = user.get('email')
-    phoneNumber = user.get('phoneNumber')
-    firstName = user.get('firstName')
-    lastName = user.get('lastName')
-    username = user.get('username')
-    address = user.get('address')
-    state = user.get('state')
-    country = user.get('country')
-    zipCode = user.get('zipCode')
-    city = user.get('city')
-    age = user.get('age')
-    gender = user.get('gender')
-    birthday = user.get('birthday')
-    profileImage = user.get('profileImage')
 
-    # udpate the user's phone number in the data base
     update_query = {}
-    if firstName is not None:
-        update_query['firstName'] = firstName
-    if lastName is not None:
-        update_query['lastName'] = lastName
-    if username is not None:
-        update_query['username'] = username
-    if phoneNumber is not None:
-        update_query['phoneNumber'] = phoneNumber
-    if address is not None:
-        update_query['address'] = address 
-    if state is not None:
-        update_query['state'] = state
-    if country is not None:
-        update_query['country'] = country
-    if zipCode is not None:
-        update_query['zipCode'] = zipCode
-    if city is not None:
-        update_query['city'] = city
-    if age is not None:
-        update_query['age'] = age
-    if birthday is not None:
-        update_query['birthday'] = birthday
-    if gender is not None:
-        update_query['gender'] = gender
-    if profileImage is not None:
-        update_query['profileImage'] = profileImage
+    for field in ['firstName', 'lastName', 'username', 'phoneNumber', 'address', 'state', 'country', 'zipCode', 'city', 'age', 'gender', 'birthday']:
+        if field in user:
+            update_query[field] = user.get(field)
 
+    if 'profileImage' in user:
+        profile_image = user.get('profileImage')
+
+        # Check if the string starts with the correct prefix 'data:image/jpeg;base64,' or any other format
+        if profile_image.startswith('data:image/jpeg;base64,'):
+            profile_image = profile_image.replace('data:image/jpeg;base64,', '')  # Remove the prefix
+        elif profile_image.startswith('data:image/png;base64,'):
+            profile_image = profile_image.replace('data:image/png;base64,', '')  # Remove the prefix
+
+        try:
+            image_data = base64.b64decode(profile_image)
+            fs.put(image_data, filename=email + '_profile_image')  # Use email as a unique identifier
+
+            # Save a reference to the image in the user's profile
+            update_query['profileImage'] = email + '_profile_image'
+            update_query['imageData'] = base64.b64encode(image_data).decode('utf-8')
+        except Exception as e:
+            # Handle base64 decoding error
+            return jsonify({'error': 'Base64 decoding error', 'message': str(e)}), 400
+
+
+    users = db.users  # Assuming your collection name is 'users'
     users.update_one({"email": email}, {"$set": update_query})
+
     return jsonify({'message': 'Profile updated successfully'}), 200
 
 def update_user_privacy():
@@ -505,13 +535,14 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
+# Send a friend request to another user
 def send_friend_request():
     # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
 
-    # check if friend exists
+        # check if friend exists
     if not users.find_one({'email': friend_email}):
         return jsonify({'message': 'Friend does not exist!'}), 404
 
@@ -537,88 +568,56 @@ def send_friend_request():
 
     # send email to friend
     print(f"Want to send email to {friend_email}, from {email}")
+
+    # check if friend doesnt have sendEmails set to False
+    if users.find_one({'email': friend_email, 'sendEmail': False}):
+        print("no email to this user")
+        return jsonify({"message": "Friend Request Sent"}), 200
+
     msg = Message('New Friend Request!', recipients=[friend_email])
     msg.html = '<p>Hello! You have a friend request waiting for you! Sign in <a href="http://localhost:3000/signin">here</a> and click the bell in the top right to view.</p>'
     mail.send(msg)
 
     return jsonify({"message": "Friend Request Sent"}), 200
 
-# should be called when a user accepts a friend request
-# user is presented all the requests where they are the friend email
+# Accept a friend request from another user
 def accept_friend_request():
     # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
 
-    # check if already friends
-    if friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}) or friends.find_one({'user': friend_email, 'friend': email, 'status': 'friends'}):
-        return jsonify({'info': 'Already Friends!'}), 401
+    return accept_request(email, friend_email)
 
-    # update friend request status to friends
-    # print(f"updating the request where the user is {friend_email} and the friend is {email}")
-    friends.update_one({'user': friend_email, 'friend': email, 'status': 'pending'}, {'$set': {'status': 'friends'}})
-
-    # add a new entry for the other user
-    # print(f"inserting a new entry where the user is {email} and the friend is {friend_email}")
-    friends.insert_one({'user': email, 'friend': friend_email, 'status': 'friends'})
-
-    return jsonify({"message": "Friend Request Accepted"}), 200
-
-# should be called when a user denies a friend request
-# user is presented all the requests where they are the friend email
+# Deny a friend request from another user
 def deny_friend_request():
     # Extracting data from request
     req = request.json
     email = req['email']
     friend_email = req['friend_email']
 
-    # check that the request exists
-    if not friends.find_one({'user': friend_email, 'friend': email, 'status': 'pending'}):
-        return jsonify({'info': 'Request does not exist!'}), 401
-
-    # delete friend request
-    friends.delete_one({'user': friend_email, 'friend': email, 'status': 'pending'})
-
-    return jsonify({"message": "Friend Request Denied"}), 200
+    return deny_request(email, friend_email)
 
 
 def get_friend_requests():
     # Extracting data from request
-    # pdb.set_trace()
     curr_email = request.args.get('email')
 
-    # get all friend requests for the user
-    friend_requests = []
-
-    for freq in friends.find({'friend': curr_email}):
-    # for freq in friends.find({'friend': curr_email, 'status': 'pending'}):
-        friend_requests.append({
-            'user': freq['user'],
-            'friend': freq['friend'],
-            'status': freq['status']
-        })
-
-    return jsonify(friend_requests), 200
+    return get_requests(curr_email)
 
 def get_friends():
-    # # Extracting data from request
-    # req = request.json
-    # email = req['email']
-    # print(email)
+    # xtracting data from request
     curr_email = request.args.get('email')
 
-    curr_friends = []
+    return get_my_friends(curr_email)
 
-    for relation in friends.find({'user': curr_email, 'status': 'friends'}):
-        print(relation)
-        curr_friends.append({
-            'user': relation['user'],
-            'friend': relation['friend'],
-            'status': relation['status']
-        })
+def remove_friend():
+    # Extracting data from request
+    req = request.json
+    email = req['email']
+    friend_email = req['friend_email']
 
-    return jsonify(curr_friends), 200
+    return remove_one(email, friend_email)
 
 def get_reports():
     user_email = request.args.get('email')
@@ -632,49 +631,52 @@ def get_reports():
     return jsonify(user_reports_list), 200
 
 def get_blocked_users():
-    email = request.args.get('email')
-    user = users.find_one({'email': email})
+    email = request.args.get('email')  # Get the email from the request
+    user = db.blocks.find_one({'email': email})  # Find the document with the provided email
+
     if user:
         blocked_users = user.get('blocked_users', [])
         return jsonify(blocked_users), 200
-    return jsonify([]), 404
+    else:
+        return jsonify([]), 404  # Return an empty list with a 404 status if the user is not found or has no blocked users
 
 def unblock_user():
     data = request.get_json()
-    blocker = data.get('blocker')
-    blocked_user = data.get('blocked_user')
+    blocker_email = data.get('blocker')
+    blocked_user_email = data.get('blocked_user')
 
-    # Update the blocked_users field in the user's document
-    user = users.find_one({'email': blocker})
+    # Find the user who has blocked someone
+    user = db.blocks.find_one({'email': blocker_email})
+
     if user:
         blocked_users = user.get('blocked_users', [])
-        if blocked_user in blocked_users:
-            blocked_users.remove(blocked_user)
-            # Update the user's document in the database
-            users.update_one({'email': blocker}, {'$set': {'blocked_users': blocked_users}})
-            return jsonify({'message': f'{blocked_user} has been unblocked by {blocker}'}), 200
+        if blocked_user_email in blocked_users:
+            # Remove the blocked user from the list
+            blocked_users.remove(blocked_user_email)
 
-    return jsonify({'error': 'Unable to unblock the user'}), 404
+            # Update the blocked_users array for the user who blocked
+            db.blocks.update_one(
+                {'email': blocker_email},
+                {'$set': {'blocked_users': blocked_users}}
+            )
 
-def remove_friend():
-    # Extracting data from request
-    req = request.json
-    email = req['email']
-    friend_email = req['friend_email']
+            return jsonify({'message': f'{blocked_user_email} unblocked successfully'}), 200
 
-    # check that the friendship exists
-    if not friends.find_one({'user': email, 'friend': friend_email, 'status': 'friends'}):
-        return jsonify({'info': 'Friendship does not exist!'}), 401
-
-    # delete friendship, from both ends
-    friends.delete_one({'user': email, 'friend': friend_email, 'status': 'friends'})
-    friends.delete_one({'user': friend_email, 'friend': email, 'status': 'friends'})
-
-    return jsonify({"message": "Friend Removed"}), 200
+    return jsonify({'message': 'User not found or unblock failed'}), 404
 
 def preprocess_phone_number(phone_number):
     # Remove non-digit characters from the phone number
     return re.sub(r'\D', '', phone_number)
+
+def get_image_from_gridfs(image_id):
+    file_doc = fs.find_one({"filename": image_id})
+    image_data = None
+    if file_doc:
+        chunks = fs.find({"files_id": file_doc._id})
+        image_data = b''.join(chunk.read() for chunk in chunks)
+        image_data = base64.b64encode(image_data).decode('utf-8')
+    return file_doc, image_data
+
 
 def user_lookup():
     search_term = request.args.get('searchTerm')
@@ -691,14 +693,15 @@ def user_lookup():
             {"email": regex},
             {"phoneNumber": regex},
             {"firstName": regex},
-            {"lastName": regex}
+            {"lastName": regex},
         ]
     }):
+        
         # Check if the searched user is blocked by the user performing the search
-        is_blocked = searching_user_email in user.get("blocked_users", [])
-
-        if not is_blocked:  # Only append if the user is not blocked
-            matching_users.append({
+        #is_blocked = searching_user_email in user.get("blocked_users", [])
+        
+    #if not is_blocked:
+        matching_users.append({
                 "id": str(user["_id"]),
                 "name": user.get("name"),
                 "username": user.get("username"),
@@ -706,20 +709,20 @@ def user_lookup():
                 "phoneNumber": user.get("phoneNumber"),
                 "firstName": user.get("firstName"),
                 "lastName": user.get("lastName"),
-                "blocked": is_blocked
+                "profileImage": user.get("profileImage"),
+                #"blocked": is_blocked,
+                "imageData": user.get("imageData")
             })
 
     return jsonify(matching_users), 200
 
-
-
-
 def get_user_info():
     email = request.args.get('email')
+    blocker_email = request.args.get('blocker_email')
+   
 
     # Query the database for the user based on email
     user = users.find_one({"email": email})
-
     if user:
         # Fetch user privacy settings
         display_phone_number = user.get("displayPhoneNumber")
@@ -733,7 +736,61 @@ def get_user_info():
             "username": user.get("username"),
             "email": user.get("email"),
             "gender": user.get("gender"),
-            "birthday": user.get("birthday")
+            "birthday": user.get("birthday"),
+            "profileImage": user.get("profileImage"),
+            "imageData": user.get("imageData"),
+            "blocked_users": user.get("blocked_users"),
+            "blocker": user.get("blocker"),
+            "blocked": user.get("blocked")
+        }
+
+        # Add fields conditionally based on privacy settings
+        if display_phone_number != "private":
+            user_info["phoneNumber"] = user.get("phoneNumber")
+        else:
+            user_info["phoneNumber"] = "This information is set on private by the user."
+
+        if not display_age:
+            user_info["age"] = user.get("age")
+        else:
+            user_info["age"] = "This information is set on private by the user."
+
+        if not display_location:
+            user_info["city"] = user.get("city")
+        else:
+            user_info["city"] = "This information is set on private by the user."
+
+        return jsonify(user_info), 200
+    else:
+        # User not found
+        return jsonify({'message': 'User not found'}), 404
+    
+def get_user_info2():
+    username = request.args.get('username')
+    blocker_email = request.args.get('blocker_email')
+   
+
+    # Query the database for the user based on email
+    user = users.find_one({"username": username})
+    if user:
+        # Fetch user privacy settings
+        display_phone_number = user.get("displayPhoneNumber")
+        display_age = user.get("displayAge")
+        display_location = user.get("displayLocation")
+
+        # Prepare user information based on privacy settings
+        user_info = {
+            "firstName": user.get("firstName"),
+            "lastName": user.get("lastName"),
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "gender": user.get("gender"),
+            "birthday": user.get("birthday"),
+            "profileImage": user.get("profileImage"),
+            "imageData": user.get("imageData"),
+            "blocked_users": user.get("blocked_users"),
+            "blocker": user.get("blocker"),
+            "blocked": user.get("blocked")
         }
 
         # Add fields conditionally based on privacy settings
@@ -778,46 +835,53 @@ def get_events():
     # Return the modified event data as JSON
     return jsonify(event_data), 200
 
-# @app.route("/get_event_details", methods=["GET"])
 def get_event_details():
-    eventID = request.args.get("id")
-    event_data = list(events.find())
+    return get_details(request.args.get("id"), list(events.find()))
 
-    for event in event_data:
-        if str(eventID) == str(event["_id"]):
-            event_info = {
-                "title": event["title"],
-                "desc": event["desc"],
-                "city": event["city"],
-                "open": event["open"],
-                "sport": event["sport"],
-                "currentParticipants": event["currentParticipants"],
-                "maxParticipants": event["maxParticipants"],
-                "participants": event["participants"],
-            }
-            break
-
-    return jsonify(event_info), 200
+def get_all_events():
+    return get_all(request.args.get('email'))
 
 def join_event():
     data = request.get_json()
-    eventID = data.get("id")
-    username = data.get("username")
+
+    bball = data.get("numBasketball")
+    tennis = data.get("numTennis")
+    soccer = data.get("numSoccer")
+    weights = data.get("numWeights")
+    users.update_one({"username": data.get('username')}, {"$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
+
+    return join(data.get("id"), data.get("username"), list(events.find()))
+
+def leave_event():
+    data = request.get_json()
+    return leave(data.get("id"), data.get("username"), list(events.find()))
+
+def get_event_history():
+    return get_history(request.args.get("username"), list(history.find()), list(events.find()))
+
+def add_event_history():
+    data = request.get_json()
+    return add_history(data.get("event"), data.get("user"))
+
+def delete_event_history():
+    data = request.get_json()
+    return delete_history(data.get("event"), data.get("user"))
+
+def get_my_events():
     event_data = list(events.find())
+    username = request.args.get("username")
+
+    user_events = []
 
     for event in event_data:
-        if eventID == str(event["_id"]):  # Compare as strings
-            # Check if the event is open for joining
-            if event["currentParticipants"] < event["maxParticipants"]:
-                # Add the username to the participants array
-                event["participants"].append(username)
-                event["currentParticipants"] += 1
-                events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
-                return jsonify({"message": "Event joined successfully"}), 200
-            else:
-                return jsonify({"message": "The event is full. You cannot join at the moment."}), 400
+        event['_id'] = str(event['_id'])
 
-    return jsonify({"message": "Event not found."}), 404
+    for event in event_data:
+        if username in event["participants"]:
+            user_events.append(event)
+
+    # Return the modified event data as JSON
+    return jsonify(user_events), 200
 
 def submit_report():
     user = request.get_json()
@@ -842,19 +906,112 @@ def submit_report():
 
     return jsonify({'message': 'Report submitted successfully'}), 200
 
-
 def block_user():
     user = request.get_json()
     email = user.get('blocker')
     blocked_user = user.get('blocked_users')
+    blocked = user.get('blocked')
 
-    # Update the user's document to add the blocked user to the 'blocked_users' field
-    users.update_one(
+    # Update the user's document to add the blocked user to the 'blocked_users' array field
+    db.blocks.update_one(
         {"email": email},
-        {"$addToSet": {"blocked_users": blocked_user}}
+        {"$addToSet": {"blocked_users": blocked_user}},
+        upsert=True  # If the document doesn't exist, create it
     )
 
     return jsonify({'message': 'User blocked successfully'}), 200
+
+def get_user_notifs_settings():
+    curr_email = request.args.get('email')
+
+    # Fetch the user's notification settings
+    curr_user = users.find_one({'email': curr_email})
+
+    if curr_user:
+        # check if they have sendEmail and showInApp fields
+        if 'sendEmail' in curr_user and 'showInApp' in curr_user:
+            settings = {
+                'sendEmail': curr_user['sendEmail'],
+                'showInApp': curr_user['showInApp']
+            }
+            return jsonify(settings), 200
+
+    # create a dummy array of sendEmail and showInApp as true
+    settings = {
+        'sendEmail': True,
+        'showInApp': True
+    }
+
+    return jsonify(settings), 200
+
+
+def set_user_notifs_settings():
+    user = request.get_json()
+    email = user.get('email')
+    sendEmail = user.get('sendEmail')
+    showInApp = user.get('showInApp')
+
+    # Update the user's notification settings in the database
+    update_query = {}
+    if sendEmail is not None:
+        update_query['sendEmail'] = sendEmail
+    if showInApp is not None:
+        update_query['showInApp'] = showInApp
+
+    users.update_one({"email": email}, {"$set": update_query})
+    return jsonify({'message': 'Notification settings updated successfully'}), 200
+
+def clear_notifications():
+    data = request.json
+    user_email = data.get("email")
+
+    if not user_email:
+        print("Error: Email is required in the request body")  # Log for debugging
+        return jsonify({"error": "Email is required"}), 400
+
+    # Check for pending friend requests
+    try:
+        pending_requests = db.friends.count_documents(
+            {"friend": user_email, "status": "pending"}
+        )
+    except Exception as e:
+        print(f"Database error: {e}")  # Log for debugging
+        return jsonify({"error": "Database error"}), 500
+
+    if pending_requests > 0:
+        print(f"Error: Cannot clear notifications with pending friend requests for {user_email}")  # Log for debugging
+        return jsonify({"error": "Cannot clear notifications with pending friend requests"}), 400
+
+    # Delete 'friends' status notifications
+    try:
+        db.friends.delete_many({"friend": user_email, "status": "friends"})
+    except Exception as e:
+        print(f"Database error during friends deletion: {e}")  # Log for debugging
+        return jsonify({"error": "Database error during friends deletion"}), 500
+
+    # Clear report notifications
+    try:
+        db.reports.delete_many({"reported_user_email": user_email})
+    except Exception as e:
+        print(f"Database error during reports deletion: {e}")  # Log for debugging
+        return jsonify({"error": "Database error during reports deletion"}), 500
+
+    return jsonify({"message": "Notifications cleared"}), 200
+
+def create_team():
+    req = request.get_json()
+    team_name = req['name']
+    team_leader = req['leader']
+    teammates = req['members']
+
+    return create_a_team(team_name, team_leader, teammates)
+
+def get_teams():
+    curr_email = request.args.get('email')
+
+    list_of_teams = get_users_teams(curr_email)
+
+    return jsonify(list_of_teams), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

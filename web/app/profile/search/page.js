@@ -45,6 +45,8 @@ function UserLookupPage() {
         setSearchResults([]);
       } else {
         const response = await axios.get(`http://localhost:5000/user_lookup?searchTerm=${input}`);
+        //sessionStorage.removeItem("user");
+        //sessionStorage.setItem("user", JSON.stringify(user));
         setSearchResults(response.data);
       }
     } catch (error) {
@@ -55,10 +57,12 @@ function UserLookupPage() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="w-full flex pb-64">
+      <div className="w-1/4">
       <Sidebar active="search" />
+      </div>
 
-      <div className="w-3/4 p-8">
+      <div className="w-3/4 text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
         <h1 className="text-2xl font-semibold mb-4">User Lookup</h1>
 
         <div className="mb-4">
@@ -81,10 +85,10 @@ function UserLookupPage() {
               <div key={user.id} className="bg-white shadow rounded-lg p-4">
                 <Link href={`/profile/userProfilePage?email=${user.email}`} onClick={() => saveVisitedProfileToHistory(user)}>
                   <img
-                    src={ProfileImage}
-                    alt="Profile"
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
+                    src={`data:image/png;base64,${user.imageData}`}
+                    alt="Profile Image"
+                    style={{ width: "100px", height: "100px" }}
+                    />
                   <div>
                     <p className="text-gray-600">Name: {`${user.firstName} ${user.lastName}`}</p>
                     <p className="text-gray-600">Username: {user.username}</p>

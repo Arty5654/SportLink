@@ -59,7 +59,7 @@ const NotifsPage = () => {
             console.log("Report response:", response.data)
           }
         } catch (error) {
-          console.error('Error getting friend requests', error);
+          console.error('Error getting potential reports', error);
         }
       };
 
@@ -71,20 +71,19 @@ const NotifsPage = () => {
       const [dateString] = timestamp.split('T');
       return dateString; // Return only the date part
     }
-  
+
     const date = new Date(timestamp);
-  
+
     if (Object.prototype.toString.call(date)) {
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
       return `${month}/${day}/${year}`;
     }
-  
+
     return 'Invalid Date';
   };
-  
-  
+
 
     // infinite scroll, loading 5 more friends at a time
     const handleScroll = () => {
@@ -149,12 +148,37 @@ const NotifsPage = () => {
         });
     }
 
+  const clearNotifications = async () => {
+    try {
+        var curr_email = user.email;
+        await axios.post("http://localhost:5000/clear_notifications", { 
+          "email": curr_email 
+        })
+        setReportNotifications([]); 
+        setFriendRequests([]); 
+        console.log("Notifications cleared");
+      } catch (error) {
+        alert("Can not clear notifcations with pending friend requests!");
+        console.error('Error clearing notifications', error);
+      }
+  };
+
+  const hasPendingFriendRequests = friendRequests.some(request => request.status !== "friends");
+
     return (
         <div>
           <div className="pb-4 flex justify-between items-center">
             {" "}
             {/* Use flex to align "Your Friends" and "Add Friends" */}
             <h1 className="font-base text-3xl">Notifications</h1>
+            
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                        onClick={clearNotifications}
+                    >
+                        Clear Notifications
+                    </button>
+                
           </div>
           {reportNotifications && reportNotifications.length > 0 && (
                 <ul>
