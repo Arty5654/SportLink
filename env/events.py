@@ -51,7 +51,9 @@ def get_details(eventID, event_data):
       event_info = {
         "title": event["title"],
         "desc": event["desc"],
-        "city": event["city"],
+        "address": event["address"],
+        "lat": event["lat"],
+        "lng": event["lng"],
         "open": event["open"],
         "sport": event["sport"],
         "level": event["level"],

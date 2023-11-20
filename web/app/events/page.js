@@ -4,13 +4,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
+import SmallMap from "./SmallMap";
 
 const EventDetails = () => {
   const [user, setUser] = useState(new User());
   const [event, setEvent] = useState({
     title: "",
     desc: "",
-    city: "",
+    address: "",
+    lat: 0,
+    lng: 0,
     sport: "",
     level: "",
     open: false,
@@ -38,7 +41,9 @@ const EventDetails = () => {
           setEvent({
             title: data.title,
             desc: data.desc,
-            city: data.city,
+            address: data.address,
+            lat: data.lat,
+            lng: data.lng,
             sport: data.sport,
             level: data.level,
             open: data.open,
@@ -130,18 +135,23 @@ const EventDetails = () => {
   };
 
   return (
-    <div className="w-full flex gap-8">
-      {/* ITEM: Left Side */}
-      <div className="w-4/5">
-        <h1 className="text-3xl font-semibold">
-          {event.title}{" "}
+    <div className="flex flex-row gap-8">
+      <div className="flex-1">
+        <div>
+        <h1 className="text-3xl font-semibold">{event.title}
           <span className="text-gray-600 pb-4 font-base text-sm">
-            {event.city} • {event.sport}
+            {event.address} • {event.sport}
           </span>
         </h1>
         <p className="text-blue-500 border-b border-gray-300 pb-4">{event.level}</p>
         <p className="pt-4">{event.desc}</p>
       </div>
+
+      <div className="mt-6">
+          <SmallMap center={{ lat: event.lat, lng: event.lng }} zoom={12} address={event.address}/>
+      </div>
+    </div>
+
       {/* ITEM: Right Bar*/}
       <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">

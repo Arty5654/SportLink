@@ -76,8 +76,12 @@ paths:
                   type: string
                 desc:
                   type: string
-                city:
+                address:
                   type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
                 open:
                   type: boolean
                 sport:
@@ -985,8 +989,12 @@ paths:
                     type: string
                   sport:
                     type: string
-                  city:
+                  address:
                     type: string
+                  lat:
+                    type: number
+                  lng:
+                    type: number
                   desc:
                     type: string
                   level:
