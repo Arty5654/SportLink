@@ -958,6 +958,8 @@ paths:
                       type: integer
                     maxParticipants:
                       type: integer
+                    eventOwner:
+                      type: string
         "404":
           description: Event not found
 
@@ -981,6 +983,8 @@ paths:
               schema:
                 type: object
                 properties:
+                  objectID:
+                    type: string
                   title:
                     type: string
                   sport:
@@ -1002,6 +1006,8 @@ paths:
                     default: []
                     items:
                       type: string
+                  eventOwner:
+                    type: string
         "404":
           description: Event not found
 
