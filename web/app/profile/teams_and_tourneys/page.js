@@ -13,6 +13,8 @@ const teamsNtourneys = () => {
   const [friends, setFriends] = useState([]);
   const [selectedTeammates, setSelectedTeammates] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [currentTeam, setCurrentTeam] = useState(null);
 
   useEffect(() => {
     const user1 = JSON.parse(sessionStorage.getItem("user"));
@@ -26,7 +28,12 @@ const teamsNtourneys = () => {
 
           // only set teams if the data array is not empty
           if (response.data.length > 0) {
+            console.log("Teams: ", response.data)
             setTeams(response.data);
+          } else {
+            console.log("No teams found\n")
+            console.log("Response: ", response.data)
+
           }
         } catch (error) {
           console.error('Error getting teams', error);
@@ -97,15 +104,54 @@ const teamsNtourneys = () => {
             if (response.status === 200) {
                 console.log("Team created");
                 alert("Team created!")
+                setTeamName("");
+                setSelectedTeammates([]);
+                closeModal();
+                window.location.reload();
             }
+        }).catch((error) => {
+          if (error.response) {
+            if (error.response.status === 401) {
+              console.log("Team name already exists");
+              alert("Sorry, this team name is already available. Please try again.");
+            }
+          }
         });
     } catch (error) {
         console.error('Error creating team', error);
     }
+  };
 
-    setTeamName("");
-    setSelectedTeammates([]);
-    closeModal();
+  const openTeamModal = (team) => {
+    setCurrentTeam(team);
+    setIsTeamModalOpen(true);
+  };
+
+  const handleLeaveTeam = (team) => {
+    try {
+      console.log("Leaving team: ", team.name)
+      console.log("User: ", user.email)
+
+      const response = axios.post('http://localhost:5000/leave_team', {
+        'name': team.name,
+        'user': user.email
+      });
+
+      response.then((response) => {
+        console.log("request responded");
+
+        if (response.status === 200) {
+          console.log("Team left");
+          alert("Team left!")
+          setIsTeamModalOpen(false);
+          window.location.reload();
+        }
+      }).catch((error) => {
+        console.error('Error leaving team', error);
+      });
+    } catch (error) {
+      console.error('Error leaving team', error);
+    }
   };
 
   useEffect(() => {
@@ -125,22 +171,32 @@ const teamsNtourneys = () => {
               <h2 className="text-xl font-semibold mb-4">Your Teams</h2>
               <div className="flex flex-col px-2">
               {teams.map((team, index) => (
-                  <div key={index} className="border border-gray-300 rounded-lg p-6 mb-4">
+                <div key={index} className="border border-gray-300 rounded-lg p-6 mb-4 cursor-pointer" onClick={() => openTeamModal(team)}>
                   <h2 className="text-lg font-semibold mb-2">{team.name}</h2>
-                  <p className="text-sm text-gray-600">Leader: {team.leader}</p>
-                  <p className="text-sm text-gray-600">Members:</p>
-                  <ul className="list-disc list-inside">
-                      {team.members.map((member, index) => (
-                      <li key={index} className="text-sm text-gray-600">{member}</li>
-                      ))}
-                  </ul>
-                  </div>
+                </div>
               ))}
               </div>
 
               <div className="flex justify-center items-center">
               <button className="bg-blue-500 text-white py-2 rounded-lg w-11/12" onClick={openModal}>Create Team</button>
               </div>
+
+              {isTeamModalOpen && currentTeam && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <div className="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 p-6">
+                    <button className="bg-red-500 text-white px-4 py-2 rounded-lg float-right" onClick={() => setIsTeamModalOpen(false)}>X</button>
+                    <h1 className="text-2xl font-semibold mb-4">{currentTeam.name}</h1>
+                    <p className="text-sm text-gray-600">Leader: {currentTeam.leader}</p>
+                    <p className="text-sm text-gray-600">Members:</p>
+                    <ul className="list-disc list-inside">
+                      {currentTeam.members.map((member, index) => (
+                        <li key={index} className="text-sm text-gray-600">{member}</li>
+                      ))}
+                    </ul>
+                    <button className="bg-red-500 text-white py-2 rounded-lg w-full mt-4" onClick={() => handleLeaveTeam(currentTeam)}>Leave Team</button>
+                  </div>
+                </div>
+              )}
 
               {isModalOpen && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">

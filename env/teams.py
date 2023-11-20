@@ -27,6 +27,10 @@ def create_a_team(team_name, team_leader, teammates):
         'members': teammates
     }
 
+    # check if team name is already taken
+    if teams.find_one({'name': team_name}):
+        return jsonify({"message": "Team name already taken!"}), 401
+
     # send emails to teammates, if they want emails
     for teammate in teammates:
         if users.find_one({'email': teammate, 'sendEmail': False}):
@@ -43,6 +47,7 @@ def get_users_teams(curr_email):
     # get all teams that the user is a part of
     team_list = []
 
+    # find all teams that the user is a member or leader of
     for team in teams.find({'members': curr_email}):
         team_list.append({
             'name': team['name'],
@@ -50,7 +55,6 @@ def get_users_teams(curr_email):
             'members': team['members']
         })
 
-    # also find teams that the user is the leader of
     for team in teams.find({'leader': curr_email}):
         team_list.append({
             'name': team['name'],
@@ -58,8 +62,23 @@ def get_users_teams(curr_email):
             'members': team['members']
         })
 
+    # change all emails to username
+    for team in team_list:
+        team['leader'] = users.find_one({'email': team['leader']})['username']
+        for i in range(len(team['members'])):
+            team['members'][i] = users.find_one({'email': team['members'][i]})['username']
+
     return team_list
 
+def leave_a_team(curr_email, team_name):
+    # remove user from team
+    teams.update_one({'name': team_name}, {'$pull': {'members': curr_email}})
+
+    # if user is leader, remove team
+    if teams.find_one({'name': team_name})['leader'] == curr_email:
+        teams.delete_one({'name': team_name})
+
+    return jsonify({"message": "Team Left!"}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
