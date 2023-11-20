@@ -1578,6 +1578,8 @@ paths:
       responses:
         "200":
           description: "Team Created"
+        "401":
+          description: "Team Name Already Exists"
 
   /get_teams:
     get:
@@ -1608,3 +1610,21 @@ paths:
                       default: []
                       items:
                         type: string
+
+  /leave_team:
+    post:
+      operationId: app.leave_team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                user:
+                  type: string
+      responses:
+        "200":
+          description: "Team Left"

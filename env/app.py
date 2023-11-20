@@ -26,7 +26,7 @@ import re
 # import files
 from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
-from teams import create_a_team, get_users_teams
+from teams import create_a_team, get_users_teams, leave_a_team
 
 load_dotenv()
 
@@ -999,6 +999,13 @@ def get_teams():
     list_of_teams = get_users_teams(curr_email)
 
     return jsonify(list_of_teams), 200
+
+def leave_team():
+    req = request.get_json()
+    team_name = req['name']
+    user_leaving = req['user']
+
+    return leave_a_team(user_leaving, team_name)
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
