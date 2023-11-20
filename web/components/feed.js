@@ -16,6 +16,7 @@ const HistoryCard = ({ event }) => {
     router.push(`/events?id=${event._id}`);
   };
 
+
   const deleteEventHistory = () => {
     axios
       .post("http://localhost:5000/delete_event_history", {
@@ -114,6 +115,7 @@ const EventCard = ({ event }) => {
 };
 
 const Feed = () => {
+  const router = useRouter();
   const [events, setEvents] = useState([]);
   const [selectedSport, setSelectedSport] = useState("All");
   const [selectedLevel, setSelectedLevel] = useState("All"); // Initialize with "All" as the default option
@@ -125,9 +127,24 @@ const Feed = () => {
     });
   }, []);
 
+
+  const handleCreate = () => {
+    router.push('/create');
+  }
+
   return (
     <div className="w-full">
-      <h1 className="font-semibold text-3xl pb-8">Events</h1>
+
+      <div className="flex justify-between items-center">
+        <h1 className="font-semibold text-3xl pb-8">Events</h1>
+        <button 
+          className="bg-blue-500 hover:bg-green-500 text-white font-bold py-2 px-5 rounded transition duration-300 ease-in-out transform "
+          onClick={handleCreate}
+        >
+          Create New Event
+        </button>
+      </div>
+
       <div className="flex gap-8">
         <div className="w-4/5">
           {/* ITEM: Filter */}
