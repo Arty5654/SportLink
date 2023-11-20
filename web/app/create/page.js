@@ -3,6 +3,9 @@ import React, {useEffect, useState} from 'react';
 import './creating.css';
 import axios from 'axios';
 import User from "@app/User";
+import Autocomplete from 'react-google-autocomplete';
+
+const apiKey = "AIzaSyB3DAFbqW_2DHh4yBuvUeIbk5Xp_bQYnXc"
 
 const createPage = () => {
 
@@ -12,6 +15,13 @@ const createPage = () => {
     const [currentParticipants, setCurrentParticipants] = useState(1);
     const [participants, setParticipants] = useState([]); // New state to track participants' email
     const [value, setValue] = useState(1);  // Initial value for the slider
+
+    const [location, setLocation] = useState({
+        address: '',
+        lat: null,
+        lng: null,
+    
+    }); // for each event's map
 
     useEffect(() => {
         const currentUser = JSON.parse(sessionStorage.getItem("user"));
@@ -60,10 +70,27 @@ const createPage = () => {
         setSkillLevel(event.target.value);
     }
 
+    const handleSelect = (place) => {
+        setTeamData(currentTeamData => ({
+            ...currentTeamData,
+            locationDetails: {
+                address: place.formatted_address,
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+            }
+        }));
+
+
+    };
+
     const [teamData, setTeamData] = useState({
         title: "",
         desc: "",
-        city: "",
+        locationDetails: {
+            address: "",
+            lat: null,
+            lng: null,
+        },
         open: true,
         sport: "",
         maxParticipants: 0,
@@ -82,11 +109,19 @@ const createPage = () => {
             setCurrentParticipants(currentParticipants - 1);
             setParticipants(participants.filter(email => email !== friendEmail));
         }
+
+
     };
     
     const handleSubmit = () => {
 
+        console.log(teamData.locationDetails);
+
         if (teamData['sport'] === "") {
+            return;
+        }
+
+        if (teamData.locationDetails.lat === "" || teamData.locationDetails.lng === "") {
             return;
         }
 
@@ -94,7 +129,9 @@ const createPage = () => {
         axios.post('http://localhost:5000/create', {
             title: teamData['title'],
             desc: teamData['desc'],
-            city: teamData['city'],
+            address: teamData.locationDetails.address,
+            lat: teamData.locationDetails.lat,
+            lng: teamData.locationDetails.lng,
             open: teamData['open'],
             sport: teamData['sport'],
             currentParticipants: parseInt(currentParticipants),
@@ -147,7 +184,20 @@ const createPage = () => {
              <div className="team-card">
                  <input type="text" name="title" placeholder="Title" onChange={handleChange} />
                  <textarea name="desc" placeholder="Description" onChange={handleChange}></textarea>
-                 <input type="text" name="city" placeholder="City" onChange={handleChange} />
+
+                 <label>
+                        Location:
+                        <Autocomplete
+                            apiKey={apiKey}
+                            onPlaceSelected={handleSelect}
+                            placeholder="Enter a location"
+                            required={true}
+                            options={{
+                                types: ['establishment'], // This will suggest specific addresses
+                            }}
+                        />
+                    </label>
+
                  <label>
                      Open:
                      <input type="checkbox" name="open" checked={teamData.open} onChange={() => setTeamData(prevState => ({ ...prevState, open: !prevState.open }))} />
@@ -174,7 +224,7 @@ const createPage = () => {
                          <option value="Advanced">Advanced</option>
                      </select>
                  </div>
-                 <button onClick={handleSubmit}>Create Team</button>
+                 <button onClick={handleSubmit}>Create Event</button>
              </div>
          </div>
      </div>

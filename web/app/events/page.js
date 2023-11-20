@@ -4,13 +4,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
+import SmallMap from "./SmallMap";
 
 const EventDetails = () => {
   const [user, setUser] = useState(new User());
   const [event, setEvent] = useState({
     title: "",
     desc: "",
-    city: "",
+    address: "",
+    lat: 0,
+    lng: 0,
     sport: "",
     level: "",
     open: false,
@@ -40,7 +43,9 @@ const EventDetails = () => {
           setEvent({
             title: data.title,
             desc: data.desc,
-            city: data.city,
+            address: data.address,
+            lat: data.lat,
+            lng: data.lng,
             sport: data.sport,
             level: data.level,
             open: data.open,
@@ -138,6 +143,7 @@ const EventDetails = () => {
   };
 
   return (
+
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
       <div className="w-4/5">
@@ -156,10 +162,14 @@ const EventDetails = () => {
         </div>
 
         <p className="text-gray-700 font-base border-b border-gray-300 pb-4">
-          {event.sport} in {event.city} • <span className="text-blue-500">{event.level}</span>
+          {event.sport} in {event.address} • <span className="text-blue-500">{event.level}</span>
         </p>
 
         <p className="pt-4">{event.desc}</p>
+
+        <div className="mt-6">
+            <SmallMap center={{ lat: event.lat, lng: event.lng }} zoom={12} address={event.address}/>
+        </div>
       </div>
 
       {/* ITEM: Right Bar*/}
