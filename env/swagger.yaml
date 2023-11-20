@@ -94,6 +94,8 @@ paths:
                   type: array
                 level:
                   type: string
+                eventOwner:
+                  type: string
       responses:
         "200":
           description: "Created Request"

@@ -94,11 +94,6 @@ const EventDetails = () => {
           updatedUser.numSoccer = (updatedUser.numSoccer || 0) + 1;
         }
 
-        console.log(updatedUser.numBasketball);
-        console.log(updatedUser.numWeights);
-        console.log(updatedUser.numTennis);
-        console.log(updatedUser.numSoccer);
-
         setUser(updatedUser);
         sessionStorage.removeItem("user");
         sessionStorage.setItem("user", JSON.stringify(updatedUser));
@@ -162,13 +157,13 @@ const EventDetails = () => {
         </div>
 
         <p className="text-gray-700 font-base border-b border-gray-300 pb-4">
-          {event.sport} in {event.address} • <span className="text-blue-500">{event.level}</span>
+          {event.sport} at {event.address} • <span className="text-blue-500">{event.level}</span>
         </p>
 
         <p className="pt-4">{event.desc}</p>
 
         <div className="mt-6">
-            <SmallMap center={{ lat: event.lat, lng: event.lng }} zoom={12} address={event.address}/>
+            <SmallMap center={{ lat: event.lat, lng: event.lng }} zoom={15} address={event.address}/>
         </div>
       </div>
 

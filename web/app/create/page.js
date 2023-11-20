@@ -71,6 +71,7 @@ const createPage = () => {
     }
 
     const handleSelect = (place) => {
+        console.log(place);
         setTeamData(currentTeamData => ({
             ...currentTeamData,
             locationDetails: {
@@ -138,7 +139,8 @@ const createPage = () => {
             maxParticipants: parseInt(teamData['maxParticipants']),
             type: selected,
             participants: participants,
-            level: skillLevel
+            level: skillLevel,
+            eventOwner: user.email,
         })
             .then(response => {
                 console.log('Data received:', response.data);
