@@ -53,6 +53,7 @@ const EventDetails = () => {
             maxParticipants: data.maxParticipants,
             participants: data.participants,
             eventOwner: data.eventOwner,
+            town: data.town
           });
           console.log(response.data);
         });
@@ -157,7 +158,7 @@ const EventDetails = () => {
         </div>
 
         <p className="text-gray-700 font-base border-b border-gray-300 pb-4">
-          {event.sport} at {event.address} • <span className="text-blue-500">{event.level}</span>
+          {event.sport} in {event.town} • <span className="text-blue-500">{event.level}</span>
         </p>
 
         <p className="pt-4">{event.desc}</p>

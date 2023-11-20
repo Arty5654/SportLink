@@ -78,6 +78,7 @@ const createPage = () => {
                 address: place.formatted_address,
                 lat: place.geometry.location.lat(),
                 lng: place.geometry.location.lng(),
+                town: place.address_components[2].short_name
             }
         }));
 
@@ -91,6 +92,7 @@ const createPage = () => {
             address: "",
             lat: null,
             lng: null,
+            town: ""
         },
         open: true,
         sport: "",
@@ -141,6 +143,7 @@ const createPage = () => {
             participants: participants,
             level: skillLevel,
             eventOwner: user.email,
+            town: teamData.locationDetails.town,
         })
             .then(response => {
                 console.log('Data received:', response.data);

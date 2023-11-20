@@ -94,7 +94,7 @@ const EventCard = ({ event }) => {
         {event.title}
       </h1>
       <p className="text-sm text-gray-500 pb-4 cursor-pointer" onClick={handleEventClick}>
-        {event.sport} in {event.city} - <span className="text-blue-500">{event.level}</span>
+        {event.sport} in {event.town} - <span className="text-blue-500">{event.level}</span>
       </p>
       <p className="text-sm pb-4 cursor-pointer" onClick={handleEventClick}>
         {event.desc}

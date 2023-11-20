@@ -60,7 +60,8 @@ def get_details(eventID, event_data):
         "currentParticipants": event["currentParticipants"],
         "maxParticipants": event["maxParticipants"],
         "participants": event["participants"],
-        "eventOwner": event["eventOwner"]
+        "eventOwner": event["eventOwner"],
+        "town": event["town"]
       }
       break
 

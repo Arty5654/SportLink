@@ -53,7 +53,7 @@ export default function SmallMap({ center, zoom, address }) {
           const firstResult = results[0];
           setMarker({
             position: firstResult.geometry.location,
-            title: firstResult.name,
+            title: firstResult.formatted_address,
           });
         } else {
           setQueryError(true);
