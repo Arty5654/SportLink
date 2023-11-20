@@ -17,9 +17,11 @@ const EventDetails = () => {
     currentParticipants: 0,
     maxParticipants: 0,
     participants: [],
+    eventOwner: "",
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
+  const eventOwner = event.eventOwner === user.email;
   const isUserParticipant = event.participants.includes(user?.username);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -45,7 +47,9 @@ const EventDetails = () => {
             currentParticipants: data.currentParticipants,
             maxParticipants: data.maxParticipants,
             participants: data.participants,
+            eventOwner: data.eventOwner,
           });
+          console.log(response.data);
         });
       } catch (error) {
         console.log("Error: ", error);
@@ -129,19 +133,35 @@ const EventDetails = () => {
     }
   };
 
+  const handleEditClick = () => {
+    router.push(`/edit-event?id=${eventID}`);
+  };
+
   return (
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
       <div className="w-4/5">
-        <h1 className="text-3xl font-semibold">
-          {event.title}{" "}
-          <span className="text-gray-600 pb-4 font-base text-sm">
-            {event.city} • {event.sport}
-          </span>
-        </h1>
-        <p className="text-blue-500 border-b border-gray-300 pb-4">{event.level}</p>
+        <div className="flex items-end justify-between">
+          <h1 className="text-3xl font-semibold">{event.title}</h1>
+          {eventOwner ? (
+            <button
+              className="text-sm font-base text-gray-500 pb-1 cusor-pointer"
+              onClick={handleEditClick}
+            >
+              <u>Edit</u>
+            </button>
+          ) : (
+            <p></p>
+          )}
+        </div>
+
+        <p className="text-gray-700 font-base border-b border-gray-300 pb-4">
+          {event.sport} in {event.city} • <span className="text-blue-500">{event.level}</span>
+        </p>
+
         <p className="pt-4">{event.desc}</p>
       </div>
+
       {/* ITEM: Right Bar*/}
       <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">

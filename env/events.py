@@ -58,6 +58,7 @@ def get_details(eventID, event_data):
         "currentParticipants": event["currentParticipants"],
         "maxParticipants": event["maxParticipants"],
         "participants": event["participants"],
+        "eventOwner": event["eventOwner"]
       }
       break
 
@@ -87,6 +88,20 @@ def get_all(email):
     return jsonify(user_events), 200
   else:
     return "User not found or no events for this user!", 404
+
+def get_my(event_data, username):
+  user_events = []
+
+  for event in event_data:
+      event['_id'] = str(event['_id'])
+
+  for event in event_data:
+      if username in event["participants"]:
+          user_events.append(event)
+
+  # Return the modified event data as JSON
+  return jsonify(user_events), 200
+
 
 
 # Route to get the event history of a user

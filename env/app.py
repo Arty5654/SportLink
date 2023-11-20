@@ -24,7 +24,7 @@ from bson.regex import Regex
 import re
 
 # import files
-from events import get_history, add_history, delete_history, join, get_details, get_all, leave
+from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
 from teams import create_a_team, get_users_teams
 
@@ -868,20 +868,7 @@ def delete_event_history():
     return delete_history(data.get("event"), data.get("user"))
 
 def get_my_events():
-    event_data = list(events.find())
-    username = request.args.get("username")
-
-    user_events = []
-
-    for event in event_data:
-        event['_id'] = str(event['_id'])
-
-    for event in event_data:
-        if username in event["participants"]:
-            user_events.append(event)
-
-    # Return the modified event data as JSON
-    return jsonify(user_events), 200
+    return get_my(list(events.find()), request.args.get("username"))
 
 def submit_report():
     user = request.get_json()
