@@ -4,13 +4,26 @@
 }
 
 .chat-list {
-    flex: 1;
-    background-color: #f7f7f7;
+    background-color: #ffffff;
     padding: 10px;
     overflow-y: auto;
     border-right: 1px solid #e0e0e0;
+    display:flex;
+    flex-direction: column; /* Stack the buttons vertically */
+    align-items: center;
 }
-
+.blocky-text {
+    font-family: 'Roboto Light', sans-serif; /* Choose a font that gives a blocky appearance */
+    font-weight: bold; /* Makes the text thicker */
+    color: #333; /* Sets the text color */
+    text-transform: uppercase; /* Optional: makes the text uppercase */
+    letter-spacing: 3px; /* Adds spacing between letters */
+    word-spacing: 5px; /* Adds spacing between words */
+    font-size: 40px; /* Adjust size as needed */
+    text-align: center;
+    /* You can also add text shadow for a more blocky effect */
+    text-shadow: 2px 2px 0 #000;
+}
 .chat-content {
     flex: 2;
     padding: 20px;
@@ -20,10 +33,13 @@
 .chat-button {
     display: block;
     width: 100%;
-    text-align: left;
+    text-align: right;
     padding: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     cursor: pointer;
+    border-right: 2px solid #000; /* Give it a blocky border */
+    border-right-color: #0a0a0a;
+
 }
 
 .chat-button:hover {

@@ -13,6 +13,8 @@ const Leaderboard = ({ scores, mode, setMode, friends , setScores}) => {
         axios.post('http://localhost:5000/update_stats', updatedStats)
             .then(response => {
                 console.log(response.data);
+                deltaLosses = 0
+                deltaWins = 0
 
             })
             .catch(error => {
@@ -43,7 +45,7 @@ const Leaderboard = ({ scores, mode, setMode, friends , setScores}) => {
             <ul>
                 {mode === 'ELO'
                     ? scores.sort((a, b) => b.elo - a.elo).map(player => (
-                        <li key={player}>
+                        <li key={player._id}>
                             <span className="name">{player._id}</span>
                             <span className="elo">{player.elo}</span>
                             <button onClick={() => handleUpdateStats(player, 1, 0)} style={{ backgroundColor: 'green' }}>+W</button>
@@ -52,7 +54,7 @@ const Leaderboard = ({ scores, mode, setMode, friends , setScores}) => {
                         </li>
                     ))
                     : scores.map(player => (
-                        <li key={player._id['friend']}>
+                        <li key={player._id}>
                             <span className="name">{player._id}</span>
                             <span className="elo">{player.wins}W - {player.losses}L</span>
                             <button onClick={() => handleUpdateStats(player, 1, 0)} style={{ backgroundColor: 'green' }}>+W</button>

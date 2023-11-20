@@ -121,7 +121,6 @@ def generate_user_key(user1, user2):
 def check_stats():
     emails = request.json["friends"]
 
-    print(emails)
     response_data = []
 
     for email in emails:
@@ -139,6 +138,7 @@ def check_stats():
         else:
             response_data.append(user_stats)
 
+    print(response_data)
     return jsonify(response_data), 200
 def create():
     payload = request.json
