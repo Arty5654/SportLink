@@ -7,6 +7,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import React from "react";
 import { GoogleMap, LoadScript, Marker, Autocomplete, useLoadScript, InfoWindow } from '@react-google-maps/api';
 
@@ -19,7 +20,7 @@ const containerStyle = {
 };
 const libs = ["places"];
   
-function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius}) {
+function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type}) {
   
   /* CONST VARS */
   const [autocomplete, setAutocomplete] = useState(null);
@@ -27,6 +28,10 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius}) {
   const [ac, setAc] = useState('');
   const [markers, setMarkers] = useState([]);
   const [queryError, setQueryError] = useState(false);
+
+  const [events, setEvents] = useState([]);
+
+
 
   // refs
   const mapRef = useRef();
@@ -45,7 +50,14 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius}) {
       iw.current.close();
     }
 
-  }, [sport, radius, mapRef]);
+  }, [sport, radius, type, mapRef]);
+
+  useEffect(() => {
+    axios.get("http://localhost:5000/get_events").then((response) => {
+      console.log("Feed - Response Data: ", response.data);
+      setEvents(response.data);
+    });
+  }, []);
 
 
   /* INITIAL LOADING FUNCS */
@@ -96,33 +108,41 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius}) {
 
   /* GRAB AND UPDATE MARKERS DYNAMICALLY */
   const fetchPlaces = (map, sport, radius) => {
-    // request from google Places API
-    const service = new window.google.maps.places.PlacesService(map);
 
-    // location is given by getting the center of useRef map
-    // radius filtered by user, sport selected by user and queried
-    const request = {
-      location: map.getCenter(),
-      radius: radius,
-      keyword: sport,
-    };
+    // create location markers
+    if (type == 2 || type == 3) {
 
-    // search nearby (max distance 50km) using the given params
-    // set marker array to refresh based on sport
-    service.nearbySearch(request, (results, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        const sportMarkers = results
-        .map(result => ({
-          position: result.geometry.location,
-          title: result.name,
-          address: result.vicinity || '',
-        }));
-        setMarkers(sportMarkers);
-      } else {
-        // something went wrong, make user refresh
-        setQueryError(true);
-      }
-    });
+      // request from google Places API
+      const service = new window.google.maps.places.PlacesService(map);
+
+      // location is given by getting the center of useRef map
+      // radius filtered by user, sport selected by user and queried
+      const request = {
+        location: map.getCenter(),
+        radius: radius,
+        keyword: sport,
+      };
+  
+      // search nearby (max distance 50km) using the given params
+      // set marker array to refresh based on sport
+      service.nearbySearch(request, (results, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+          const sportMarkers = results
+          .map(result => ({
+            position: result.geometry.location,
+            title: result.name,
+            address: result.vicinity || '',
+          }));
+          setMarkers(sportMarkers);
+        } else {
+          // something went wrong, make user refresh
+          setQueryError(true);
+        }
+      });
+    } else if (type == 1 || type == 0) {
+      setMarkers([]);
+    }
+
   };
 
   /* set info window ref to be selection of marker */
