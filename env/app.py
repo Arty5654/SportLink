@@ -43,6 +43,7 @@ friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
 history = db["eventHistory"]
+tournaments = db["tournaments"]
 
 messages = db["messages"]
 
@@ -1006,6 +1007,20 @@ def leave_team():
     user_leaving = req['user']
 
     return leave_a_team(user_leaving, team_name)
+
+def create_tournament():
+    data = request.json
+
+    tournament_data = {
+        'sport': data.get('sport', ''),
+        'teamCount': data.get('teamCount', ''),
+        'tournamentDuration': data.get('tournamentDuration', ''),
+        'matchDuration': data.get('matchDuration', '')
+    }
+
+    tournaments.insert_one(tournament_data)
+
+    return jsonify({'message': 'Tournament created successfully'}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
