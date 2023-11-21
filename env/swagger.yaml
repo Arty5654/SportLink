@@ -1628,3 +1628,27 @@ paths:
       responses:
         "200":
           description: "Team Left"
+
+  /create_tournament:
+    post:
+      operationId: app.create_tournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sport:
+                  type: string
+                teamCount:
+                  type: string
+                tournamentDuration:
+                  type: string
+                matchDuration:
+                  type: string
+      responses:
+        "200":
+          description: "Tournament Created"
+
+          
