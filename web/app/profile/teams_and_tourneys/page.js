@@ -16,6 +16,31 @@ const teamsNtourneys = () => {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [currentTeam, setCurrentTeam] = useState(null);
 
+  //tourny stuff
+  const [isTournamentModalOpen, setIsTournamentModalOpen] = useState(false);
+  const [sport, setSport] = useState('');
+  const [teamCount, setTeamCount] = useState('');
+  const [tournamentDuration, setTournamentDuration] = useState('');
+  const [matchDuration, setMatchDuration] = useState('');
+
+  const handleTournamentSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        await axios.post('http://localhost:5000/create_tournament', {
+            sport,
+            teamCount,
+            tournamentDuration,
+            matchDuration
+        });
+        alert('Tournament created successfully!');
+        setIsTournamentModalOpen(false);
+    } catch (error) {
+        console.error('Error creating tournament:', error);
+        alert('Failed to create tournament.');
+    }
+  };
+
+
   useEffect(() => {
     const user1 = JSON.parse(sessionStorage.getItem("user"));
     setUser(user1);
@@ -237,6 +262,69 @@ const teamsNtourneys = () => {
             </div>
             <div className="w-1/2">
               <h2 className="text-xl font-semibold mb-4">Tournaments</h2>
+              <button onClick={() => setIsTournamentModalOpen(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                    Create Tournament
+                </button>
+                {isTournamentModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 p-6">
+                            <button className="bg-red-500 text-white px-4 py-2 rounded-lg float-right" onClick={() => setIsTournamentModalOpen(false)}>X</button>
+                            <form onSubmit={handleTournamentSubmit} className="space-y-6">
+                                {/* Tournament form fields... */}
+                                <div>
+                        <label htmlFor="sport" className="block text-lg font-semibold">Sport:</label>
+                        <select
+                            id="sport"
+                            className="w-full border p-2 rounded-md"
+                            value={sport}
+                            onChange={(e) => setSport(e.target.value)}
+                        >
+                            <option value="">Select a Sport</option>
+                            <option value="tennis">Tennis</option>
+                            <option value="basketball">Basketball</option>
+                            <option value="soccer">Soccer</option>
+                            <option value="weightlifting">Weightlifting</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="teamCount" className="block text-lg font-semibold">Number of Teams:</label>
+                        <input
+                            type="number"
+                            id="teamCount"
+                            className="w-full border p-2 rounded-md"
+                            value={teamCount}
+                            onChange={(e) => setTeamCount(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="tournamentDuration" className="block text-lg font-semibold">Tournament Duration (days):</label>
+                        <input
+                            type="number"
+                            id="tournamentDuration"
+                            className="w-full border p-2 rounded-md"
+                            value={tournamentDuration}
+                            onChange={(e) => setTournamentDuration(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="matchDuration" className="block text-lg font-semibold">Match Duration (minutes):</label>
+                        <input
+                            type="number"
+                            id="matchDuration"
+                            className="w-full border p-2 rounded-md"
+                            value={matchDuration}
+                            onChange={(e) => setMatchDuration(e.target.value)}
+                        />
+                    </div>
+
+                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full">Create Tournament</button>
+                    </form>
+                        </div>
+                    </div>
+                )}
             </div>
           </div>
         </div>
