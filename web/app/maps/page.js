@@ -10,6 +10,7 @@ const MapsPage = () => {
   const [radius, setRadius] = useState("Select"); // initialize radius to 10 miles
   const [center, setCenter] = useState({lat: 40.4261983,lng: -86.9108354/*west laf default */});
   const [recenter, setRecenter] = useState(false);
+  const [type, setType] = useState(0);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -51,6 +52,16 @@ const MapsPage = () => {
     setFilter("Select");
     setRadius("Select");
   }
+
+  const handleTypeChange = (event) => {
+    // handles event type checkboxes
+    const { name, checked } = event.target;
+    setType((prevType) => {
+      // 1 means events checked, two means loc checked, 3 means both
+      if (name === "events") return checked ? prevType + 1 : prevType - 1;
+      if (name === "locations") return checked ? prevType + 2 : prevType - 2;
+    });
+  };
   
   
   return (
@@ -91,6 +102,28 @@ const MapsPage = () => {
             <option value="50">50</option>
           </select>
         </div>
+
+        <div className="flex flex-col items-center">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="events"
+              name="events"
+              onChange={handleTypeChange}
+            />
+            <label htmlFor="events" className="ml-2 font-bold">Events</label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="locations"
+              name="locations"
+              onChange={handleTypeChange}
+            />
+            <label htmlFor="locations" className="ml-2 font-bold">Locations</label>
+          </div>
+        </div>
+
       </div>
 
       <GoogleMapComponent 
@@ -99,6 +132,7 @@ const MapsPage = () => {
         handleNewCenter={handleCenterChange}
         sport={filter}
         radius={radius /*in meters; convert to KM*/}
+        type={type}
        />
 
       <div className="flex justify-center items-center">
