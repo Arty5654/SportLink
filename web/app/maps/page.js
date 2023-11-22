@@ -7,7 +7,7 @@ import GoogleMapComponent from "./GoogleMapComponent";
 const MapsPage = () => {
   
   const [filter, setFilter] = useState('Select');
-  const [radius, setRadius] = useState("Select"); // initialize radius to 10 miles
+  const [radius, setRadius] = useState(0); // initialize radius to 0
   const [center, setCenter] = useState({lat: 40.4261983,lng: -86.9108354/*west laf default */});
   const [recenter, setRecenter] = useState(false);
   const [type, setType] = useState(0);
@@ -45,12 +45,14 @@ const MapsPage = () => {
     setCenter(e);
     setFilter("Select");
     setRadius("Select");
+    setType(0);
   };
 
   const handleRecenter = () => {
     setRecenter(true);
     setFilter("Select");
     setRadius("Select");
+    setType(0);
   }
 
   const handleTypeChange = (event) => {
@@ -69,10 +71,7 @@ const MapsPage = () => {
     <div className="flex flex-col items-center my-4 -mt-20">
       <div className="flex items-center mb-4">
         <span className="text-3xl font-bold text-blue-500">
-          Sport
-        </span>
-        <span className="text-3xl font-bold text-green-500 ml-2">
-          Maps
+          Map!
         </span>
       </div>
       
@@ -93,7 +92,7 @@ const MapsPage = () => {
         <div className="flex items-center mr-4">
           <label className="mr-2 font-bold">Radius(Km):</label>
           <select value={radius} onChange={handleRadiusChange} className="border rounded-lg p-2">
-            <option value="Select">Select...</option>
+            <option value="0">Select...</option>
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -109,6 +108,7 @@ const MapsPage = () => {
               type="checkbox"
               id="events"
               name="events"
+              checked={type === 1 || type === 3}
               onChange={handleTypeChange}
             />
             <label htmlFor="events" className="ml-2 font-bold">Events</label>
@@ -118,6 +118,7 @@ const MapsPage = () => {
               type="checkbox"
               id="locations"
               name="locations"
+              checked={type === 2 || type === 3}
               onChange={handleTypeChange}
             />
             <label htmlFor="locations" className="ml-2 font-bold">Locations</label>
@@ -131,7 +132,7 @@ const MapsPage = () => {
         zoom={13} 
         handleNewCenter={handleCenterChange}
         sport={filter}
-        radius={radius /*in meters; convert to KM*/}
+        radius={radius}
         type={type}
        />
 
