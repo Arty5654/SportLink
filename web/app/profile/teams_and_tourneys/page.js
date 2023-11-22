@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useEffect, useState } from "react";
 import Sidebar from "@components/profileSidebar";
 import "@styles/global.css";
+import Link from "next/link";
 
 const teamsNtourneys = () => {
   const [user, setUser] = useState(new User());
@@ -262,9 +263,18 @@ const teamsNtourneys = () => {
             </div>
             <div className="w-1/2">
               <h2 className="text-xl font-semibold mb-4">Tournaments</h2>
-              <button onClick={() => setIsTournamentModalOpen(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+              <div className="flex justify-center mb-4">
+              <button onClick={() => setIsTournamentModalOpen(true)} className="bg-blue-500 text-white py-2 rounded-lg w-11/12">
                     Create Tournament
                 </button>
+                </div>
+                <div className="flex justify-center mb-4">
+              <Link href="/profile/tourneys" passHref>
+                <div className="bg-blue-500 text-white py-2 rounded-lg w-11/12 text-center">
+                  View Tournaments
+                </div>
+              </Link>
+              </div>
                 {isTournamentModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                         <div className="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 p-6">
@@ -280,10 +290,10 @@ const teamsNtourneys = () => {
                             onChange={(e) => setSport(e.target.value)}
                         >
                             <option value="">Select a Sport</option>
-                            <option value="tennis">Tennis</option>
-                            <option value="basketball">Basketball</option>
-                            <option value="soccer">Soccer</option>
-                            <option value="weightlifting">Weightlifting</option>
+                            <option value="Tennis">Tennis</option>
+                            <option value="Basketball">Basketball</option>
+                            <option value="Soccer">Soccer</option>
+                            <option value="Weightlifting">Weightlifting</option>
                         </select>
                     </div>
 
