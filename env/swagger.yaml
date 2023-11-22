@@ -1651,4 +1651,32 @@ paths:
         "200":
           description: "Tournament Created"
 
+ /get_tournaments:
+     get:
+      summary: Get Tourny Information
+      description: Retrieve event information from the database.
+      operationId: app.get_tournaments
+      responses:
+        "200":
+          description: Tourny information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    objectID:
+                      type: string
+                    sport:
+                      type: string
+                    teamCount:
+                      type: string
+                    tournamentDuration:
+                      type: string
+                    matchDuration:
+                      type: string
+        "404":
+          description: Tournament not found
+
           
