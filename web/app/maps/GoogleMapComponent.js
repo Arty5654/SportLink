@@ -10,7 +10,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import React from "react";
 import { GoogleMap, LoadScript, Marker, Autocomplete, useLoadScript, InfoWindow } from '@react-google-maps/api';
-
+import { faMapPin, faLocationPin } from "@fortawesome/free-solid-svg-icons";
 
 // HELPERS
 const apiKey = "AIzaSyB3DAFbqW_2DHh4yBuvUeIbk5Xp_bQYnXc"
@@ -18,20 +18,19 @@ const containerStyle = {
   width: '70vw',
   height: '70vh'
 };
-const libs = ["places"];
+const libs = ["places", "geometry"];
   
-function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type}) {
+function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type }) {
   
   /* CONST VARS */
   const [autocomplete, setAutocomplete] = useState(null);
   const onAcLoad = (autoC) => setAutocomplete(autoC);
   const [ac, setAc] = useState('');
   const [markers, setMarkers] = useState([]);
+  const [eventMarkers, setEventMarkers] = useState([]);
   const [queryError, setQueryError] = useState(false);
 
   const [events, setEvents] = useState([]);
-
-
 
   // refs
   const mapRef = useRef();
@@ -39,10 +38,13 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
 
   /* WHEN A FILTER CHANGES, UPDATE MARKERS */
   useEffect(() => {
-    if (mapRef.current && sport !== "Select" && radius !== "Select") {
+    if (mapRef.current && sport !== "Select" && radius >= 5) {
+
       fetchPlaces(mapRef.current, sport, (radius * 1000));
-    } else if (sport === "Select" || radius === "Select") {
+        
+    } else if ((sport === "Select" || radius === "Select") && type === 0) {
       setMarkers([]);
+      setEventMarkers([]);
     }
 
     // close window if filter changes (mess handling)
@@ -50,7 +52,7 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
       iw.current.close();
     }
 
-  }, [sport, radius, type, mapRef]);
+  }, [sport, radius, type, mapRef.current]);
 
   useEffect(() => {
     axios.get("http://localhost:5000/get_events").then((response) => {
@@ -109,8 +111,8 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
   /* GRAB AND UPDATE MARKERS DYNAMICALLY */
   const fetchPlaces = (map, sport, radius) => {
 
-    // create location markers
-    if (type == 2 || type == 3) {
+    // LOCATION MARKERS
+    if (type === 2 || type === 3) {
 
       // request from google Places API
       const service = new window.google.maps.places.PlacesService(map);
@@ -118,7 +120,7 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
       // location is given by getting the center of useRef map
       // radius filtered by user, sport selected by user and queried
       const request = {
-        location: map.getCenter(),
+        location: new google.maps.LatLng(center.lat, center.lng),
         radius: radius,
         keyword: sport,
       };
@@ -126,13 +128,29 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
       // search nearby (max distance 50km) using the given params
       // set marker array to refresh based on sport
       service.nearbySearch(request, (results, status) => {
+
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-          const sportMarkers = results
-          .map(result => ({
+          const sportMarkers = results.map(result => ({
+
             position: result.geometry.location,
-            title: result.name,
+            title: `Location: ${result.name}`,
             address: result.vicinity || '',
+
+            icon: {
+              path: faLocationPin.icon[4],
+              fillColor: "#bb0000",
+              fillOpacity: 1,
+              anchor: new google.maps.Point(
+                faMapPin.icon[0] / 2, // width
+                faMapPin.icon[1], // height
+              ),
+              strokeWeight: 1,
+              strokeColor: "#000000",
+              scale: 0.075,
+            },
+
           }));
+
           setMarkers(sportMarkers);
         } else {
           // something went wrong, make user refresh
@@ -143,12 +161,84 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
       setMarkers([]);
     }
 
+    // EVENT MARKERS
+    if (type === 1 || type === 3) {
+
+      const eventMarkers = events.filter(event => {
+
+        // get distance from center to event
+        const distance = window.google.maps.geometry.spherical.computeDistanceBetween(
+          new window.google.maps.LatLng(center.lat, center.lng),
+          new window.google.maps.LatLng(event.lat, event.lng)
+        );
+
+          
+        // only return events which match the criteria for sport and distance
+        if (sport === "Basketball Court") {
+          if (radius === 0) {
+            return event.sport === "Basketball"
+          }
+          return event.sport === "Basketball" && distance <= radius;
+
+        } else if (sport === "Tennis Court") {
+          if (radius === 0) {
+            return event.sport === "Tennis"
+          }
+          return event.sport === "Tennis" && distance <= radius;
+
+        } else if (sport === "Soccer Field") {
+          if (radius === 0) {
+            return event.sport === "Soccer"
+          }
+          return event.sport === "Soccer" && distance <= radius;
+
+        } else if (sport === "Weightlifting") {
+          if (radius === 0) {
+            return event.sport === "Weightlifting"
+          }
+          return event.sport === "Weightlifting" && distance <= radius;
+
+        }  else {
+          // sport is select
+          if (radius === 0 && type === 1) {
+            // if no parameters set, just return all events
+            return true;
+          }
+        }
+
+      }).map(event => ({
+
+        position: { lat: event.lat, lng: event.lng },
+        title: `Event Title: ${event.title}`,
+        address: `Address: ${event.address}`,
+        
+        icon: {
+          path: faMapPin.icon[4],
+          fillColor: "#000000",
+          fillOpacity: 1,
+          anchor: new google.maps.Point(
+            faMapPin.icon[0] / 2, // width
+            faMapPin.icon[1], // height
+          ),
+          strokeWeight: 1,
+          strokeColor: "#000000",
+          scale: 0.075,
+        },
+
+      }));
+
+      setEventMarkers(eventMarkers);
+
+    } else if (type == 2 || type == 0) {
+      setEventMarkers([]);
+    }
+
   };
 
   /* set info window ref to be selection of marker */
   const mSelect = (marker) => {
 
-    const c = `<h1>${marker.title}</h1><h3>${marker.address}</h3>`
+    const c = `<strong>${marker.title}</strong><h3>${marker.address}</h3>`;
 
     iw.current.setContent(c);
     iw.current.setPosition(marker.position);
@@ -175,6 +265,17 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
           key={index} 
           position={marker.position} 
           title={marker.title}
+          icon={marker.icon}
+          onClick={() => mSelect(marker)}  
+        /> 
+      ))}
+
+      {eventMarkers && eventMarkers.map((marker, index) => (
+        <Marker 
+          key={index} 
+          position={marker.position} 
+          title={marker.title}
+          icon={marker.icon}
           onClick={() => mSelect(marker)}  
         /> 
       ))}
