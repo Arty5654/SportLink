@@ -1,0 +1,63 @@
+"use client";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Sidebar from '@components/profileSidebar';
+
+const TournamentCard = ({ tournament }) => {
+    const handleTournamentClick = () => {
+        // Navigate to the tournament detail page or handle click
+    };
+
+    return (
+        <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64 shadow-lg">
+            <h1 className="font-semibold cursor-pointer" onClick={handleTournamentClick}>
+                {tournament.sport}
+            </h1>
+            <p className="text-sm text-gray-500 pb-4 cursor-pointer" onClick={handleTournamentClick}>
+                Number of Teams: {tournament.teamCount}
+            </p>
+            <p className="text-sm pb-4 cursor-pointer" onClick={handleTournamentClick}>
+                Tournament Duration: {tournament.tournamentDuration} days
+            </p>
+            <p className="text-sm pb-4 cursor-pointer" onClick={handleTournamentClick}>
+                Match Duration: {tournament.matchDuration} minutes
+            </p>
+        </div>
+    );
+};
+
+function TournamentsPage() {
+    const [tournaments, setTournaments] = useState([]);
+
+    useEffect(() => {
+        async function fetchTournaments() {
+            try {
+                const response = await axios.get('http://localhost:5000/get_tournaments');
+                setTournaments(response.data);
+            } catch (error) {
+                console.error('Error fetching tournaments:', error);
+            }
+        }
+        fetchTournaments();
+    }, []);
+
+    return (
+        <div className="w-full">
+            <div className="flex gap-8">
+                <div className="w-1/4">
+                    <Sidebar active="teams_and_tourneys"/>
+                </div>
+                <div className="w-3/4">
+                    <h1 className="font-semibold text-3xl pb-8">Tournaments</h1>
+                    <div className="grid grid-cols-3 gap-4">
+                        {tournaments.map((tournament, index) => (
+                            <TournamentCard key={index} tournament={tournament} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default TournamentsPage;
