@@ -1022,6 +1022,17 @@ def create_tournament():
 
     return jsonify({'message': 'Tournament created successfully'}), 200
 
+def get_tournaments():
+    all_tournaments = list(tournaments.find({}))
+
+    # Convert ObjectId to string
+    for tournament in all_tournaments:
+        tournament['_id'] = str(tournament['_id'])
+
+    #print("All tournaments:", all_tournaments)
+
+    return jsonify(all_tournaments), 200
+
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
