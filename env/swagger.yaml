@@ -1625,6 +1625,8 @@ paths:
                   type: string
                 user:
                   type: string
+                new_leader:
+                  type: string
       responses:
         "200":
           description: "Team Left"
@@ -1651,7 +1653,7 @@ paths:
         "200":
           description: "Tournament Created"
 
- /get_tournaments:
+  /get_tournaments:
      get:
       summary: Get Tourny Information
       description: Retrieve event information from the database.
@@ -1678,5 +1680,3 @@ paths:
                       type: string
         "404":
           description: Tournament not found
-
-          
