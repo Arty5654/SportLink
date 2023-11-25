@@ -59,7 +59,6 @@ const teamsNtourneys = () => {
           } else {
             console.log("No teams found\n")
             console.log("Response: ", response.data)
-
           }
         } catch (error) {
           console.error('Error getting teams', error);
@@ -154,13 +153,29 @@ const teamsNtourneys = () => {
   };
 
   const handleLeaveTeam = (team) => {
+    var new_leader = "";
+    console.log("leaving team ...")
+
     try {
       console.log("Leaving team: ", team.name)
       console.log("User: ", user.email)
 
+      if (team.leader === user.username) {
+        // prompt for new leader
+        if (team.members.length === 0) {
+          new_leader = "";
+          alert("Since there are no other members of the team, it will be deleted.")
+        } else {
+          new_leader = prompt("Please choose a new leader from the current members: " + team.members);
+        }
+      } else {
+        new_leader = "";
+      }
+
       const response = axios.post('http://localhost:5000/leave_team', {
         'name': team.name,
-        'user': user.email
+        'user': user.email,
+        'new_leader': new_leader
       });
 
       response.then((response) => {
@@ -196,11 +211,14 @@ const teamsNtourneys = () => {
           <div className="w-1/2">
               <h2 className="text-xl font-semibold mb-4">Your Teams</h2>
               <div className="flex flex-col px-2">
-              {teams.map((team, index) => (
+              {teams.length > 0 ? (
+              teams.map((team, index) => (
                 <div key={index} className="border border-gray-300 rounded-lg p-6 mb-4 cursor-pointer" onClick={() => openTeamModal(team)}>
                   <h2 className="text-lg font-semibold mb-2">{team.name}</h2>
                 </div>
-              ))}
+              ))) : (
+                <p className="text-md text-gray-600 p-6 mb-2">You are not in any teams!</p>
+              )}
               </div>
 
               <div className="flex justify-center items-center">

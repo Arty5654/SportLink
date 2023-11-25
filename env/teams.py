@@ -70,15 +70,40 @@ def get_users_teams(curr_email):
 
     return team_list
 
-def leave_a_team(curr_email, team_name):
+def leave_a_team(curr_email, team_name, new_leader):
     # remove user from team
     teams.update_one({'name': team_name}, {'$pull': {'members': curr_email}})
 
-    # if user is leader, remove team
+    # check if the user is the team leader
     if teams.find_one({'name': team_name})['leader'] == curr_email:
-        teams.delete_one({'name': team_name})
+        # if new_leader is not provided, delete team
+        if not new_leader:
+            teams.delete_one({'name': team_name})
+        else:
+            # new leader is given as a username, so convert to email
+            new_leader = users.find_one({'username': new_leader})['email']
+            teams.update_one({'name': team_name}, {'$set': {'leader': new_leader}})
+            # remove new leader from members list
+            teams.update_one({'name': team_name}, {'$pull': {'members': new_leader}})
+
+            # send email to new leader, if they want emails
+            if users.find_one({'email': new_leader, 'sendEmail': True}):
+                msg = Message('You are now the leader of a team!', recipients=[new_leader])
+                msg.html = f'<p>Hello! You\'ve been made the leader of a team! Sign in to SportLink to check it out!</p>'
+                mail.send(msg)
 
     return jsonify({"message": "Team Left!"}), 200
+
+# TODO: SWAGGER FILE AND FRONT END
+def change_name(team_name):
+    # check if team name is already taken
+    if teams.find_one({'name': team_name}):
+        return jsonify({"message": "Team name already taken!"}), 401
+
+    # change team name
+    teams.update_one({'name': team_name}, {'$set': {'name': request.json['new_name']}})
+
+    return jsonify({"message": "Team Name Changed!"}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
