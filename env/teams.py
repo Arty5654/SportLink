@@ -20,11 +20,13 @@ friends = db["friends"]
 stats = db["stats"]
 history = db["eventHistory"]
 
-def create_a_team(team_name, team_leader, teammates):
+def create_a_team(team_name, team_leader, teammates, size, privacy):
     team_data = {
         'name': team_name,
         'leader': team_leader,
-        'members': teammates
+        'members': teammates,
+        'size': size,
+        'public': privacy
     }
 
     # check if team name is already taken
@@ -104,6 +106,29 @@ def change_name(team_name):
     teams.update_one({'name': team_name}, {'$set': {'name': request.json['new_name']}})
 
     return jsonify({"message": "Team Name Changed!"}), 200
+
+def get_pub_teams():
+    # get all public teams
+    team_list = []
+
+    # append all public teams to the list
+    # will need to add a check for if the teams are full
+    # if a team is full dont display it
+    for team in teams.find({'public': True}):
+        team_list.append({
+            'name': team['name'],
+            'leader': team['leader'],
+            'members': team['members'],
+            'size': team['size']
+        })
+
+    # change all emails to usernames
+    for team in team_list:
+        team['leader'] = users.find_one({'email': team['leader']})['username']
+        for i in range(len(team['members'])):
+            team['members'][i] = users.find_one({'email': team['members'][i]})['username']
+
+    return team_list
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

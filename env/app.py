@@ -26,7 +26,7 @@ import re
 # import files
 from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
-from teams import create_a_team, get_users_teams, leave_a_team, change_name
+from teams import create_a_team, get_users_teams, leave_a_team, change_name, get_pub_teams
 
 load_dotenv()
 
@@ -991,8 +991,10 @@ def create_team():
     team_name = req['name']
     team_leader = req['leader']
     teammates = req['members']
+    team_size = req['size']
+    privacy_settings = req['publicity']
 
-    return create_a_team(team_name, team_leader, teammates)
+    return create_a_team(team_name, team_leader, teammates, team_size, privacy_settings)
 
 def get_teams():
     curr_email = request.args.get('email')
@@ -1007,7 +1009,7 @@ def leave_team():
     user_leaving = req['user']
     new_leader = req['new_leader']
 
-    return leave_a_team(user_leaving, team_name, new_leader)
+    return leave_a_team(user_leaving, team_name, new_leader), 200
 
 
 def change_team_name():
@@ -1015,6 +1017,9 @@ def change_team_name():
     team_name = req['name']
 
     return change_name(team_name), 200
+
+def get_public_teams():
+    return get_pub_teams(), 200
 
 def create_tournament():
     data = request.json
