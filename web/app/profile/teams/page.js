@@ -18,6 +18,9 @@ const TeamCard = ({ team }) => {
             <p className="text-sm pb-4 cursor-pointer">
                 Size: {team.size}
             </p>
+            <p className="text-sm pb-4 cursor-pointer">
+                Max Team Size: {team.maxSize}
+            </p>
         </div>
     );
 };

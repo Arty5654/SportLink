@@ -992,9 +992,10 @@ def create_team():
     team_leader = req['leader']
     teammates = req['members']
     team_size = req['size']
+    max_team_size = req['maxSize']
     privacy_settings = req['publicity']
 
-    return create_a_team(team_name, team_leader, teammates, team_size, privacy_settings)
+    return create_a_team(team_name, team_leader, teammates, team_size, max_team_size, privacy_settings)
 
 def get_teams():
     curr_email = request.args.get('email')

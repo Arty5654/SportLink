@@ -20,12 +20,13 @@ friends = db["friends"]
 stats = db["stats"]
 history = db["eventHistory"]
 
-def create_a_team(team_name, team_leader, teammates, size, privacy):
+def create_a_team(team_name, team_leader, teammates, size, maxSize, privacy):
     team_data = {
         'name': team_name,
         'leader': team_leader,
         'members': teammates,
         'size': size,
+        'maxSize': maxSize,
         'public': privacy
     }
 
@@ -119,7 +120,8 @@ def get_pub_teams():
             'name': team['name'],
             'leader': team['leader'],
             'members': team['members'],
-            'size': team['size']
+            'size': team['size'],
+            'maxSize': team['maxSize']
         })
 
     # change all emails to usernames

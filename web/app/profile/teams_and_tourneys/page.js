@@ -15,6 +15,7 @@ const teamsNtourneys = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [publicTeam, setPublicTeam] = useState(true);
+  const [maxTeamSize, setMaxTeamSize] = useState(0);
   const [selectedTeammates, setSelectedTeammates] = useState([]);
   const [friends, setFriends] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -119,12 +120,18 @@ const teamsNtourneys = () => {
       return;
     }
 
+    if (maxTeamSize < selectedTeammates.length + 1) {
+      alert("Please make your team size larger!");
+      return;
+    }
+
     try {
         const response = axios.post('http://localhost:5000/create_team', {
           'name': teamName,
           'leader': user.email,
           'members': selectedTeammates,
           'size': selectedTeammates.length + 1,
+          'maxSize': parseInt(maxTeamSize),
           'publicity': publicTeam
         });
 
@@ -216,25 +223,28 @@ const teamsNtourneys = () => {
           <div className="w-1/2">
               <h2 className="text-xl font-semibold mb-4">Your Teams</h2>
               <div className="flex flex-col px-2">
-              {teams.length > 0 ? (
-              teams.map((team, index) => (
-                <div key={index} className="border border-gray-300 rounded-lg p-6 mb-4 cursor-pointer" onClick={() => openTeamModal(team)}>
-                  <h2 className="text-lg font-semibold mb-2">{team.name}</h2>
-                </div>
-              ))) : (
-                <p className="text-md text-gray-600 p-6 mb-2">You are not in any teams!</p>
-              )}
+                {teams.length > 0 ? (
+                teams.map((team, index) => (
+                  <div key={index} className="border border-gray-300 rounded-lg p-6 mb-4 cursor-pointer" onClick={() => openTeamModal(team)}>
+                    <h2 className="text-lg font-semibold mb-2">{team.name}</h2>
+                  </div>
+                ))) : (
+                  <p className="text-md text-gray-600 p-6 mb-2">You are not in any teams!</p>
+                )}
               </div>
 
               <div className="flex justify-center items-center">
-              <button className="bg-blue-500 text-white py-2 rounded-lg w-11/12" onClick={openModal}>Create Team</button>
+                <button className="bg-blue-500 text-white py-2 rounded-lg w-11/12" onClick={openModal}>Create Team</button>
               </div>
 
-              <Link href="/profile/teams" passHref>
-                <div className="bg-blue-500 text-white py-2 rounded-lg w-11/12 text-center">
-                  View Public Teams
-                </div>
-              </Link>
+              <div className="flex justify-center items-center mt-4 flex items-center">
+                  <button
+                    className="bg-green-500 text-white py-2 rounded-lg w-11/12"
+                    onClick={() => window.location.href = "/profile/teams"}
+                  >
+                    View Public Teams
+                  </button>
+              </div>
 
               {isTeamModalOpen && currentTeam && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -290,9 +300,20 @@ const teamsNtourneys = () => {
                                 className="ml-2"
                                 checked={publicTeam}
                                 onChange={(checked) => {
-                                    console.log("changed team publicity to: " + !publicTeam); // Log the updated state
-                                    setPublicTeam(!publicTeam); // Update the state
+                                    console.log("changed team publicity to: " + !publicTeam);
+                                    setPublicTeam(!publicTeam);
                                 }}
+                            />
+                          </div>
+
+                          <div className="mt-4 flex items-center">
+                            <label htmlFor="teamName" className="w-1/4 block text-sm font-medium text-gray-700">Team Size</label>
+                            <input
+                                type="number"
+                                id="teamCount"
+                                className="w-3/4 border p-2 rounded-md"
+                                value={maxTeamSize}
+                                onChange={(e) => setMaxTeamSize(e.target.value)}
                             />
                           </div>
 
@@ -306,17 +327,22 @@ const teamsNtourneys = () => {
             </div>
             <div className="w-1/2">
               <h2 className="text-xl font-semibold mb-4">Tournaments</h2>
+              <div className="flex flex-col px-2">
+                <p className="text-md text-gray-600 p-6 mb-2">You are not a part of any tournaments!</p>
+              </div>
               <div className="flex justify-center mb-4">
-              <button onClick={() => setIsTournamentModalOpen(true)} className="bg-blue-500 text-white py-2 rounded-lg w-11/12">
-                    Create Tournament
+                <button onClick={() => setIsTournamentModalOpen(true)} className="bg-blue-500 text-white py-2 rounded-lg w-11/12">
+                  Create Tournament
                 </button>
-                </div>
-                <div className="flex justify-center mb-4">
-              <Link href="/profile/tourneys" passHref>
-                <div className="bg-blue-500 text-white py-2 rounded-lg w-11/12 text-center">
+              </div>
+
+              <div className="flex justify-center items-center mt-4 flex items-center">
+                <button
+                  className="bg-green-500 text-white py-2 rounded-lg w-11/12"
+                  onClick={() => window.location.href = "/profile/tourneys"}
+                >
                   View Tournaments
-                </div>
-              </Link>
+                </button>
               </div>
                 {isTournamentModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
