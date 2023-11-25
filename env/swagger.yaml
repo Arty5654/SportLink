@@ -1575,6 +1575,10 @@ paths:
                   default: []
                   items:
                     type: string
+                size:
+                  type: integer
+                publicity:
+                  type: boolean
       responses:
         "200":
           description: "Team Created"
@@ -1610,6 +1614,10 @@ paths:
                       default: []
                       items:
                         type: string
+                    size:
+                      type: integer
+                    publicity:
+                      type: boolean
 
   /leave_team:
     post:
@@ -1630,6 +1638,33 @@ paths:
       responses:
         "200":
           description: "Team Left"
+
+  /get_public_teams:
+    get:
+      operationId: app.get_public_teams
+      responses:
+        "200":
+          description: "Public Teams Retrieved"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    leader:
+                      type: string
+                    members:
+                      type: array
+                      default: []
+                      items:
+                        type: string
+                    size:
+                      type: integer
+                    publicity:
+                      type: boolean
 
   /create_tournament:
     post:

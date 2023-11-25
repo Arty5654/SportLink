@@ -6,13 +6,17 @@ import { useEffect, useState } from "react";
 import Sidebar from "@components/profileSidebar";
 import "@styles/global.css";
 import Link from "next/link";
+import Switch from "react-switch";
 
 const teamsNtourneys = () => {
   const [user, setUser] = useState(new User());
+
+  // team stuff
   const [isModalOpen, setModalOpen] = useState(false);
   const [teamName, setTeamName] = useState('');
-  const [friends, setFriends] = useState([]);
+  const [publicTeam, setPublicTeam] = useState(true);
   const [selectedTeammates, setSelectedTeammates] = useState([]);
+  const [friends, setFriends] = useState([]);
   const [teams, setTeams] = useState([]);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [currentTeam, setCurrentTeam] = useState(null);
@@ -82,6 +86,7 @@ const teamsNtourneys = () => {
 
   const openModal = () => {
     setModalOpen(true);
+    setPublicTeam(false);
 
     const fetchData = async () => {
         try {
@@ -113,14 +118,14 @@ const teamsNtourneys = () => {
       alert("Please enter a team name.");
       return;
     }
-    console.log("Team Name: ", teamName);
-    console.log("Selected Teammates: ", selectedTeammates);
 
     try {
         const response = axios.post('http://localhost:5000/create_team', {
-            'name': teamName,
-            'members': selectedTeammates,
-            'leader': user.email
+          'name': teamName,
+          'leader': user.email,
+          'members': selectedTeammates,
+          'size': selectedTeammates.length + 1,
+          'publicity': publicTeam
         });
 
         response.then((response) => {
@@ -225,6 +230,12 @@ const teamsNtourneys = () => {
               <button className="bg-blue-500 text-white py-2 rounded-lg w-11/12" onClick={openModal}>Create Team</button>
               </div>
 
+              <Link href="/profile/teams" passHref>
+                <div className="bg-blue-500 text-white py-2 rounded-lg w-11/12 text-center">
+                  View Public Teams
+                </div>
+              </Link>
+
               {isTeamModalOpen && currentTeam && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                   <div className="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 p-6">
@@ -258,22 +269,36 @@ const teamsNtourneys = () => {
                           />
 
                           <div className="mt-4">
-                          <h2 className="text-lg font-semibold mb-2">Choose Teammates</h2>
-                          {friends.map((curr_user, index) => (
-                              <div key={index}>
-                              <input
-                                  type="checkbox"
-                                  id={`friend-${index}`}
-                                  value={curr_user.friend}
-                                  checked={selectedTeammates.includes(curr_user.friend)}
-                                  onChange={handleCheckboxChange}
-                              />
-                              <label htmlFor={`friend-${index}`} className="ml-2">{curr_user.friend}</label>
-                              </div>
-                          ))}
+                            <h2 className="block text-sm font-medium text-gray-700">Choose Teammates</h2>
+                            {friends.map((curr_user, index) => (
+                                <div key={index}>
+                                <input
+                                    type="checkbox"
+                                    id={`friend-${index}`}
+                                    value={curr_user.friend}
+                                    checked={selectedTeammates.includes(curr_user.friend)}
+                                    onChange={handleCheckboxChange}
+                                />
+                                <label htmlFor={`friend-${index}`} className="ml-2">{curr_user.friend}</label>
+                                </div>
+                            ))}
                           </div>
 
-                          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4">Submit</button>
+                          <div className="mt-4 flex items-center">
+                            <h2 className="block text-sm font-medium text-gray-700">Public Team:</h2>
+                            <Switch
+                                className="ml-2"
+                                checked={publicTeam}
+                                onChange={(checked) => {
+                                    console.log("changed team publicity to: " + !publicTeam); // Log the updated state
+                                    setPublicTeam(!publicTeam); // Update the state
+                                }}
+                            />
+                          </div>
+
+                          <div className="mt-4"/>
+
+                          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full">Submit</button>
                       </form>
                       </div>
                   </div>
