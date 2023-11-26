@@ -67,6 +67,9 @@ def get_details(eventID, event_data):
 
   return jsonify(event_info), 200
 
+def edit_event():
+  pass
+
 # Route to join a user to an event
 def get_all(email):
   # Get the email from the query parameters

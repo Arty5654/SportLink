@@ -63,6 +63,7 @@ paths:
       responses:
         "200":
           description: "Created Request"
+
   /create:
     post:
       operationId: app.create
@@ -933,6 +934,45 @@ paths:
         "404":
           description: Event not found
 
+  /edit_event_details:
+    post:
+      operationId: app.edit_event_details
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                desc:
+                  type: string
+                address:
+                  type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
+                open:
+                  type: boolean
+                sport:
+                  type: string
+                currentParticipants:
+                  type: integer
+                maxParticipants:
+                  type: integer
+                participants:
+                  type: array
+                level:
+                  type: string
+                eventOwner:
+                  type: string
+                town:
+                  type: string
+      responses:
+        "200":
+          description: "Created Request"
+
   /get_my_events:
     get:
       summary: Get Event Information that user is part of
@@ -1650,5 +1690,3 @@ paths:
       responses:
         "200":
           description: "Tournament Created"
-
-          

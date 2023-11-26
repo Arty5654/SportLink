@@ -24,7 +24,7 @@ from bson.regex import Regex
 import re
 
 # import files
-from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my
+from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my, edit_event
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
 from teams import create_a_team, get_users_teams, leave_a_team
 
@@ -838,6 +838,19 @@ def get_events():
 
 def get_event_details():
     return get_details(request.args.get("id"), list(events.find()))
+
+def edit_event_details():
+    data = request.get_json()
+    event_id = data.get("eventID")
+    event_data = list(events.find())
+
+    for event in event_data:
+        if str(event_id) == str(event["_id"]):
+            events.update_one({"_id": event["_id"]}, {"$set": data})
+
+    return jsonify({"message": "Event details updated successfully"}), 200
+
+
 
 def get_all_events():
     return get_all(request.args.get('email'))
