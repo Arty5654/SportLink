@@ -12,7 +12,12 @@ const TeamCard = ({ team }) => {
                 Leader: {team.leader}
             </p>
             <p className="text-sm pb-4 cursor-pointer">
-                Members: {team.members}
+                Members: {
+                    team.members.map((member, index) => (
+                        // list each member comma separated
+                        <span key={index}>{member}{index < team.members.length - 1 ? ', ' : ''}</span>
+                    ))
+                }
             </p>
             <p className="text-sm pb-4 cursor-pointer">
                 Size: {team.size}
