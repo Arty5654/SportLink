@@ -26,7 +26,7 @@ import re
 # import files
 from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my, edit_event
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
-from teams import create_a_team, get_users_teams, leave_a_team
+from teams import create_a_team, get_users_teams, leave_a_team, change_name, get_pub_teams
 
 load_dotenv()
 
@@ -1004,8 +1004,11 @@ def create_team():
     team_name = req['name']
     team_leader = req['leader']
     teammates = req['members']
+    team_size = req['size']
+    max_team_size = req['maxSize']
+    privacy_settings = req['publicity']
 
-    return create_a_team(team_name, team_leader, teammates)
+    return create_a_team(team_name, team_leader, teammates, team_size, max_team_size, privacy_settings)
 
 def get_teams():
     curr_email = request.args.get('email')
@@ -1018,8 +1021,19 @@ def leave_team():
     req = request.get_json()
     team_name = req['name']
     user_leaving = req['user']
+    new_leader = req['new_leader']
 
-    return leave_a_team(user_leaving, team_name)
+    return leave_a_team(user_leaving, team_name, new_leader), 200
+
+
+def change_team_name():
+    req = request.get_json()
+    team_name = req['name']
+
+    return change_name(team_name), 200
+
+def get_public_teams():
+    return get_pub_teams(), 200
 
 def create_tournament():
     data = request.json
@@ -1034,6 +1048,17 @@ def create_tournament():
     tournaments.insert_one(tournament_data)
 
     return jsonify({'message': 'Tournament created successfully'}), 200
+
+def get_tournaments():
+    all_tournaments = list(tournaments.find({}))
+
+    # Convert ObjectId to string
+    for tournament in all_tournaments:
+        tournament['_id'] = str(tournament['_id'])
+
+    #print("All tournaments:", all_tournaments)
+
+    return jsonify(all_tournaments), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
