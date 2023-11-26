@@ -10,7 +10,9 @@ const EditEvent = () => {
   const [event, setEvent] = useState({
     title: "",
     desc: "",
-    city: "",
+    address: "",
+    lat: 0,
+    lng: 0,
     sport: "",
     level: "",
     open: false,
@@ -18,6 +20,7 @@ const EditEvent = () => {
     maxParticipants: 0,
     participants: [],
     eventOwner: "",
+    twon: "",
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -40,7 +43,9 @@ const EditEvent = () => {
           setEvent({
             title: data.title,
             desc: data.desc,
-            city: data.city,
+            address: data.address,
+            lat: data.lat,
+            lng: data.lng,
             sport: data.sport,
             level: data.level,
             open: data.open,
@@ -48,17 +53,30 @@ const EditEvent = () => {
             maxParticipants: data.maxParticipants,
             participants: data.participants,
             eventOwner: data.eventOwner,
+            town: data.town,
           });
-          console.log(response.data);
+          console.log("Response Data: ", response.data);
         });
       } catch (error) {
-        console.log("Error: ", error);
+        console.log("Get Event Details Error: ", error);
       }
     };
     getEventDetails();
   }, [eventID]);
 
-  const handleCancelClick = () => {
+  const handleSaveClick = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedEvent = { ...event, eventID }; // Include eventID in the payload
+      await axios.post("http://localhost:5000/edit_event_details", updatedEvent);
+      router.push(`/events?id=${eventID}`);
+    } catch (error) {
+      console.log("Handle Save Error: ", error);
+    }
+  };
+
+  const handleCancelClick = async (e) => {
+    e.preventDefault();
     router.push(`/events?id=${eventID}`);
   };
 
@@ -74,7 +92,7 @@ const EditEvent = () => {
               name="eventTitle"
               value={event.title}
               onChange={(e) => setEvent({ ...event, title: e.target.value })}
-              className="w-full rounded-lg h-8 pl-2 text-2xl outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
+              className="w-full rounded-lg h-8 px-2 py-1 text-xl outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
             />
           </div>
 
@@ -96,14 +114,14 @@ const EditEvent = () => {
                 <option value="Weightlifting">Weightlifting</option>
               </select>
             </div>
-            {/* City Textbox */}
+            {/* Town Textbox */}
             <div className="w-1/2 flex gap-4">
-              <h2 className="text-2xl font-semibold">City: </h2>
+              <h2 className="text-2xl font-semibold">Town: </h2>
               <textarea
-                name="eventCity"
-                value={event.city}
-                onChange={(e) => setEvent({ ...event, city: e.target.value })}
-                className="w-full rounded-lg pt-1 h-8 pl-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
+                name="eventTown"
+                value={event.town}
+                onChange={(e) => setEvent({ ...event, town: e.target.value })}
+                className="w-full rounded-lg pt-1 h-8 px-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
               />
             </div>
           </div>
@@ -114,14 +132,19 @@ const EditEvent = () => {
               name="eventDesc"
               value={event.desc}
               onChange={(e) => setEvent({ ...event, desc: e.target.value })}
-              className="w-full rounded-lg h-96 pl-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
+              className="w-full rounded-lg h-96 px-2 py-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
             />
           </div>
           {/* ITEM: Row Four */}
           <div className="flex gap-4 w-full pb-8">
-            <button className="bg-blue-500 text-white w-1/2 py-2 rounded-xl">Save</button>
             <button
-              className="text-black w-1/2 py-2 rounded-xl border border-black"
+              className="bg-blue-500 text-white w-1/2 py-2 rounded-xl"
+              onClick={handleSaveClick}
+            >
+              Save
+            </button>
+            <button
+              className="text-black w-1/2 py-2 rounded-xl border border-gray-300"
               onClick={handleCancelClick}
             >
               Cancel
@@ -135,7 +158,10 @@ const EditEvent = () => {
             <h1 className="text-2xl font-semibold pb-8">Participants</h1>
             <div classname="">
               {event.participants.map((event, index) => (
-                <p className="text-sm border-l border-gray-400 px-2 relative">{event}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm border-l border-gray-400 px-2 relative">{event}</p>
+                  <p className="text-red-500">x</p>
+                </div>
               ))}
             </div>
           </div>

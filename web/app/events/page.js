@@ -21,6 +21,7 @@ const EventDetails = () => {
     maxParticipants: 0,
     participants: [],
     eventOwner: "",
+    twon: "",
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -53,7 +54,7 @@ const EventDetails = () => {
             maxParticipants: data.maxParticipants,
             participants: data.participants,
             eventOwner: data.eventOwner,
-            town: data.town
+            town: data.town,
           });
           console.log(response.data);
         });
@@ -139,7 +140,6 @@ const EventDetails = () => {
   };
 
   return (
-
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
       <div className="w-4/5">
@@ -164,7 +164,11 @@ const EventDetails = () => {
         <p className="pt-4">{event.desc}</p>
 
         <div className="mt-6">
-            <SmallMap center={{ lat: event.lat, lng: event.lng }} zoom={15} address={event.address}/>
+          <SmallMap
+            center={{ lat: event.lat, lng: event.lng }}
+            zoom={15}
+            address={event.address}
+          />
         </div>
       </div>
 
