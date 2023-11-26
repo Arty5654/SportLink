@@ -26,7 +26,7 @@ import re
 # import files
 from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
-from teams import create_a_team, get_users_teams, leave_a_team, change_name, get_pub_teams
+from teams import create_a_team, get_users_teams, leave_a_team, change_name, get_pub_teams, join_team
 
 load_dotenv()
 
@@ -1021,7 +1021,10 @@ def change_team_name():
 
 def get_public_teams():
     return get_pub_teams(), 200
+def joinTeam():
+    req = request.json
 
+    return join_team(req), 200
 def create_tournament():
     data = request.json
 
