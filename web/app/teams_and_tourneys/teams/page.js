@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Sidebar from '@components/profileSidebar';
 
 const TeamCard = ({ team }) => {
     return (
@@ -41,12 +40,9 @@ function TeamsPage() {
     }, []);
 
     return (
-        <div className="w-full">
-            <div className="flex gap-8">
-                <div className="w-1/4">
-                    <Sidebar active="teams_and_tourneys"/>
-                </div>
-                <div className="w-3/4">
+        <div className="w-full flex pb-64">
+            <div className="w-full text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
+                <div className="w-full">
                     <h1 className="font-semibold text-3xl pb-8">Public Teams</h1>
                     <div className="grid grid-cols-3 gap-4">
                         {teams.map((curr_team, index) => (

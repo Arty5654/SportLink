@@ -52,15 +52,6 @@ const profileSidebar = ({ active }) => {
             User Look Up
           </p>
         </Link>
-        <Link href="/profile/teams_and_tourneys">
-          <p
-            className={`cursor-pointer ${
-              active === "teams_and_tourneys" ? "border-l-4 border-blue-500 pl-1" : ""
-            } ` }
-            >
-              My Teams & Tournaments
-              </p>
-        </Link>
         <Link href="/profile/userPlayerHistory">
           <p
             className={`cursor-pointer ${

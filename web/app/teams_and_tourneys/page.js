@@ -3,7 +3,6 @@
 import User from "@app/User";
 import axios from 'axios';
 import { useEffect, useState } from "react";
-import Sidebar from "@components/profileSidebar";
 import "@styles/global.css";
 import Link from "next/link";
 import Switch from "react-switch";
@@ -214,10 +213,7 @@ const teamsNtourneys = () => {
 
   return (
     <div className="w-full flex pb-64">
-      <div className="w-1/4">
-          <Sidebar active="teams_and_tourneys"/>
-      </div>
-      <div className="w-3/4 text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
+      <div className="w-full text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
           <h1 className="text-2xl font-semibold mb-4">Teams & Tournaments</h1>
           <div className="flex flex-row">
           <div className="w-1/2">
@@ -240,7 +236,7 @@ const teamsNtourneys = () => {
               <div className="flex justify-center items-center mt-4 flex items-center">
                   <button
                     className="bg-green-500 text-white py-2 rounded-lg w-11/12"
-                    onClick={() => window.location.href = "/profile/teams"}
+                    onClick={() => window.location.href = "/teams_and_tourneys/teams"}
                   >
                     View Public Teams
                   </button>
@@ -339,7 +335,7 @@ const teamsNtourneys = () => {
               <div className="flex justify-center items-center mt-4 flex items-center">
                 <button
                   className="bg-green-500 text-white py-2 rounded-lg w-11/12"
-                  onClick={() => window.location.href = "/profile/tourneys"}
+                  onClick={() => window.location.href = "/teams_and_tourneys/tourneys"}
                 >
                   View Tournaments
                 </button>
