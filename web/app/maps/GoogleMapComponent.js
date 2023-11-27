@@ -42,6 +42,10 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
 
       fetchPlaces(mapRef.current, sport, (radius * 1000));
         
+    } else if (sport === "all") {
+
+      fetchPlaces(mapRef.current, sport, 0);
+
     } else if ((sport === "Select" || radius === "Select") && type === 0) {
       setMarkers([]);
       setEventMarkers([]);
@@ -154,7 +158,7 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
           setMarkers(sportMarkers);
         } else {
           // something went wrong, make user refresh
-          setQueryError(true);
+          setMarkers([]);
         }
       });
     } else if (type == 1 || type == 0) {
@@ -200,7 +204,7 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
 
         }  else {
           // sport is select
-          if (radius === 0 && type === 1) {
+          if (sport === "all") {
             // if no parameters set, just return all events
             return true;
           }

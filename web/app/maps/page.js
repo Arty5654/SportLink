@@ -35,10 +35,16 @@ const MapsPage = () => {
   
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
+    if (e.target.value === "all") {
+      setRadius("0");
+      setType(1);
+    }
   };
 
   const handleRadiusChange = (e) => {
-    setRadius(e.target.value);
+    if (filter != "all") {
+      setRadius(e.target.value);
+    }
   };
 
   const handleCenterChange = (e) => {
@@ -57,12 +63,18 @@ const MapsPage = () => {
 
   const handleTypeChange = (event) => {
     // handles event type checkboxes
-    const { name, checked } = event.target;
-    setType((prevType) => {
-      // 1 means events checked, two means loc checked, 3 means both
-      if (name === "events") return checked ? prevType + 1 : prevType - 1;
-      if (name === "locations") return checked ? prevType + 2 : prevType - 2;
-    });
+
+    if (filter != "all") {
+
+      const { name, checked } = event.target;
+      setType((prevType) => {
+        // 1 means events checked, two means loc checked, 3 means both
+        if (name === "events") return checked ? prevType + 1 : prevType - 1;
+        if (name === "locations") return checked ? prevType + 2 : prevType - 2;
+      });
+
+    }
+
   };
   
   
@@ -86,6 +98,7 @@ const MapsPage = () => {
             <option value="Soccer Field">Soccer</option>
             <option value="Running Track">Running</option>
             <option value="Golf Course">Golf</option>
+            <option value="all">All Events</option>
           </select>
         </div>
         
