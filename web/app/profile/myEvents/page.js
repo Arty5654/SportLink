@@ -39,6 +39,7 @@ const EventCard = ({ event }) => {
 const MyEvents = () => {
   const [user, setUser] = useState(new User());
   const [events, setEvents] = useState([]);
+  const [createdEvents, setCreatedEvents] = useState([]);
 
   // get user from session storage, send to backend to fetch events that contain
   // the users username in the participants array
@@ -49,28 +50,52 @@ const MyEvents = () => {
     axios
       .get(`http://localhost:5000/get_my_events?username=${currentUser.username}`)
       .then((response) => {
-        console.log(response.data);
         setEvents(response.data);
+      });
+
+    axios
+      .get(`http://localhost:5000/get_my_created_events?email=${currentUser.email}`)
+      .then((response) => {
+        setCreatedEvents(response.data);
       });
   }, []);
 
   return (
-    <div className="flex">
+    <div className="flex pb-16">
       {/* ITEM: SideBar */}
       <div className="w-1/4">
         <Sidebar active="myEvents" />
       </div>
-      <div className="w-3/4 h-128 border border-gray-300 rounded-2xl px-8 py-10">
-        <p className="text-2xl font-semibold pb-1">Registered Events</p>
-        <p className="text-gray-500 pb-8">
-          These are events that you are currently apart of. You can click into them to view the
-          event details or to manage your status. Any event that you created will also be
-          listed below.
-        </p>
-        <div className="flex flex-col gap-4">
-          {events.map((event, index) => (
-            <EventCard key={index} event={event} {...event} />
-          ))}
+
+      <div className="w-3/4 flex flex-col gap-8">
+        {/* ITEM: Registered Events */}
+        <div className="h-128 border border-gray-300 rounded-2xl px-8 py-10">
+          <p className="text-2xl font-semibold pb-1">Registered Events</p>
+          <p className="text-gray-500 pb-8">
+            These are events that you are currently apart of. You can click into them to view
+            the event details or to manage your status. Any event that you created will also be
+            listed below.
+          </p>
+          <div className="flex flex-col gap-4">
+            {events.map((event, index) => (
+              <EventCard key={index} event={event} {...event} />
+            ))}
+          </div>
+        </div>
+
+        {/* ITEM: Created Events */}
+        <div className="h-128 border border-gray-300 rounded-2xl px-8 py-10">
+          <p className="text-2xl font-semibold pb-1">Created Events</p>
+          <p className="text-gray-500 pb-8">
+            These are events that you have created. You can click into them to view the event
+            details or to manage the event status. As the event owner you can delete the event,
+            end the event, or remove people from the event.
+          </p>
+          <div className="flex flex-col gap-4">
+            {createdEvents.map((createdEvents, index) => (
+              <EventCard key={index} event={createdEvents} {...createdEvents} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
