@@ -841,15 +841,17 @@ def get_event_details():
 
 def edit_event_details():
     data = request.get_json()
-    event_id = data.get("eventID")
-    event_data = list(events.find())
+    return edit_event(data.get("eventID"), list(events.find()))
 
+def delete_event_details():
+    event_data = list(events.find())
+    data = request.get_json()
+    event_id = data.get("eventID")
+    
     for event in event_data:
         if str(event_id) == str(event["_id"]):
-            events.update_one({"_id": event["_id"]}, {"$set": data})
-
-    return jsonify({"message": "Event details updated successfully"}), 200
-
+            events.delete_one({"_id": event["_id"]})
+            return jsonify({"message": "Event deleted from database"}), 200
 
 
 def get_all_events():
@@ -883,6 +885,21 @@ def delete_event_history():
 
 def get_my_events():
     return get_my(list(events.find()), request.args.get("username"))
+
+def get_my_created_events():
+    event_data = list(events.find())
+    email = request.args.get("email")
+
+    user_events = []
+
+    for event in event_data:
+        event['_id'] = str(event['_id'])
+
+    for event in event_data:
+        if event["eventOwner"] == email:
+            user_events.append(event)
+
+    return jsonify(user_events), 200
 
 def submit_report():
     user = request.get_json()

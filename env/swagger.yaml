@@ -973,11 +973,69 @@ paths:
         "200":
           description: "Created Request"
 
+  /delete_event_details:
+    post:
+      summary: Delete event from database
+      description: Delete event from database
+      operationId: app.delete_event_details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventID:
+                  type: string
+      responses:
+        "200":
+          description: Event deleted from database
+        "400":
+          description: Bad request
+
   /get_my_events:
     get:
       summary: Get Event Information that user is part of
       description: Retrieve event information from the database.
       operationId: app.get_my_events
+      responses:
+        "200":
+          description: Event information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    objectID:
+                      type: string
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+                    eventOwner:
+                      type: string
+        "404":
+          description: Event not found
+
+  /get_my_created_events:
+    get:
+      summary: Get Event Information that user is part of
+      description: Retrieve event information from the database.
+      operationId: app.get_my_created_events
       responses:
         "200":
           description: Event information retrieved successfully

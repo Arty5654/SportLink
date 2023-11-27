@@ -67,8 +67,12 @@ def get_details(eventID, event_data):
 
   return jsonify(event_info), 200
 
-def edit_event():
-  pass
+def edit_event(event_id, event_data):
+  for event in event_data:
+    if str(event_id) == str(event["_id"]):
+      events.update_one({"_id": event["_id"]}, {"$set": data})
+
+  return jsonify({"message": "Event details updated successfully"}), 200
 
 # Route to join a user to an event
 def get_all(email):
@@ -99,11 +103,11 @@ def get_my(event_data, username):
   user_events = []
 
   for event in event_data:
-      event['_id'] = str(event['_id'])
+    event['_id'] = str(event['_id'])
 
   for event in event_data:
-      if username in event["participants"]:
-          user_events.append(event)
+    if username in event["participants"]:
+        user_events.append(event)
 
   # Return the modified event data as JSON
   return jsonify(user_events), 200

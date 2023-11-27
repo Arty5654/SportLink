@@ -75,6 +75,16 @@ const EditEvent = () => {
     }
   };
 
+  const handleDeleteEvent = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/delete_event_details", { eventID });
+    } catch (error) {
+      console.log("Handle Delete Error: ", error);
+    }
+    router.push("/");
+  };
+
   const handleCancelClick = async (e) => {
     e.preventDefault();
     router.push(`/events?id=${eventID}`);
@@ -153,7 +163,7 @@ const EditEvent = () => {
         </div>
 
         {/* ITEM: Right Bar*/}
-        <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
+        <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg relative">
           <div className="py-10 px-8">
             <h1 className="text-2xl font-semibold pb-8">Participants</h1>
             <div classname="">
@@ -164,6 +174,17 @@ const EditEvent = () => {
                 </div>
               ))}
             </div>
+          </div>
+          <div className="absolute bottom-0 py-10 px-8 w-full">
+            <button className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2">
+              End Event
+            </button>
+            <button
+              className="w-full rounded-lg bg-red-500 text-white py-2"
+              onClick={handleDeleteEvent}
+            >
+              Delete Event
+            </button>
           </div>
         </div>
       </form>
