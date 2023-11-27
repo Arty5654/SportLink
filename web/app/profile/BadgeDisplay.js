@@ -31,7 +31,7 @@ export default function BadgeDisplay({ numTennis, numBasketball, numSoccer, numW
     const getBadge = (num, sport, bronze, silver, gold) => {
         if (num >= 75) {
             return gold;
-        } else if (num >= 25) {
+        } else if (num >= 50) {
             return silver;
         } else if (num >= 10) {
             return bronze;
@@ -43,7 +43,7 @@ export default function BadgeDisplay({ numTennis, numBasketball, numSoccer, numW
     const getLabel = (num) => {
         if (num >= 75) {
             return 'Gold';
-        } else if (num >= 25) {
+        } else if (num >= 50) {
             return 'Silver';
         } else if (num >= 10) {
             return 'Bronze';
