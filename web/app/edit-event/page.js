@@ -7,6 +7,8 @@ import User from "@app/User";
 
 const EditEvent = () => {
   const [user, setUser] = useState(new User());
+  const [endState, setEndState] = useState(false);
+  const [summary, setSummary] = useState("");
   const [event, setEvent] = useState({
     title: "",
     desc: "",
@@ -20,7 +22,8 @@ const EditEvent = () => {
     maxParticipants: 0,
     participants: [],
     eventOwner: "",
-    twon: "",
+    town: "",
+    end: false,
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -64,6 +67,7 @@ const EditEvent = () => {
     getEventDetails();
   }, [eventID]);
 
+  // Handle saving edits, send new event data to the backend
   const handleSaveClick = async (e) => {
     e.preventDefault();
     try {
@@ -75,12 +79,36 @@ const EditEvent = () => {
     }
   };
 
+  // Handle deleting an event, post request to backend
   const handleDeleteEvent = async (e) => {
     e.preventDefault();
     try {
       await axios.post("http://localhost:5000/delete_event_details", { eventID });
     } catch (error) {
       console.log("Handle Delete Error: ", error);
+    }
+    router.push("/");
+  };
+
+  // Handle first end event click, set end state to true and switch to confirm state
+  const handleEndEvent = async (e) => {
+    e.preventDefault();
+    setEndState(true);
+  };
+
+  // Handle typing in the summary box
+  const handleSummaryChange = (e) => {
+    setSummary(e.target.value);
+  };
+
+  // Handle confirming to end event, send summary to backend to update description
+  const handleEndConfirm = async (e) => {
+    e.preventDefault();
+    try {
+      const confirmEndData = { summary, eventID };
+      await axios.post("http://localhost:5000/end_event", confirmEndData);
+    } catch (error) {
+      console.log("Error with ending the event");
     }
     router.push("/");
   };
@@ -163,30 +191,64 @@ const EditEvent = () => {
         </div>
 
         {/* ITEM: Right Bar*/}
-        <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg relative">
-          <div className="py-10 px-8">
-            <h1 className="text-2xl font-semibold pb-8">Participants</h1>
-            <div classname="">
-              {event.participants.map((event, index) => (
-                <div className="flex items-center justify-between">
-                  <p className="text-sm border-l border-gray-400 px-2 relative">{event}</p>
-                  <p className="text-red-500">x</p>
-                </div>
-              ))}
+        {endState ? (
+          <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg relative">
+            <div className="py-10 px-8">
+              <h1 className="text-2xl font-semibold pb-8">Summary</h1>
+              <textarea
+                placeholder="Enter the event summary here."
+                className="w-full h-60 text-sm"
+                value={summary}
+                onChange={handleSummaryChange}
+              />
+            </div>
+            <div className="absolute bottom-0 py-10 px-8 w-full">
+              <button
+                className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setEndState(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="w-full rounded-lg bg-green-500 text-white py-2"
+                onClick={handleEndConfirm}
+              >
+                Confirm
+              </button>
             </div>
           </div>
-          <div className="absolute bottom-0 py-10 px-8 w-full">
-            <button className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2">
-              End Event
-            </button>
-            <button
-              className="w-full rounded-lg bg-red-500 text-white py-2"
-              onClick={handleDeleteEvent}
-            >
-              Delete Event
-            </button>
+        ) : (
+          <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg relative">
+            <div className="py-10 px-8">
+              <h1 className="text-2xl font-semibold pb-8">Participants</h1>
+              <div classname="">
+                {event.participants.map((event, index) => (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm border-l border-gray-400 px-2 relative">{event}</p>
+                    <p className="text-red-500">x</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="absolute bottom-0 py-10 px-8 w-full">
+              <button
+                className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2"
+                onClick={handleEndEvent}
+              >
+                End Event
+              </button>
+              <button
+                className="w-full rounded-lg bg-red-500 text-white py-2"
+                onClick={handleDeleteEvent}
+              >
+                Delete Event
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </form>
     </div>
   );

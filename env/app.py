@@ -901,6 +901,18 @@ def get_my_created_events():
 
     return jsonify(user_events), 200
 
+def end_event():
+    event_data = list(events.find())
+    data = request.get_json()
+    eventID = data["eventID"]
+    summary = data["summary"]
+
+    for event in event_data:
+        if str(eventID) == str(event["_id"]):
+            events.update_one({"_id": event["_id"]}, {"$set": {"end": True, "desc": summary}})
+
+    return jsonify({"message": "Event ended successfully"}), 200
+
 def submit_report():
     user = request.get_json()
     email = user.get('email')

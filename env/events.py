@@ -61,7 +61,8 @@ def get_details(eventID, event_data):
         "maxParticipants": event["maxParticipants"],
         "participants": event["participants"],
         "eventOwner": event["eventOwner"],
-        "town": event["town"]
+        "town": event["town"],
+        "end": event["end"]
       }
       break
 
@@ -90,7 +91,8 @@ def get_all(email):
       "open": event['open'],
       "currentParticipants": event['currentParticipants'],
       "maxParticipants": event['maxParticipants'],
-      "participants": event['participants']
+      "participants": event['participants'],
+      "end": event["end"]
     }
   ]
 

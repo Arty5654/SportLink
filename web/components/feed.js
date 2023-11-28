@@ -99,17 +99,29 @@ const EventCard = ({ event }) => {
       >
         {event.sport} in {event.town} - <span className="text-blue-500">{event.level}</span>
       </p>
-      <p className="text-sm cursor-pointer line-clamp-4" onClick={handleEventClick}>
-        {event.desc}
-      </p>
+
+      {event.end ? (
+        <div>
+          <p className="text-sm font-semibold">Event Summary:</p>
+          <p className="text-sm cursor-pointer line-clamp-3">{event.desc}</p>
+        </div>
+      ) : (
+        <p className="text-sm cursor-pointer line-clamp-4" onClick={handleEventClick}>
+          {event.desc}
+        </p>
+      )}
 
       <p className="text-sm absolute bottom-6">
         <span>
           Registered {event.currentParticipants} / {event.maxParticipants}
           {" • "}
-          <span className={status === "Open" ? "text-green-500" : "text-red-500"}>
-            {status}
-          </span>
+          {event.end ? (
+            <span className="text-red-500 font-semibold">Ended</span>
+          ) : (
+            <span className={status === "Open" ? "text-green-500" : "text-red-500"}>
+              {status}
+            </span>
+          )}
         </span>
       </p>
     </div>
@@ -134,7 +146,7 @@ const Feed = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-24">
       <div className="flex justify-between items-center gap-6">
         <div className="pb-8 w-4/5">
           <h1 className="font-semibold text-3xl pb-2">Events</h1>

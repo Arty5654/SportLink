@@ -21,7 +21,8 @@ const EventDetails = () => {
     maxParticipants: 0,
     participants: [],
     eventOwner: "",
-    twon: "",
+    town: "",
+    end: false,
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -55,6 +56,7 @@ const EventDetails = () => {
             participants: data.participants,
             eventOwner: data.eventOwner,
             town: data.town,
+            end: data.end,
           });
           console.log(response.data);
         });
@@ -139,21 +141,30 @@ const EventDetails = () => {
     router.push(`/edit-event?id=${eventID}`);
   };
 
+  console.log(event.end);
+
   return (
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
       <div className="w-4/5">
         <div className="flex items-end justify-between">
           <h1 className="text-3xl font-semibold">{event.title}</h1>
-          {eventOwner ? (
-            <button
-              className="text-sm font-base text-gray-500 pb-1 cusor-pointer"
-              onClick={handleEditClick}
-            >
-              <u>Edit</u>
-            </button>
-          ) : (
+
+          {event.end ? (
             <p></p>
+          ) : (
+            <div>
+              {eventOwner ? (
+                <button
+                  className="text-sm font-base text-gray-500 pb-1 cusor-pointer"
+                  onClick={handleEditClick}
+                >
+                  <u>Edit</u>
+                </button>
+              ) : (
+                <p></p>
+              )}
+            </div>
           )}
         </div>
 
@@ -161,9 +172,16 @@ const EventDetails = () => {
           {event.sport} in {event.town} • <span className="text-blue-500">{event.level}</span>
         </p>
 
-        <p className="pt-4">{event.desc}</p>
+        {event.end ? (
+          <div>
+            <p className="pt-4 text-xl font-semibold">Event Summary</p>
+            <p>{event.desc}</p>
+          </div>
+        ) : (
+          <p className="pt-4">{event.desc}</p>
+        )}
 
-        <div className="mt-6">
+        <div className="mt-8">
           <SmallMap
             center={{ lat: event.lat, lng: event.lng }}
             zoom={15}
@@ -175,36 +193,49 @@ const EventDetails = () => {
       {/* ITEM: Right Bar*/}
       <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">
-          <h1 className="text-xl font-semibold">
-            Status:{" "}
-            <span
-              className={
-                status === "Open" ? "text-blue-500 font-base" : "text-red-500 font-base"
-              }
-            >
-              {status}
-            </span>
+          <h1 className="text-xl font-semibold flex items-center">
+            Status:&nbsp;
+            {event.end ? (
+              <p className="text-red-500">Ended</p>
+            ) : (
+              <span
+                className={
+                  status === "Open" ? "text-blue-500 font-base" : "text-red-500 font-base"
+                }
+              >
+                {status}
+              </span>
+            )}
           </h1>
+
           <p className="text-sm text-gray-600 pb-6">
             Participants{" "}
             <span>
               {event.currentParticipants} / {event.maxParticipants}
             </span>
           </p>
-          <button
-            onClick={handleJoinEvent}
-            className={
-              status === "Open"
-                ? `w-full ${
-                    isUserParticipant ? "bg-red-500" : "bg-green-500"
-                  } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
-                : isUserParticipant
-                ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-                : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-            }
-          >
-            {isUserParticipant ? "Leave Event" : "Join Event"}
-          </button>
+
+          {event.end ? (
+            <p className="w-full bg-gray-400 text-white font-semibold text-lg rounded-xl py-2 mb-4 text-center">
+              Event has Ended
+            </p>
+          ) : (
+            <button
+              onClick={handleJoinEvent}
+              className={
+                status === "Open"
+                  ? `w-full ${
+                      isUserParticipant ? "bg-red-500" : "bg-green-500"
+                    } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
+                  : isUserParticipant
+                  ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+                  : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+              }
+            >
+              {isUserParticipant ? "Leave Event" : "Join Event"}
+            </button>
+          )}
+
           <div>
             <h2 className="pb-4 text-lg pt-2">Participants</h2>
             <div className="flex flex-col gap-2">

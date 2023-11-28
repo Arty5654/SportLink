@@ -99,6 +99,8 @@ paths:
                   type: string
                 town:
                   type: string
+                end:
+                  type: boolean
       responses:
         "200":
           description: "Created Request"
@@ -931,6 +933,8 @@ paths:
                       type: integer
                     maxParticipants:
                       type: integer
+                    end:
+                      type: boolean
         "404":
           description: Event not found
 
@@ -969,6 +973,8 @@ paths:
                   type: string
                 town:
                   type: string
+                end:
+                  type: boolean
       responses:
         "200":
           description: "Created Request"
@@ -986,6 +992,28 @@ paths:
               type: object
               properties:
                 eventID:
+                  type: string
+      responses:
+        "200":
+          description: Event deleted from database
+        "400":
+          description: Bad request
+
+  /end_event:
+    post:
+      summary: End event
+      description: End the event
+      operationId: app.end_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventID:
+                  type: string
+                summary:
                   type: string
       responses:
         "200":
@@ -1028,6 +1056,8 @@ paths:
                       type: integer
                     eventOwner:
                       type: string
+                    end:
+                      type: boolean
         "404":
           description: Event not found
 
@@ -1066,6 +1096,8 @@ paths:
                       type: integer
                     eventOwner:
                       type: string
+                    end:
+                      type: boolean
         "404":
           description: Event not found
 
@@ -1120,6 +1152,8 @@ paths:
                       type: string
                   eventOwner:
                     type: string
+                  end:
+                    type: boolean
         "404":
           description: Event not found
 
