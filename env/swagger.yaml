@@ -1932,6 +1932,7 @@ paths:
                     type: string
         "404":
           description: Tournament not found
+
   
   /join_tournament:
     post:
