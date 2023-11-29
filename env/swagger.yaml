@@ -1209,6 +1209,28 @@ paths:
         "400":
           description: Bad request
 
+  /remove_participant:
+    post:
+      summary: Remove Participant
+      description: Leave an event.
+      operationId: app.remove_participant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventID:
+                  type: string
+                username:
+                  type: string
+      responses:
+        "200":
+          description: participant removed successfully
+        "400":
+          description: Bad request
+
   /get_reports:
     get:
       operationId: app.get_reports
@@ -1871,7 +1893,7 @@ paths:
                     type: string
         "404":
           description: Tournament not found
-  
+
   /get_tournament_details:
     get:
       summary: Get Tournament Details
@@ -1904,5 +1926,3 @@ paths:
                     type: string
         "404":
           description: Tournament not found
-
-
