@@ -6,6 +6,78 @@ import axios from "axios";
 import User from "@app/User";
 import SmallMap from "./SmallMap";
 
+const ParticipantCard = ({ username }) => {
+  const [user, setUser] = useState(new User());
+  const [friendEmail, setFriendEmail] = useState("");
+
+  // set initial state
+  useEffect(() => {
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
+  }, []);
+
+  useEffect(() => {
+    const convertUsername = async () => {
+      try {
+        await axios
+          .post("http://localhost:5000/get_email_from_username", {
+            friendUsername: username,
+          })
+          .then((response) => {
+            console.log("Email response", response.data);
+            setFriendEmail(response.data);
+          });
+      } catch (error) {
+        console.log("Error converting username to email");
+      }
+    };
+
+    convertUsername();
+  }, []);
+
+  const handleAddFriend = () => {
+    try {
+      const r = axios.post("http://localhost:5000/send_friend_request", {
+        email: user.email,
+        friend_email: friendEmail.email,
+      });
+
+      r.then((response) => {
+        if (response.status === 200) {
+          alert("Friend Request sent!");
+          console.log("Friend request sent");
+        } else if (response.status === 204) {
+          console.log("There is already a request pending between you and this user!");
+        }
+      });
+    } catch (error) {
+      console.log("Error adding friend", error);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <p className="text-sm border-l border-gray-400 px-2 relative">{username}</p>
+      <div onClick={handleAddFriend} className="cursor-pointer">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="gray"
+          class="w-5 h-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+};
+
 const EventDetails = () => {
   const [user, setUser] = useState(new User());
   const [event, setEvent] = useState({
@@ -141,8 +213,6 @@ const EventDetails = () => {
     router.push(`/edit-event?id=${eventID}`);
   };
 
-  console.log(event.end);
-
   return (
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
@@ -239,26 +309,8 @@ const EventDetails = () => {
           <div>
             <h2 className="pb-4 text-lg pt-2">Participants</h2>
             <div className="flex flex-col gap-2">
-              {event.participants.map((event, index) => (
-                <p className="text-sm border-l border-gray-400 px-2 relative">
-                  {event}
-                  <span className="absolute right-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="gray"
-                      class="w-5 h-5"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </span>
-                </p>
+              {event.participants.map((participant, index) => (
+                <ParticipantCard key={index} username={participant} />
               ))}
             </div>
           </div>
