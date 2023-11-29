@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
 import SmallMap from "./SmallMap";
+import eventsCSS from './eventsCSS.css'
 
 const ParticipantCard = ({ username }) => {
   const [user, setUser] = useState(new User());
@@ -128,7 +129,6 @@ const EventDetails = () => {
             participants: data.participants,
             eventOwner: data.eventOwner,
             town: data.town,
-            end: data.end,
           });
           console.log(response.data);
         });
@@ -146,6 +146,7 @@ const EventDetails = () => {
         .post("http://localhost:5000/leave_event", {
           id: eventID,
           username: user.username,
+          team: team
         })
         .then((response) => {
           if (response.status === 200) {
@@ -278,13 +279,39 @@ const EventDetails = () => {
             )}
           </h1>
 
+          <div className="team-container">
+            <div className="team-card red-team">
+              <h3 className="team-title">Team Red</h3>
+              {event.participants.red.map((member, index) => (
+                  <p key={index} className="team-member">{member}</p>
+              ))}
+            </div>
+
+            <div className="team-card blue-team">
+              <h3 className="team-title">Team Blue</h3>
+              {event.participants.blue.map((member, index) => (
+                  <p key={index} className="team-member">{member}</p>
+              ))}
+            </div>
           <p className="text-sm text-gray-600 pb-6">
             Participants{" "}
             <span>
               {event.currentParticipants} / {event.maxParticipants}
             </span>
           </p>
-
+          <button
+            onClick={handleJoinEvent}
+            className={
+              status === "Open"
+                ? `w-full ${
+                    isUserParticipant ? "bg-red-500" : "bg-green-500"
+                  } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
+                : isUserParticipant
+                ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+                : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+            }
+          >
+            {isUserParticipant ? "Leave Event" : "Join Event"}
           {event.end ? (
             <p className="w-full bg-gray-400 text-white font-semibold text-lg rounded-xl py-2 mb-4 text-center">
               Event has Ended

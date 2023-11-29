@@ -935,6 +935,7 @@ paths:
                       type: integer
                     end:
                       type: boolean
+
         "404":
           description: Event not found
 
@@ -1919,6 +1920,49 @@ paths:
                     type: string
         "404":
           description: Tournament not found
+  /join_team:
+    post:
+      operationId: app.joinTeam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                _id:
+                  type: string
+                num:
+                  type: integer
+
+
+      responses:
+        "200":
+          description: "Team created sucessfully"
+  /create_chat:
+    post:
+      operationId: app.create_chat
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                members:
+                  type: array
+                user:
+                  type: string
+      responses:
+        "200":
+          description: "Created Chat"
+
+  /group_messages:
+    post:
+      operationId: app.init_groups
+      requestBody:
+
 
   /get_tournament_details:
     get:
@@ -1965,6 +2009,26 @@ paths:
             schema:
               type: object
               properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: "AAAAAAAAAA"
+
+  /refresh_gmsg:
+    post:
+      operationId: app.refresh_gmsg
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat_key:
+                  type: string
+      responses:
+        "200":
+          description: "POOP"
                 tournamentId:
                   type: string
                   description: The ID of the tournament to join.
@@ -1990,4 +2054,3 @@ paths:
         "404":
           description: Tournament or Team not found.
         "500":
-          description: Failed to join the tournament due to a server error.
