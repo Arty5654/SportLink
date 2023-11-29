@@ -930,6 +930,10 @@ paths:
                       type: integer
                     maxParticipants:
                       type: integer
+                    teamRed:
+                      type: array
+                    teamBlue:
+                      type: array
         "404":
           description: Event not found
 

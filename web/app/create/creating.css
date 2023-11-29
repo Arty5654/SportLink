@@ -13,16 +13,7 @@
     justify-content: center; /* horizontal alignment */
 
 }
-.team-card {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 5px;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin: 20px;
-    align-items: center;
-    justify-content: center;
-}
+
 
 .team-card input,
 .team-card textarea {
@@ -61,4 +52,110 @@
 .switch-container.event-selected .switch-option:last-child {
     background-color: #007BFF;
     color: black;  /* Text color for selected option is white */
+}
+
+.friends-list-container {
+    text-align: center;
+    margin: 20px;
+}
+
+.friends-list-title {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.friends-list {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.friend-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.friend-email {
+    margin-bottom: 10px;
+}
+
+.friend-checkbox {
+    margin-right: 10px;
+}
+
+.team-select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.team-select option[value="red"] {
+    background-color: lightcoral;
+}
+
+.team-select option[value="blue"] {
+    background-color: lightblue;
+}
+.team-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.team-card {
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 45%;
+}
+
+.red-team {
+    background-color: #ffdddd;
+    border-left: 5px solid darkred;
+}
+
+.blue-team {
+    background-color: #ddddff;
+    border-left: 5px solid darkblue;
+}
+
+.team-title {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: bold;
+}
+
+.team-member {
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+.event-title-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center;     /* Vertically center */
+    height: 100px;           /* Adjust height as needed */
+}
+
+.event-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.5em;
+    color: #333;
+    font-weight: bold;
+}
+
+.sports-icon {
+    width: 30px;
+    height: 30px;
+    fill: #555;
+    margin-left: 10px;
 }

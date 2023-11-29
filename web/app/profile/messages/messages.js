@@ -297,36 +297,36 @@ function Messages() {
             {activeButton === 'DM' && (
                 <div className="App">
                     <div className="chat-list">
-                    {currentKeys.map(keyObject => {
+                        {currentKeys.map(keyObject => {
 
-                        return (
-                            <button
-                                key={keyObject}
-                                onClick={() => setSelectedChat(keyObject)}
-                                className="chat-button">
-                                {keyObject}
-                            </button>
-                        );
-                    })}
-                </div>
+                            return (
+                                <button
+                                    key={keyObject}
+                                    onClick={() => setSelectedChat(keyObject)}
+                                    className="chat-button">
+                                    {keyObject}
+                                </button>
+                            );
+                        })}
+                    </div>
                     <div className="chat-content">
 
-                    {selectedChat && (
-                        currentChats.find(chat => chat.hasOwnProperty(selectedChat))?.[selectedChat]?.map((message, index) => (
-                            <div key={index}>{message.content}</div>
-                        ))
-                    )}
-                    {selectedChat && (
-                        <div className="input-container">
-                            <input
-                                value={inputMessage}
-                                onChange={e => setInputMessage(e.target.value)}
-                                placeholder="Type a message..."
-                            />
-                            <button onClick={sendMessage}>Send</button>
-                        </div>
-                    )}
-                </div>
+                        {selectedChat && (
+                            currentChats.find(chat => chat.hasOwnProperty(selectedChat))?.[selectedChat]?.map((message, index) => (
+                                <div key={index}>{message.content}</div>
+                            ))
+                        )}
+                        {selectedChat && (
+                            <div className="input-container">
+                                <input
+                                    value={inputMessage}
+                                    onChange={e => setInputMessage(e.target.value)}
+                                    placeholder="Type a message..."
+                                />
+                                <button onClick={sendMessage}>Send</button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
             {activeButton === 'Groups' && (
