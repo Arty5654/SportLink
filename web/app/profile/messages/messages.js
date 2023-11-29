@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef} from 'react';
 import './board.css';
 import io from 'socket.io-client';
 import axios from "@node_modules/axios/index";
 import User from "@app/User";
-
 const socket = io('http://localhost:5000', {reconnect: true})
 
 function Messages() {
@@ -18,6 +17,9 @@ function Messages() {
     const [currentGroupChats, setCurrentGroupChats] = useState([]);
     const [selectedGroupChat, setSelectedGroupChat] = useState(null);
     const [currentGroupKeys, setCurrentGroupKeys] = useState([])
+
+    const currentGCRef = useRef(currentGroupChats);
+    currentGCRef.current = currentGroupChats;
 
     const [inputMessage, setInputMessage] = useState('');
     const [inputGroupMessage, setInputGroupMessage] = useState('')
@@ -155,13 +157,13 @@ function Messages() {
             console.log("Recieved Group Message")
             let updatedGroupChats = [];
             let chatKey = data.key
-            console.log(currentGroupChats.length)
-            for (let i = 0; i < currentGroupChats.length; i++) {
-                const chat = currentGroupChats[i];
+            console.log(currentGCRef.current.length);
+            for (let i = 0; i < currentGCRef.current.length; i++) {
+                const chat = currentGCRef.current[i];
 
                 console.log(chatKey)
                 console.log(data.key)
-                console.log(currentGroupChats[i])
+                console.log(data)
                 if (chat.key === chatKey) {
                     console.log("RAHHHH!");
                     updatedGroupChats.push({
@@ -172,7 +174,7 @@ function Messages() {
                     updatedGroupChats.push(chat);
                 }
             }
-            console.log(updatedGroupChats)
+            setCurrentGroupChats(updatedGroupChats)
         }
         socket.on('message_response', messageResponseHandler);
 
