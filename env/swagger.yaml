@@ -1231,6 +1231,26 @@ paths:
         "400":
           description: Bad request
 
+  /get_email_from_username:
+    post:
+      summary: Remove Participant
+      description: Convert username to email
+      operationId: app.get_email_from_username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                friendUsername:
+                  type: string
+      responses:
+        "200":
+          description: username converted succesfully
+        "400":
+          description: Bad request
+
   /get_reports:
     get:
       operationId: app.get_reports
@@ -1925,7 +1945,7 @@ paths:
                   sport:
                     type: string
                   teamCount:
-                    type: string                  
+                    type: string
                   tournamentDuration:
                     type: string
                   matchDuration:
@@ -1933,7 +1953,6 @@ paths:
         "404":
           description: Tournament not found
 
-  
   /join_tournament:
     post:
       summary: Join a tournament with a team
@@ -1956,7 +1975,7 @@ paths:
                 - tournamentId
                 - teamId
       responses:
-        '200':
+        "200":
           description: Successfully joined the tournament.
           content:
             application/json:
@@ -1966,11 +1985,9 @@ paths:
                   message:
                     type: string
                     example: Joined the tournament successfully.
-        '400':
+        "400":
           description: Missing tournamentId or teamId in the request.
-        '404':
+        "404":
           description: Tournament or Team not found.
-        '500':
+        "500":
           description: Failed to join the tournament due to a server error.
-  
-

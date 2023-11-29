@@ -536,6 +536,23 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
+# Use the username to find the user email
+def get_email_from_username():
+    data = request.get_json()
+    username = data["friendUsername"]
+    user_data = list(users.find())
+
+    request_data = {
+        "email": ""
+    }
+
+    for user in user_data:
+        if str(username) == user["username"]:
+            request_data["email"] = user["email"]
+
+    return jsonify(request_data)
+
+
 # Send a friend request to another user
 def send_friend_request():
     # Extracting data from request
