@@ -152,19 +152,28 @@ function Messages() {
             }
         };
         const groupMessageResponseHandler = async (data) => {
-            const chatKey = data.key;
-            console.log(chatKey);
-            try {
-                const response = await axios.post("http://localhost:5000/refresh_gmsg", {
-                    chat_key: chatKey
-                });
+            console.log("Recieved Group Message")
+            let updatedGroupChats = [];
+            let chatKey = data.key
+            console.log(currentGroupChats.length)
+            for (let i = 0; i < currentGroupChats.length; i++) {
+                const chat = currentGroupChats[i];
 
-                console.log(currentGroupChats)
-                console.log(response.data);
-            } catch (error) {
-                console.error('Error making the API call:', error);
+                console.log(chatKey)
+                console.log(data.key)
+                console.log(currentGroupChats[i])
+                if (chat.key === chatKey) {
+                    console.log("RAHHHH!");
+                    updatedGroupChats.push({
+                        ...chat,
+                        messages: [...chat.messages, {content: data.content}]
+                    });
+                } else {
+                    updatedGroupChats.push(chat);
+                }
             }
-        };
+            console.log(updatedGroupChats)
+        }
         socket.on('message_response', messageResponseHandler);
 
         socket.on('group_response', groupMessageResponseHandler);
@@ -331,7 +340,7 @@ function Messages() {
                     <div className="chat-content">
                         {selectedGroupChat && (
                             currentGroupChats.find(chat => chat.key === selectedGroupChat)?.messages.map((message, index) => (
-                                <div key={index}>{message.content}</div> // Replace 'message.id' with the unique identifier of your messages
+                                <div key={index}>{message.content}</div>
                             ))
                         )}
                         {selectedGroupChat && (
