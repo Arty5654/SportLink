@@ -1853,3 +1853,56 @@ paths:
                       type: string
         "404":
           description: Tournament not found
+
+  /get_tournament_id:
+    get:
+      summary: Get Tournament ID
+      description: Retrieve a tournament ID from the database.
+      operationId: app.get_tournament_id
+      responses:
+        "200":
+          description: Tournament ID retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tournamentId:
+                    type: string
+        "404":
+          description: Tournament not found
+  
+  /get_tournament_details:
+    get:
+      summary: Get Tournament Details
+      description: Retrieve detailed information for a specific tournament from the database.
+      operationId: app.get_tournament_details
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: The ID of the tournament to fetch details for.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tournament details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectID:
+                    type: string
+                  sport:
+                    type: string
+                  teamCount:
+                    type: string
+                  tournamentDuration:
+                    type: string
+                  matchDuration:
+                    type: string
+        "404":
+          description: Tournament not found
+
+

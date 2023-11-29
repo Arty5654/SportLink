@@ -155,7 +155,7 @@ const NotifsPage = () => {
           "email": curr_email 
         })
         setReportNotifications([]); 
-        setFriendRequests([]); 
+        //setFriendRequests([]); 
         console.log("Notifications cleared");
       } catch (error) {
         alert("Can not clear notifcations with pending friend requests!");

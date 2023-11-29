@@ -1089,6 +1089,30 @@ def get_tournaments():
 
     return jsonify(all_tournaments), 200
 
+def get_tournament_id():
+    tournament = tournaments.find_one({})
+    if tournament:
+        return jsonify({'tournamentId': str(tournament['_id'])}), 200
+    else:
+        return jsonify({'message': 'Tournament not found'}), 404
+
+def get_tournament_details():
+    tournament_id = request.args.get('id')
+    if not tournament_id:
+        return jsonify({'message': 'Missing tournament ID'}), 400
+
+    try:
+        object_id = ObjectId(tournament_id)
+    except:
+        return jsonify({'message': 'Invalid tournament ID'}), 400
+
+    tournament = tournaments.find_one({'_id': object_id})
+    if tournament:
+        tournament['_id'] = str(tournament['_id'])
+        return jsonify(tournament), 200
+    else:
+        return jsonify({'message': 'Tournament not found'}), 404
+
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
 app.add_api('swagger.yaml')
