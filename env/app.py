@@ -913,6 +913,19 @@ def end_event():
 
     return jsonify({"message": "Event ended successfully"}), 200
 
+def remove_participant():
+    event_data = list(events.find())
+    data = request.get_json()
+    eventID = data["eventID"]
+    username = data["username"]
+
+    for event in event_data:
+        if str(eventID) == str(event["_id"]):
+            event["participants"].remove(username)
+            event["currentParticipants"] -= 1
+            events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
+            return jsonify({'message': 'Deleted User from event'}), 200
+
 def submit_report():
     user = request.get_json()
     email = user.get('email')
