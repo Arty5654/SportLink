@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './board.css';
 import io from 'socket.io-client';
 import axios from "@node_modules/axios/index";
@@ -13,14 +13,17 @@ function Messages() {
 
     const [currentChats, setCurrentChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
-    const [currentKeys, setCurrentKeys] = useState([])
+    const [currentKeys, setCurrentKeys] = useState([]);
 
     const [currentGroupChats, setCurrentGroupChats] = useState([]);
     const [selectedGroupChat, setSelectedGroupChat] = useState(null);
-    const [currentGroupKeys, setCurrentGroupKeys] = useState([])
+    const [currentGroupKeys, setCurrentGroupKeys] = useState([]);
+
+    const currentGCRef = useRef(currentGroupChats);
+    currentGCRef.current = currentGroupChats;
 
     const [inputMessage, setInputMessage] = useState('');
-    const [inputGroupMessage, setInputGroupMessage] = useState('')
+    const [inputGroupMessage, setInputGroupMessage] = useState('');
     const hostAddress = user.email;
 
     const [activeButton, setActiveButton] = useState('DM');
@@ -116,13 +119,14 @@ function Messages() {
 
                     console.log(response.data)
                     setCurrentGroupChats(response.data.group_chats)
+                    console.log(response.data.group_chats);
                     setCurrentGroupKeys(response.data.group_keys)
                 })
                 .catch(error => {
                     console.error('Error fetching group messages:', error);
                 });
         }
-    }, [friends]);
+    }, [ , friends]);
 
     useEffect(() => {
         socket.on('connect', () => {
@@ -154,14 +158,15 @@ function Messages() {
         const groupMessageResponseHandler = async (data) => {
             console.log("Recieved Group Message")
             let updatedGroupChats = [];
-            let chatKey = data.key
-            console.log(currentGroupChats.length)
-            for (let i = 0; i < currentGroupChats.length; i++) {
-                const chat = currentGroupChats[i];
+            let chatKey = data.key;
+            console.log(chatKey)
+            console.log(currentGCRef.current.length);
+            for (let i = 0; i < currentGCRef.current.length; i++) {
+                const chat = currentGCRef.current[i];
 
                 console.log(chatKey)
                 console.log(data.key)
-                console.log(currentGroupChats[i])
+                console.log(data);
                 if (chat.key === chatKey) {
                     console.log("RAHHHH!");
                     updatedGroupChats.push({
@@ -173,6 +178,10 @@ function Messages() {
                 }
             }
             console.log(updatedGroupChats)
+            if (updatedGroupChats.length > 0) {
+                setCurrentGroupChats(updatedGroupChats);
+            }
+
         }
         socket.on('message_response', messageResponseHandler);
 
@@ -182,6 +191,7 @@ function Messages() {
             socket.off('connect');
             socket.off('message');
             socket.off('message_response', messageResponseHandler);
+            socket.off('group_response', groupMessageResponseHandler);
         };
     }, [selectedChat, hostAddress]); // Dependencies
 
