@@ -1040,11 +1040,21 @@ def create_team():
     return create_a_team(team_name, team_leader, teammates, team_size, max_team_size, privacy_settings)
 
 def get_teams():
-    curr_email = request.args.get('email')
+    #curr_email = request.args.get('email')
 
-    list_of_teams = get_users_teams(curr_email)
+    #list_of_teams = get_users_teams(curr_email)
 
-    return jsonify(list_of_teams), 200
+    #return jsonify(list_of_teams), 200
+
+    all_teams = list(teams.find({}))
+
+    # Convert ObjectId to string
+    for team in all_teams:
+        team['_id'] = str(team['_id'])
+
+    #print("All teams:", all_teams)
+
+    return jsonify(all_teams), 200
 
 def leave_team():
     req = request.get_json()
@@ -1087,7 +1097,7 @@ def get_tournaments():
 
     #print("All tournaments:", all_tournaments)
 
-    return jsonify(all_tournaments), 200
+    return jsonify(json.loads(json.dumps(all_tournaments, default=str)))
 
 def get_tournament_id():
     tournament = tournaments.find_one({})
@@ -1109,9 +1119,45 @@ def get_tournament_details():
     tournament = tournaments.find_one({'_id': object_id})
     if tournament:
         tournament['_id'] = str(tournament['_id'])
-        return jsonify(tournament), 200
+        return jsonify(json.loads(json.dumps(tournament, default=str)))
     else:
         return jsonify({'message': 'Tournament not found'}), 404
+
+def join_tournament():
+    data = request.json
+    tournament_id = data.get('tournamentId')
+    team_id = data.get('teamId')
+
+    # Validate inputs
+    if not tournament_id or not team_id:
+        return jsonify({"message": "Missing tournamentId or teamId"}), 400
+
+    # Convert IDs to ObjectId
+    try:
+        obj_tournament_id = ObjectId(tournament_id)
+        obj_team_id = ObjectId(team_id)
+    except:
+        return jsonify({"message": "Invalid tournamentId or teamId"}), 400
+
+    # Check if tournament and team exist
+    tournament = db.tournaments.find_one({'_id': obj_tournament_id})
+    team = db.teams.find_one({'_id': obj_team_id})
+    if not tournament or not team:
+        return jsonify({"message": "Tournament or Team not found"}), 404
+
+    # Add team name to tournament
+    updated_tournament = db.tournaments.update_one(
+        {'_id': obj_tournament_id},
+        {'$addToSet': {'teams': team['name']}}  # Use team name here
+    )
+
+    if updated_tournament.modified_count == 0:
+        return jsonify({"message": "Failed to join the tournament"}), 500
+
+    return jsonify({"message": "Joined the tournament successfully"}), 200
+
+
+
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
