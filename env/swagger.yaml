@@ -1932,6 +1932,49 @@ paths:
                     type: string
         "404":
           description: Tournament not found
+  
+  /join_tournament:
+    post:
+      summary: Join a tournament with a team
+      description: Endpoint to join a tournament with a specific team.
+      operationId: app.join_tournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tournamentId:
+                  type: string
+                  description: The ID of the tournament to join.
+                teamId:
+                  type: string
+                  description: The ID of the team joining the tournament.
+              required:
+                - tournamentId
+                - teamId
+      responses:
+        '200':
+          description: Successfully joined the tournament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Joined the tournament successfully.
+        '400':
+          description: Missing tournamentId or teamId in the request.
+        '404':
+          description: Tournament or Team not found.
+        '500':
+          description: Failed to join the tournament due to a server error.
+  
+
+  
+  
 
   
   /join_tournament:
