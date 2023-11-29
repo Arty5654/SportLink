@@ -1256,7 +1256,7 @@ def group_message(data):
 
     # Broadcast or emit the message as needed
     for member in members:
-        emit('group_response', {'key': key}, room=member)
+        emit('group_response', {'key': key, 'content': content}, room=member)
         print("Sent to : " + member)
 
     print("Messages Sent")
