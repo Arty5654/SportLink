@@ -7,6 +7,78 @@ import User from "@app/User";
 import SmallMap from "./SmallMap";
 import eventsCSS from './eventsCSS.css'
 
+const ParticipantCard = ({ username }) => {
+  const [user, setUser] = useState(new User());
+  const [friendEmail, setFriendEmail] = useState("");
+
+  // set initial state
+  useEffect(() => {
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
+  }, []);
+
+  useEffect(() => {
+    const convertUsername = async () => {
+      try {
+        await axios
+          .post("http://localhost:5000/get_email_from_username", {
+            friendUsername: username,
+          })
+          .then((response) => {
+            console.log("Email response", response.data);
+            setFriendEmail(response.data);
+          });
+      } catch (error) {
+        console.log("Error converting username to email");
+      }
+    };
+
+    convertUsername();
+  }, []);
+
+  const handleAddFriend = () => {
+    try {
+      const r = axios.post("http://localhost:5000/send_friend_request", {
+        email: user.email,
+        friend_email: friendEmail.email,
+      });
+
+      r.then((response) => {
+        if (response.status === 200) {
+          alert("Friend Request sent!");
+          console.log("Friend request sent");
+        } else if (response.status === 204) {
+          console.log("There is already a request pending between you and this user!");
+        }
+      });
+    } catch (error) {
+      console.log("Error adding friend", error);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <p className="text-sm border-l border-gray-400 px-2 relative">{username}</p>
+      <div onClick={handleAddFriend} className="cursor-pointer">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="gray"
+          class="w-5 h-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+};
+
 const EventDetails = () => {
   const [user, setUser] = useState(new User());
   const [event, setEvent] = useState({
@@ -22,6 +94,8 @@ const EventDetails = () => {
     maxParticipants: 0,
     participants: [],
     eventOwner: "",
+    town: "",
+    end: false,
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -55,7 +129,6 @@ const EventDetails = () => {
             participants: data.participants,
             eventOwner: data.eventOwner,
             town: data.town,
-
           });
           console.log(response.data);
         });
@@ -142,21 +215,27 @@ const EventDetails = () => {
   };
 
   return (
-
     <div className="w-full flex gap-8">
       {/* ITEM: Left Side */}
       <div className="w-4/5">
         <div className="flex items-end justify-between">
           <h1 className="text-3xl font-semibold">{event.title}</h1>
-          {eventOwner ? (
-            <button
-              className="text-sm font-base text-gray-500 pb-1 cusor-pointer"
-              onClick={handleEditClick}
-            >
-              <u>Edit</u>
-            </button>
-          ) : (
+
+          {event.end ? (
             <p></p>
+          ) : (
+            <div>
+              {eventOwner ? (
+                <button
+                  className="text-sm font-base text-gray-500 pb-1 cusor-pointer"
+                  onClick={handleEditClick}
+                >
+                  <u>Edit</u>
+                </button>
+              ) : (
+                <p></p>
+              )}
+            </div>
           )}
         </div>
 
@@ -164,26 +243,42 @@ const EventDetails = () => {
           {event.sport} in {event.town} • <span className="text-blue-500">{event.level}</span>
         </p>
 
-        <p className="pt-4">{event.desc}</p>
+        {event.end ? (
+          <div>
+            <p className="pt-4 text-xl font-semibold">Event Summary</p>
+            <p>{event.desc}</p>
+          </div>
+        ) : (
+          <p className="pt-4">{event.desc}</p>
+        )}
 
-        <div className="mt-6">
-            <SmallMap center={{ lat: event.lat, lng: event.lng }} zoom={15} address={event.address}/>
+        <div className="mt-8">
+          <SmallMap
+            center={{ lat: event.lat, lng: event.lng }}
+            zoom={15}
+            address={event.address}
+          />
         </div>
       </div>
 
       {/* ITEM: Right Bar*/}
       <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">
-          <h1 className="text-xl font-semibold">
-            Status:{" "}
-            <span
-              className={
-                status === "Open" ? "text-blue-500 font-base" : "text-red-500 font-base"
-              }
-            >
-              {status}
-            </span>
+          <h1 className="text-xl font-semibold flex items-center">
+            Status:&nbsp;
+            {event.end ? (
+              <p className="text-red-500">Ended</p>
+            ) : (
+              <span
+                className={
+                  status === "Open" ? "text-blue-500 font-base" : "text-red-500 font-base"
+                }
+              >
+                {status}
+              </span>
+            )}
           </h1>
+
           <div className="team-container">
             <div className="team-card red-team">
               <h3 className="team-title">Team Red</h3>
@@ -198,7 +293,6 @@ const EventDetails = () => {
                   <p key={index} className="team-member">{member}</p>
               ))}
             </div>
-          </div>
           <p className="text-sm text-gray-600 pb-6">
             Participants{" "}
             <span>
@@ -218,7 +312,35 @@ const EventDetails = () => {
             }
           >
             {isUserParticipant ? "Leave Event" : "Join Event"}
-          </button>
+          {event.end ? (
+            <p className="w-full bg-gray-400 text-white font-semibold text-lg rounded-xl py-2 mb-4 text-center">
+              Event has Ended
+            </p>
+          ) : (
+            <button
+              onClick={handleJoinEvent}
+              className={
+                status === "Open"
+                  ? `w-full ${
+                      isUserParticipant ? "bg-red-500" : "bg-green-500"
+                    } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
+                  : isUserParticipant
+                  ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+                  : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+              }
+            >
+              {isUserParticipant ? "Leave Event" : "Join Event"}
+            </button>
+          )}
+
+          <div>
+            <h2 className="pb-4 text-lg pt-2">Participants</h2>
+            <div className="flex flex-col gap-2">
+              {event.participants.map((participant, index) => (
+                <ParticipantCard key={index} username={participant} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -5,12 +5,42 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
 
+const ParticipantCard = ({ username }) => {
+  const searchParams = useSearchParams();
+  const eventID = searchParams.get("id");
+
+  // Handle removing a participant from the participants list
+  const handleDeleteParticipant = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/remove_participant", { eventID, username });
+      alert("You have successfully removed a participant");
+      window.location.reload();
+    } catch (error) {
+      console.log("Error removing participant from event: ", error);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <p className="text-sm border-l border-gray-400 px-2 relative">{username}</p>
+      <p className="text-red-500 cursor-pointer" onClick={handleDeleteParticipant}>
+        x
+      </p>
+    </div>
+  );
+};
+
 const EditEvent = () => {
   const [user, setUser] = useState(new User());
+  const [endState, setEndState] = useState(false);
+  const [summary, setSummary] = useState("");
   const [event, setEvent] = useState({
     title: "",
     desc: "",
-    city: "",
+    address: "",
+    lat: 0,
+    lng: 0,
     sport: "",
     level: "",
     open: false,
@@ -18,6 +48,8 @@ const EditEvent = () => {
     maxParticipants: 0,
     participants: [],
     eventOwner: "",
+    town: "",
+    end: false,
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -40,7 +72,9 @@ const EditEvent = () => {
           setEvent({
             title: data.title,
             desc: data.desc,
-            city: data.city,
+            address: data.address,
+            lat: data.lat,
+            lng: data.lng,
             sport: data.sport,
             level: data.level,
             open: data.open,
@@ -48,17 +82,65 @@ const EditEvent = () => {
             maxParticipants: data.maxParticipants,
             participants: data.participants,
             eventOwner: data.eventOwner,
+            town: data.town,
           });
-          console.log(response.data);
+          console.log("Response Data: ", response.data);
         });
       } catch (error) {
-        console.log("Error: ", error);
+        console.log("Get Event Details Error: ", error);
       }
     };
     getEventDetails();
   }, [eventID]);
 
-  const handleCancelClick = () => {
+  // Handle saving edits, send new event data to the backend
+  const handleSaveClick = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedEvent = { ...event, eventID }; // Include eventID in the payload
+      await axios.post("http://localhost:5000/edit_event_details", updatedEvent);
+      router.push(`/events?id=${eventID}`);
+    } catch (error) {
+      console.log("Handle Save Error: ", error);
+    }
+  };
+
+  // Handle deleting an event, post request to backend
+  const handleDeleteEvent = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/delete_event_details", { eventID });
+    } catch (error) {
+      console.log("Handle Delete Error: ", error);
+    }
+    router.push("/");
+  };
+
+  // Handle first end event click, set end state to true and switch to confirm state
+  const handleEndEvent = async (e) => {
+    e.preventDefault();
+    setEndState(true);
+  };
+
+  // Handle typing in the summary box
+  const handleSummaryChange = (e) => {
+    setSummary(e.target.value);
+  };
+
+  // Handle confirming to end event, send summary to backend to update description
+  const handleEndConfirm = async (e) => {
+    e.preventDefault();
+    try {
+      const confirmEndData = { summary, eventID };
+      await axios.post("http://localhost:5000/end_event", confirmEndData);
+    } catch (error) {
+      console.log("Error with ending the event");
+    }
+    router.push("/");
+  };
+
+  const handleCancelClick = async (e) => {
+    e.preventDefault();
     router.push(`/events?id=${eventID}`);
   };
 
@@ -74,7 +156,7 @@ const EditEvent = () => {
               name="eventTitle"
               value={event.title}
               onChange={(e) => setEvent({ ...event, title: e.target.value })}
-              className="w-full rounded-lg h-8 pl-2 text-2xl outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
+              className="w-full rounded-lg h-8 px-2 py-1 text-xl outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
             />
           </div>
 
@@ -96,14 +178,14 @@ const EditEvent = () => {
                 <option value="Weightlifting">Weightlifting</option>
               </select>
             </div>
-            {/* City Textbox */}
+            {/* Town Textbox */}
             <div className="w-1/2 flex gap-4">
-              <h2 className="text-2xl font-semibold">City: </h2>
+              <h2 className="text-2xl font-semibold">Town: </h2>
               <textarea
-                name="eventCity"
-                value={event.city}
-                onChange={(e) => setEvent({ ...event, city: e.target.value })}
-                className="w-full rounded-lg pt-1 h-8 pl-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
+                name="eventTown"
+                value={event.town}
+                onChange={(e) => setEvent({ ...event, town: e.target.value })}
+                className="w-full rounded-lg pt-1 h-8 px-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
               />
             </div>
           </div>
@@ -114,14 +196,19 @@ const EditEvent = () => {
               name="eventDesc"
               value={event.desc}
               onChange={(e) => setEvent({ ...event, desc: e.target.value })}
-              className="w-full rounded-lg h-96 pl-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
+              className="w-full rounded-lg h-96 px-2 py-2 outline-0 border resize-none border-blue-100 hover:border-blue-200 active:border-blue-200"
             />
           </div>
           {/* ITEM: Row Four */}
           <div className="flex gap-4 w-full pb-8">
-            <button className="bg-blue-500 text-white w-1/2 py-2 rounded-xl">Save</button>
             <button
-              className="text-black w-1/2 py-2 rounded-xl border border-black"
+              className="bg-blue-500 text-white w-1/2 py-2 rounded-xl"
+              onClick={handleSaveClick}
+            >
+              Save
+            </button>
+            <button
+              className="text-black w-1/2 py-2 rounded-xl border border-gray-300"
               onClick={handleCancelClick}
             >
               Cancel
@@ -130,16 +217,61 @@ const EditEvent = () => {
         </div>
 
         {/* ITEM: Right Bar*/}
-        <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
-          <div className="py-10 px-8">
-            <h1 className="text-2xl font-semibold pb-8">Participants</h1>
-            <div classname="">
-              {event.participants.map((event, index) => (
-                <p className="text-sm border-l border-gray-400 px-2 relative">{event}</p>
-              ))}
+        {endState ? (
+          <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg relative">
+            <div className="py-10 px-8">
+              <h1 className="text-2xl font-semibold pb-8">Summary</h1>
+              <textarea
+                placeholder="Enter the event summary here."
+                className="w-full h-60 text-sm"
+                value={summary}
+                onChange={handleSummaryChange}
+              />
+            </div>
+            <div className="absolute bottom-0 py-10 px-8 w-full">
+              <button
+                className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setEndState(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="w-full rounded-lg bg-green-500 text-white py-2"
+                onClick={handleEndConfirm}
+              >
+                Confirm
+              </button>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg relative">
+            <div className="py-10 px-8">
+              <h1 className="text-2xl font-semibold pb-8">Participants</h1>
+              <div classname="">
+                {event.participants.map((participant, index) => (
+                  <ParticipantCard key={index} username={participant} />
+                ))}
+              </div>
+            </div>
+            <div className="absolute bottom-0 py-10 px-8 w-full">
+              <button
+                className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2"
+                onClick={handleEndEvent}
+              >
+                End Event
+              </button>
+              <button
+                className="w-full rounded-lg bg-red-500 text-white py-2"
+                onClick={handleDeleteEvent}
+              >
+                Delete Event
+              </button>
+            </div>
+          </div>
+        )}
       </form>
     </div>
   );

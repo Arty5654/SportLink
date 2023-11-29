@@ -63,6 +63,7 @@ paths:
       responses:
         "200":
           description: "Created Request"
+
   /create:
     post:
       operationId: app.create
@@ -98,6 +99,8 @@ paths:
                   type: string
                 town:
                   type: string
+                end:
+                  type: boolean
       responses:
         "200":
           description: "Created Request"
@@ -930,12 +933,94 @@ paths:
                       type: integer
                     maxParticipants:
                       type: integer
-                    teamRed:
-                      type: array
-                    teamBlue:
-                      type: array
+                    end:
+                      type: boolean
+
         "404":
           description: Event not found
+
+  /edit_event_details:
+    post:
+      operationId: app.edit_event_details
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                desc:
+                  type: string
+                address:
+                  type: string
+                lat:
+                  type: number
+                lng:
+                  type: number
+                open:
+                  type: boolean
+                sport:
+                  type: string
+                currentParticipants:
+                  type: integer
+                maxParticipants:
+                  type: integer
+                participants:
+                  type: array
+                level:
+                  type: string
+                eventOwner:
+                  type: string
+                town:
+                  type: string
+                end:
+                  type: boolean
+      responses:
+        "200":
+          description: "Created Request"
+
+  /delete_event_details:
+    post:
+      summary: Delete event from database
+      description: Delete event from database
+      operationId: app.delete_event_details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventID:
+                  type: string
+      responses:
+        "200":
+          description: Event deleted from database
+        "400":
+          description: Bad request
+
+  /end_event:
+    post:
+      summary: End event
+      description: End the event
+      operationId: app.end_event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventID:
+                  type: string
+                summary:
+                  type: string
+      responses:
+        "200":
+          description: Event deleted from database
+        "400":
+          description: Bad request
 
   /get_my_events:
     get:
@@ -972,6 +1057,48 @@ paths:
                       type: integer
                     eventOwner:
                       type: string
+                    end:
+                      type: boolean
+        "404":
+          description: Event not found
+
+  /get_my_created_events:
+    get:
+      summary: Get Event Information that user is part of
+      description: Retrieve event information from the database.
+      operationId: app.get_my_created_events
+      responses:
+        "200":
+          description: Event information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    objectID:
+                      type: string
+                    title:
+                      type: string
+                    sport:
+                      type: string
+                    city:
+                      type: string
+                    desc:
+                      type: string
+                    level:
+                      type: string
+                    open:
+                      type: boolean
+                    currentParticipants:
+                      type: integer
+                    maxParticipants:
+                      type: integer
+                    eventOwner:
+                      type: string
+                    end:
+                      type: boolean
         "404":
           description: Event not found
 
@@ -1026,6 +1153,8 @@ paths:
                       type: string
                   eventOwner:
                     type: string
+                  end:
+                    type: boolean
         "404":
           description: Event not found
 
@@ -1078,6 +1207,48 @@ paths:
       responses:
         "200":
           description: Event left successfully
+        "400":
+          description: Bad request
+
+  /remove_participant:
+    post:
+      summary: Remove Participant
+      description: Leave an event.
+      operationId: app.remove_participant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventID:
+                  type: string
+                username:
+                  type: string
+      responses:
+        "200":
+          description: participant removed successfully
+        "400":
+          description: Bad request
+
+  /get_email_from_username:
+    post:
+      summary: Remove Participant
+      description: Convert username to email
+      operationId: app.get_email_from_username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                friendUsername:
+                  type: string
+      responses:
+        "200":
+          description: username converted succesfully
         "400":
           description: Bad request
 
@@ -1611,6 +1782,8 @@ paths:
                 items:
                   type: object
                   properties:
+                    objectID:
+                      type: string
                     name:
                       type: string
                     leader:
@@ -1699,7 +1872,7 @@ paths:
           description: "Tournament Created"
 
   /get_tournaments:
-     get:
+    get:
       summary: Get Tourny Information
       description: Retrieve event information from the database.
       operationId: app.get_tournaments
@@ -1723,6 +1896,28 @@ paths:
                       type: string
                     matchDuration:
                       type: string
+                    teams:
+                      type: array
+                    isFull:
+                      type: boolean
+        "404":
+          description: Tournament not found
+
+  /get_tournament_id:
+    get:
+      summary: Get Tournament ID
+      description: Retrieve a tournament ID from the database.
+      operationId: app.get_tournament_id
+      responses:
+        "200":
+          description: Tournament ID retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tournamentId:
+                    type: string
         "404":
           description: Tournament not found
   /join_team:
@@ -1767,6 +1962,48 @@ paths:
     post:
       operationId: app.init_groups
       requestBody:
+
+
+  /get_tournament_details:
+    get:
+      summary: Get Tournament Details
+      description: Retrieve detailed information for a specific tournament from the database.
+      operationId: app.get_tournament_details
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: The ID of the tournament to fetch details for.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tournament details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectID:
+                    type: string
+                  sport:
+                    type: string
+                  teamCount:
+                    type: string
+                  tournamentDuration:
+                    type: string
+                  matchDuration:
+                    type: string
+        "404":
+          description: Tournament not found
+
+  /join_tournament:
+    post:
+      summary: Join a tournament with a team
+      description: Endpoint to join a tournament with a specific team.
+      operationId: app.join_tournament
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1792,3 +2029,28 @@ paths:
       responses:
         "200":
           description: "POOP"
+                tournamentId:
+                  type: string
+                  description: The ID of the tournament to join.
+                teamId:
+                  type: string
+                  description: The ID of the team joining the tournament.
+              required:
+                - tournamentId
+                - teamId
+      responses:
+        "200":
+          description: Successfully joined the tournament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Joined the tournament successfully.
+        "400":
+          description: Missing tournamentId or teamId in the request.
+        "404":
+          description: Tournament or Team not found.
+        "500":

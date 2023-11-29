@@ -16,7 +16,6 @@ const HistoryCard = ({ event }) => {
     router.push(`/events?id=${event._id}`);
   };
 
-
   const deleteEventHistory = () => {
     axios
       .post("http://localhost:5000/delete_event_history", {
@@ -90,24 +89,39 @@ const EventCard = ({ event }) => {
   };
 
   return (
-    <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64 shadow-lg">
+    <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64 shadow-lg line-clamp-1">
       <h1 className="font-semibold cursor-pointer" onClick={handleEventClick}>
         {event.title}
       </h1>
-      <p className="text-sm text-gray-500 pb-4 cursor-pointer" onClick={handleEventClick}>
+      <p
+        className="text-sm text-gray-500 pb-4 cursor-pointer line-clamp-2"
+        onClick={handleEventClick}
+      >
         {event.sport} in {event.town} - <span className="text-blue-500">{event.level}</span>
       </p>
-      <p className="text-sm pb-4 cursor-pointer" onClick={handleEventClick}>
-        {event.desc}
-      </p>
+
+      {event.end ? (
+        <div>
+          <p className="text-sm font-semibold">Event Summary:</p>
+          <p className="text-sm cursor-pointer line-clamp-3">{event.desc}</p>
+        </div>
+      ) : (
+        <p className="text-sm cursor-pointer line-clamp-4" onClick={handleEventClick}>
+          {event.desc}
+        </p>
+      )}
 
       <p className="text-sm absolute bottom-6">
         <span>
           Registered {event.currentParticipants} / {event.maxParticipants}
           {" • "}
-          <span className={status === "Open" ? "text-green-500" : "text-red-500"}>
-            {status}
-          </span>
+          {event.end ? (
+            <span className="text-red-500 font-semibold">Ended</span>
+          ) : (
+            <span className={status === "Open" ? "text-green-500" : "text-red-500"}>
+              {status}
+            </span>
+          )}
         </span>
       </p>
     </div>
@@ -127,18 +141,23 @@ const Feed = () => {
     });
   }, []);
 
-
   const handleCreate = () => {
-    router.push('/create');
-  }
+    router.push("/create");
+  };
 
   return (
-    <div className="w-full">
-
-      <div className="flex justify-between items-center">
-        <h1 className="font-semibold text-3xl pb-8">Events</h1>
-        <button 
-          className="bg-blue-500 hover:bg-green-500 text-white font-bold py-2 px-5 rounded transition duration-300 ease-in-out transform "
+    <div className="w-full pb-24">
+      <div className="flex justify-between items-center gap-6">
+        <div className="pb-8 w-4/5">
+          <h1 className="font-semibold text-3xl pb-2">Events</h1>
+          <p className="text-gray-500">
+            Here is a list of all events that you can register for that you can filter by sport
+            or level to find an event that suits what you are looking for. And if you don't see
+            an event that you're interested in, you can always create your own!
+          </p>
+        </div>
+        <button
+          className="bg-blue-500 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition duration-300 ease-in-out transform w-1/5"
           onClick={handleCreate}
         >
           Create New Event

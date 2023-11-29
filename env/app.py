@@ -24,7 +24,7 @@ from bson.regex import Regex
 import re
 
 # import files
-from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my
+from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my, edit_event
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
 from teams import create_a_team, get_users_teams, leave_a_team, change_name, get_pub_teams, join_team
 
@@ -549,6 +549,22 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
+# Use the username to find the user email
+def get_email_from_username():
+    data = request.get_json()
+    username = data["friendUsername"]
+    user_data = list(users.find())
+
+    request_data = {
+        "email": ""
+    }
+
+    for user in user_data:
+        if str(username) == user["username"]:
+            request_data["email"] = user["email"]
+
+    return jsonify(request_data)
+
 
 # Send a friend request to another user
 def send_friend_request():
@@ -863,6 +879,20 @@ def get_events():
 def get_event_details():
     return get_details(request.args.get("id"), list(events.find()))
 
+def edit_event_details():
+    data = request.get_json()
+    return edit_event(data.get("eventID"), list(events.find()))
+
+def delete_event_details():
+    event_data = list(events.find())
+    data = request.get_json()
+    event_id = data.get("eventID")
+    
+    for event in event_data:
+        if str(event_id) == str(event["_id"]):
+            events.delete_one({"_id": event["_id"]})
+            return jsonify({"message": "Event deleted from database"}), 200
+
 
 def get_all_events():
     return get_all(request.args.get('email'))
@@ -903,6 +933,45 @@ def delete_event_history():
 def get_my_events():
     return get_my(list(events.find()), request.args.get("username"))
 
+def get_my_created_events():
+    event_data = list(events.find())
+    email = request.args.get("email")
+
+    user_events = []
+
+    for event in event_data:
+        event['_id'] = str(event['_id'])
+
+    for event in event_data:
+        if event["eventOwner"] == email:
+            user_events.append(event)
+
+    return jsonify(user_events), 200
+
+def end_event():
+    event_data = list(events.find())
+    data = request.get_json()
+    eventID = data["eventID"]
+    summary = data["summary"]
+
+    for event in event_data:
+        if str(eventID) == str(event["_id"]):
+            events.update_one({"_id": event["_id"]}, {"$set": {"end": True, "desc": summary}})
+
+    return jsonify({"message": "Event ended successfully"}), 200
+
+def remove_participant():
+    event_data = list(events.find())
+    data = request.get_json()
+    eventID = data["eventID"]
+    username = data["username"]
+
+    for event in event_data:
+        if str(eventID) == str(event["_id"]):
+            event["participants"].remove(username)
+            event["currentParticipants"] -= 1
+            events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
+            return jsonify({'message': 'Deleted User from event'}), 200
 
 def submit_report():
     user = request.get_json()
@@ -1036,11 +1105,21 @@ def create_team():
 
 
 def get_teams():
-    curr_email = request.args.get('email')
+    #curr_email = request.args.get('email')
 
-    list_of_teams = get_users_teams(curr_email)
+    #list_of_teams = get_users_teams(curr_email)
 
-    return jsonify(list_of_teams), 200
+    #return jsonify(list_of_teams), 200
+
+    all_teams = list(teams.find({}))
+
+    # Convert ObjectId to string
+    for team in all_teams:
+        team['_id'] = str(team['_id'])
+
+    #print("All teams:", all_teams)
+
+    return jsonify(all_teams), 200
 
 
 def leave_team():
@@ -1093,7 +1172,67 @@ def get_tournaments():
 
     # print("All tournaments:", all_tournaments)
 
-    return jsonify(all_tournaments), 200
+    return jsonify(json.loads(json.dumps(all_tournaments, default=str)))
+
+def get_tournament_id():
+    tournament = tournaments.find_one({})
+    if tournament:
+        return jsonify({'tournamentId': str(tournament['_id'])}), 200
+    else:
+        return jsonify({'message': 'Tournament not found'}), 404
+
+def get_tournament_details():
+    tournament_id = request.args.get('id')
+    if not tournament_id:
+        return jsonify({'message': 'Missing tournament ID'}), 400
+
+    try:
+        object_id = ObjectId(tournament_id)
+    except:
+        return jsonify({'message': 'Invalid tournament ID'}), 400
+
+    tournament = tournaments.find_one({'_id': object_id})
+    if tournament:
+        tournament['_id'] = str(tournament['_id'])
+        return jsonify(json.loads(json.dumps(tournament, default=str)))
+    else:
+        return jsonify({'message': 'Tournament not found'}), 404
+
+def join_tournament():
+    data = request.json
+    tournament_id = data.get('tournamentId')
+    team_id = data.get('teamId')
+
+    # Validate inputs
+    if not tournament_id or not team_id:
+        return jsonify({"message": "Missing tournamentId or teamId"}), 400
+
+    # Convert IDs to ObjectId
+    try:
+        obj_tournament_id = ObjectId(tournament_id)
+        obj_team_id = ObjectId(team_id)
+    except:
+        return jsonify({"message": "Invalid tournamentId or teamId"}), 400
+
+    # Check if tournament and team exist
+    tournament = db.tournaments.find_one({'_id': obj_tournament_id})
+    team = db.teams.find_one({'_id': obj_team_id})
+    if not tournament or not team:
+        return jsonify({"message": "Tournament or Team not found"}), 404
+
+    # Add team name to tournament
+    updated_tournament = db.tournaments.update_one(
+        {'_id': obj_tournament_id},
+        {'$addToSet': {'teams': team['name']}}  # Use team name here
+    )
+
+    if updated_tournament.modified_count == 0:
+        return jsonify({"message": "Failed to join the tournament"}), 500
+
+    return jsonify({"message": "Joined the tournament successfully"}), 200
+
+
+
 
 
 def init_groups():
