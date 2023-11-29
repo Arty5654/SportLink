@@ -13,6 +13,7 @@ Type and enter python app.py to start the backend
 In a browser, go to “http://localhost:3000/signin” 
 
 Example profiles which graders can use to test:
+
 	Email: sportlinkemail@gmail.com
 	Password: Profturk1
 
