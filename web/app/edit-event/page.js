@@ -5,6 +5,32 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
 
+const ParticipantCard = ({ username }) => {
+  const searchParams = useSearchParams();
+  const eventID = searchParams.get("id");
+
+  // Handle removing a participant from the participants list
+  const handleDeleteParticipant = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/remove_participant", { eventID, username });
+      alert("You have successfully removed a participant");
+      window.location.reload();
+    } catch (error) {
+      console.log("Error removing participant from event: ", error);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <p className="text-sm border-l border-gray-400 px-2 relative">{username}</p>
+      <p className="text-red-500 cursor-pointer" onClick={handleDeleteParticipant}>
+        x
+      </p>
+    </div>
+  );
+};
+
 const EditEvent = () => {
   const [user, setUser] = useState(new User());
   const [endState, setEndState] = useState(false);
@@ -225,11 +251,8 @@ const EditEvent = () => {
             <div className="py-10 px-8">
               <h1 className="text-2xl font-semibold pb-8">Participants</h1>
               <div classname="">
-                {event.participants.map((event, index) => (
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm border-l border-gray-400 px-2 relative">{event}</p>
-                    <p className="text-red-500">x</p>
-                  </div>
+                {event.participants.map((participant, index) => (
+                  <ParticipantCard key={index} username={participant} />
                 ))}
               </div>
             </div>
