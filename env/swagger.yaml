@@ -1925,7 +1925,7 @@ paths:
                   sport:
                     type: string
                   teamCount:
-                    type: string                  
+                    type: string
                   tournamentDuration:
                     type: string
                   matchDuration:
@@ -1933,7 +1933,6 @@ paths:
         "404":
           description: Tournament not found
 
-  
   /join_tournament:
     post:
       summary: Join a tournament with a team
@@ -1956,7 +1955,7 @@ paths:
                 - tournamentId
                 - teamId
       responses:
-        '200':
+        "200":
           description: Successfully joined the tournament.
           content:
             application/json:
@@ -1966,11 +1965,11 @@ paths:
                   message:
                     type: string
                     example: Joined the tournament successfully.
-        '400':
+        "400":
           description: Missing tournamentId or teamId in the request.
-        '404':
+        "404":
           description: Tournament or Team not found.
-        '500':
+        "500":
           description: Failed to join the tournament due to a server error.
 
   /leave_tournament:
@@ -1999,7 +1998,7 @@ paths:
                 - teamId
                 - userEmail
       responses:
-        '200':
+        "200":
           description: Successfully left the tournament.
           content:
             application/json:
@@ -2009,20 +2008,33 @@ paths:
                   message:
                     type: string
                     example: Left the tournament successfully.
-        '400':
+        "400":
           description: Missing tournamentId, teamId, or userEmail in the request.
-        '403':
+        "403":
           description: Unauthorized action, only team leaders can make the team leave the tournament.
-        '404':
+        "404":
           description: Tournament or Team not found.
-        '409':
+        "409":
           description: Cannot leave the tournament as it has already started.
-        '500':
+        "500":
           description: Failed to leave the tournament due to a server error.
 
-  
-
-  
-  
-
-
+  /get_email_from_username:
+    post:
+      summary: Remove Participant
+      description: Convert username to email
+      operationId: app.get_email_from_username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                friendUsername:
+                  type: string
+      responses:
+        "200":
+          description: username converted succesfully
+        "400":
+          description: Bad request
