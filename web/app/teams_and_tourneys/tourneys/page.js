@@ -8,7 +8,6 @@ const TournamentCard = ({ tournament }) => {
     const handleTournamentClick = () => {
         // Navigate to the tournament detail page or handle click
         router.push(`/teams_and_tourneys/tourneyDetails?id=${tournament._id}`);
-        console.log("ID:", tournament._id);
     };
 
     return (

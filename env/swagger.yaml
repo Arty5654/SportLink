@@ -935,7 +935,6 @@ paths:
                       type: integer
                     end:
                       type: boolean
-
         "404":
           description: Event not found
 
@@ -1229,26 +1228,6 @@ paths:
       responses:
         "200":
           description: participant removed successfully
-        "400":
-          description: Bad request
-
-  /get_email_from_username:
-    post:
-      summary: Remove Participant
-      description: Convert username to email
-      operationId: app.get_email_from_username
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                friendUsername:
-                  type: string
-      responses:
-        "200":
-          description: username converted succesfully
         "400":
           description: Bad request
 
@@ -1920,49 +1899,6 @@ paths:
                     type: string
         "404":
           description: Tournament not found
-  /join_team:
-    post:
-      operationId: app.joinTeam
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                user:
-                  type: string
-                _id:
-                  type: string
-                num:
-                  type: integer
-
-
-      responses:
-        "200":
-          description: "Team created sucessfully"
-  /create_chat:
-    post:
-      operationId: app.create_chat
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                members:
-                  type: array
-                user:
-                  type: string
-      responses:
-        "200":
-          description: "Created Chat"
-
-  /group_messages:
-    post:
-      operationId: app.init_groups
-      requestBody:
-
 
   /get_tournament_details:
     get:
@@ -1989,7 +1925,7 @@ paths:
                   sport:
                     type: string
                   teamCount:
-                    type: string
+                    type: string                  
                   tournamentDuration:
                     type: string
                   matchDuration:
@@ -1997,6 +1933,7 @@ paths:
         "404":
           description: Tournament not found
 
+  
   /join_tournament:
     post:
       summary: Join a tournament with a team
@@ -2009,26 +1946,6 @@ paths:
             schema:
               type: object
               properties:
-                email:
-                  type: string
-      responses:
-        "200":
-          description: "AAAAAAAAAA"
-
-  /refresh_gmsg:
-    post:
-      operationId: app.refresh_gmsg
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                chat_key:
-                  type: string
-      responses:
-        "200":
-          description: "POOP"
                 tournamentId:
                   type: string
                   description: The ID of the tournament to join.
@@ -2039,7 +1956,7 @@ paths:
                 - tournamentId
                 - teamId
       responses:
-        "200":
+        '200':
           description: Successfully joined the tournament.
           content:
             application/json:
@@ -2049,8 +1966,63 @@ paths:
                   message:
                     type: string
                     example: Joined the tournament successfully.
-        "400":
+        '400':
           description: Missing tournamentId or teamId in the request.
-        "404":
+        '404':
           description: Tournament or Team not found.
-        "500":
+        '500':
+          description: Failed to join the tournament due to a server error.
+
+  /leave_tournament:
+    post:
+      summary: Leave a tournament with a team
+      description: Endpoint to allow a team to leave a tournament.
+      operationId: app.leave_tournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tournamentId:
+                  type: string
+                  description: The ID of the tournament to leave.
+                teamId:
+                  type: string
+                  description: The ID of the team leaving the tournament.
+                userEmail:
+                  type: string
+                  description: The email of the user who is trying to make the team leave the tournament.
+              required:
+                - tournamentId
+                - teamId
+                - userEmail
+      responses:
+        '200':
+          description: Successfully left the tournament.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Left the tournament successfully.
+        '400':
+          description: Missing tournamentId, teamId, or userEmail in the request.
+        '403':
+          description: Unauthorized action, only team leaders can make the team leave the tournament.
+        '404':
+          description: Tournament or Team not found.
+        '409':
+          description: Cannot leave the tournament as it has already started.
+        '500':
+          description: Failed to leave the tournament due to a server error.
+
+  
+
+  
+  
+
+

@@ -1231,6 +1231,51 @@ def join_tournament():
 
     return jsonify({"message": "Joined the tournament successfully"}), 200
 
+def leave_tournament():
+    data = request.get_json()
+    tournament_id = data.get('tournamentId')
+    team_id = data.get('teamId')
+    user_email = data.get('userEmail')
+
+    # Validate inputs
+    if not tournament_id or not team_id or not user_email:
+        return jsonify({"message": "Missing tournamentId, teamId, or userEmail"}), 400
+
+    # Convert tournament ID to ObjectId
+    try:
+        obj_tournament_id = ObjectId(tournament_id)
+    except:
+        return jsonify({"message": "Invalid tournamentId"}), 400
+
+    # Check if tournament exists
+    tournament = db.tournaments.find_one({'_id': obj_tournament_id})
+    if not tournament:
+        return jsonify({"message": "Tournament not found"}), 404
+
+    # Check if the team exists and the user is the leader
+    team = db.teams.find_one({'_id': ObjectId(team_id), 'leader': user_email})
+    if not team:
+        return jsonify({"message": "Team not found or you are not the leader"}), 403
+
+    # Check if the tournament has started
+    if tournament.get('start_date') and tournament['start_date'] <= datetime.now():
+        return jsonify({"message": "Cannot leave the tournament after it has started"}), 403
+
+    # Remove the team name from the tournament
+    if team['name'] in tournament.get('teams', []):
+        result = db.tournaments.update_one(
+            {'_id': obj_tournament_id},
+            {'$pull': {'teams': team['name']}}
+        )
+
+        if result.modified_count == 0:
+            return jsonify({"message": "Failed to leave the tournament"}), 500
+
+        # Notify team members (Implement your notification logic here)
+        return jsonify({"message": "Left the tournament successfully"}), 200
+    else:
+        return jsonify({"message": "Team not participating in this tournament"}), 400
+
 
 
 
