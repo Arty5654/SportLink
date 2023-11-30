@@ -174,6 +174,7 @@ const EventDetails = () => {
         sessionStorage.removeItem("user");
         sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
+
         axios
             .post("http://localhost:5000/join_event", {
               id: eventID,
