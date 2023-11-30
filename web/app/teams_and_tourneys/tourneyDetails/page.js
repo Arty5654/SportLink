@@ -11,6 +11,7 @@ const TournamentDetails = () => {
   const [selectedTeamId, setSelectedTeamId] = useState(null);
   const [isJoinTournamentModalOpen, setIsJoinTournamentModalOpen] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
+  const [maxTeamsAllowed, setMaxTeamsAllowed] = useState(0);
   const [userTeams, setUserTeams] = useState([])
   const [tournament, setTournament] = useState({
     sport: "",
@@ -36,6 +37,7 @@ const TournamentDetails = () => {
       const fetchTournamentDetails = async () => {
         try {
           const detailsResponse = await axios.get(`http://localhost:5000/get_tournament_details?id=${tournamentId}`);
+          setMaxTeamsAllowed(detailsResponse.data.teamCount);
           setTournament({
             objectID: detailsResponse.data._id,
             sport: detailsResponse.data.sport,
@@ -43,6 +45,7 @@ const TournamentDetails = () => {
             tournamentDuration: detailsResponse.data.tournamentDuration,
             matchDuration: detailsResponse.data.matchDuration,
             teams: detailsResponse.data.teams,
+            isFull: detailsResponse.data.teams.length >= detailsResponse.data.teamCount
           });
           
         } catch (error) {
@@ -102,11 +105,11 @@ const TournamentDetails = () => {
 
     //console.log("teamID", team._id);
 
-    console.log("Selected Team ID:", selectedTeamId);
+    if (tournament.isFull) {
+      alert("The tournament is full. You cannot join at this time.");
+      return;
+    }
 
-    console.log("Joining tournament with ID:", tournament.objectID, "and team ID:", selectedTeamId);
-
-  
     try {
       await axios.post('http://localhost:5000/join_tournament', { tournamentId: tournament.objectID, teamId: selectedTeamId });
       setIsJoinTournamentModalOpen(false);
@@ -221,6 +224,7 @@ const TournamentDetails = () => {
           
 
           <h2 className="text-xl font-semibold mb-2">Teams in this Tournament:</h2>
+          <p>Teams: {tournament.teams.length} / {maxTeamsAllowed}</p> 
         {tournament.teams && tournament.teams.length > 0
           ? tournament.teams.map((teamName, index) => (
            <p key={index}>{teamName}</p>
