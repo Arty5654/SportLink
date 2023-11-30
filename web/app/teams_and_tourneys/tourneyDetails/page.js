@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
+import LeaveTournamentButton from "@components/LeaveTournamentButton";
+
 
 
 const TournamentDetails = () => {
@@ -55,15 +57,23 @@ const TournamentDetails = () => {
   //console.log("TOURNY INFO", tournament.teams);
 
   useEffect(() => {
-    const user1 = JSON.parse(sessionStorage.getItem("user"));
-    setUser(user1);
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
   
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/get_teams?email=${user1.email}`);
+        const response = await axios.get(`http://localhost:5000/get_teams?email=${currentUser.email}`);
         if (response.data.length > 0) {
-          setUserTeams(response.data);
-          console.log("Fetched teams:", response.data);
+          const teams = response.data;
+          // Assuming each team object has a 'leader' field with the leader's email
+          setUserTeams(teams);
+          const leaderTeams = teams.filter(team => team.leader === currentUser.email);
+          // If the user is a leader of at least one team, set the first one as selected by default
+          if (leaderTeams.length > 0) {
+            setSelectedTeamId(leaderTeams[0]._id);
+          }
+          console.log("Fetched teams:", teams);
+          console.log("leader", leaderTeams);
         } else {
           console.log("No teams found");
         }
@@ -74,6 +84,7 @@ const TournamentDetails = () => {
   
     fetchData();
   }, []);
+  
 
   const handleCheckboxChange = (teamId) => {
      console.log("Selected team ID:", teamId); 
@@ -84,10 +95,6 @@ const TournamentDetails = () => {
   const handleJoinTournament = () => {
     setIsJoinTournamentModalOpen(true);
     //alert("Join Tournament logic here");
-  };
-
-  const handleLeaveTournament = () => {
-    alert("Leave Tournament logic here");
   };
 
   const joinTournamentWithTeam = async () => {
@@ -205,12 +212,13 @@ const TournamentDetails = () => {
 )}
 
 
-          <button
-            onClick={handleLeaveTournament}
-            className="w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-          >
-            Leave Tournament
-          </button>
+     
+            <LeaveTournamentButton
+              tournamentId={tournament.objectID}
+              teamId={selectedTeamId}
+              isLeader={userTeams.some(team => team._id === selectedTeamId && team.leader === user.email)}
+            />
+          
 
           <h2 className="text-xl font-semibold mb-2">Teams in this Tournament:</h2>
         {tournament.teams && tournament.teams.length > 0
