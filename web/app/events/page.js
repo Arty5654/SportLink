@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
 import SmallMap from "./SmallMap";
-import eventsCSS from './eventsCSS.css'
 
 const ParticipantCard = ({ username }) => {
   const [user, setUser] = useState(new User());
@@ -21,13 +20,13 @@ const ParticipantCard = ({ username }) => {
     const convertUsername = async () => {
       try {
         await axios
-          .post("http://localhost:5000/get_email_from_username", {
-            friendUsername: username,
-          })
-          .then((response) => {
-            console.log("Email response", response.data);
-            setFriendEmail(response.data);
-          });
+            .post("http://localhost:5000/get_email_from_username", {
+              friendUsername: username,
+            })
+            .then((response) => {
+              console.log("Email response", response.data);
+              setFriendEmail(response.data);
+            });
       } catch (error) {
         console.log("Error converting username to email");
       }
@@ -57,25 +56,25 @@ const ParticipantCard = ({ username }) => {
   };
 
   return (
-    <div className="flex items-center justify-between">
-      <p className="text-sm border-l border-gray-400 px-2 relative">{username}</p>
-      <div onClick={handleAddFriend} className="cursor-pointer">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="gray"
-          class="w-5 h-5"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+      <div className="flex items-center justify-between">
+        <p className="text-sm border-l border-gray-400 px-2 relative">{username}</p>
+        <div onClick={handleAddFriend} className="cursor-pointer">
+          <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="gray"
+              class="w-5 h-5"
+          >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
       </div>
-    </div>
   );
 };
 
@@ -129,6 +128,7 @@ const EventDetails = () => {
             participants: data.participants,
             eventOwner: data.eventOwner,
             town: data.town,
+            end: data.end,
           });
           console.log(response.data);
         });
@@ -143,17 +143,16 @@ const EventDetails = () => {
     if (isUserParticipant) {
       // user is registered for event
       axios
-        .post("http://localhost:5000/leave_event", {
-          id: eventID,
-          username: user.username,
-          team: team
-        })
-        .then((response) => {
-          if (response.status === 200) {
-            alert("You have successfully left the event");
-            window.location.reload();
-          }
-        });
+          .post("http://localhost:5000/leave_event", {
+            id: eventID,
+            username: user.username,
+          })
+          .then((response) => {
+            if (response.status === 200) {
+              alert("You have successfully left the event");
+              window.location.reload();
+            }
+          });
     } else {
       // user isnt registered for event
       if (event.currentParticipants < event.maxParticipants) {
@@ -176,34 +175,34 @@ const EventDetails = () => {
         sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
         axios
-          .post("http://localhost:5000/join_event", {
-            id: eventID,
-            username: user.username,
-            numBasketball: updatedUser.numBasketball,
-            numTennis: updatedUser.numTennis,
-            numSoccer: updatedUser.numSoccer,
-            numWeights: updatedUser.numWeights,
-          })
-          .then((response) => {
-            if (response.status === 200) {
-              alert("You have successfully joined the event!");
-              window.location.reload();
-            }
-          })
-          .catch((error) => {
-            console.error("Error joining event: ", error);
-          });
+            .post("http://localhost:5000/join_event", {
+              id: eventID,
+              username: user.username,
+              numBasketball: updatedUser.numBasketball,
+              numTennis: updatedUser.numTennis,
+              numSoccer: updatedUser.numSoccer,
+              numWeights: updatedUser.numWeights,
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                alert("You have successfully joined the event!");
+                window.location.reload();
+              }
+            })
+            .catch((error) => {
+              console.error("Error joining event: ", error);
+            });
         // add to event history
         axios
-          .post("http://localhost:5000/add_event_history", {
-            event: eventID,
-            user: user.username,
-          })
-          .then((response) => {
-            if (response.status === 200) {
-              console.log("Added to History");
-            }
-          });
+            .post("http://localhost:5000/add_event_history", {
+              event: eventID,
+              user: user.username,
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                console.log("Added to History");
+              }
+            });
       } else {
         alert("The event is full. You cannot join at the moment.");
       }
@@ -215,135 +214,109 @@ const EventDetails = () => {
   };
 
   return (
-    <div className="w-full flex gap-8">
-      {/* ITEM: Left Side */}
-      <div className="w-4/5">
-        <div className="flex items-end justify-between">
-          <h1 className="text-3xl font-semibold">{event.title}</h1>
+      <div className="w-full flex gap-8">
+        {/* ITEM: Left Side */}
+        <div className="w-4/5">
+          <div className="flex items-end justify-between">
+            <h1 className="text-3xl font-semibold">{event.title}</h1>
+
+            {event.end ? (
+                <p></p>
+            ) : (
+                <div>
+                  {eventOwner ? (
+                      <button
+                          className="text-sm font-base text-gray-500 pb-1 cusor-pointer"
+                          onClick={handleEditClick}
+                      >
+                        <u>Edit</u>
+                      </button>
+                  ) : (
+                      <p></p>
+                  )}
+                </div>
+            )}
+          </div>
+
+          <p className="text-gray-700 font-base border-b border-gray-300 pb-4">
+            {event.sport} in {event.town} • <span className="text-blue-500">{event.level}</span>
+          </p>
 
           {event.end ? (
-            <p></p>
+              <div>
+                <p className="pt-4 text-xl font-semibold">Event Summary</p>
+                <p>{event.desc}</p>
+              </div>
           ) : (
-            <div>
-              {eventOwner ? (
-                <button
-                  className="text-sm font-base text-gray-500 pb-1 cusor-pointer"
-                  onClick={handleEditClick}
-                >
-                  <u>Edit</u>
-                </button>
-              ) : (
-                <p></p>
-              )}
-            </div>
+              <p className="pt-4">{event.desc}</p>
           )}
-        </div>
 
-        <p className="text-gray-700 font-base border-b border-gray-300 pb-4">
-          {event.sport} in {event.town} • <span className="text-blue-500">{event.level}</span>
-        </p>
-
-        {event.end ? (
-          <div>
-            <p className="pt-4 text-xl font-semibold">Event Summary</p>
-            <p>{event.desc}</p>
+          <div className="mt-8">
+            <SmallMap
+                center={{ lat: event.lat, lng: event.lng }}
+                zoom={15}
+                address={event.address}
+            />
           </div>
-        ) : (
-          <p className="pt-4">{event.desc}</p>
-        )}
-
-        <div className="mt-8">
-          <SmallMap
-            center={{ lat: event.lat, lng: event.lng }}
-            zoom={15}
-            address={event.address}
-          />
         </div>
-      </div>
 
-      {/* ITEM: Right Bar*/}
-      <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
-        <div className="py-10 px-8">
-          <h1 className="text-xl font-semibold flex items-center">
-            Status:&nbsp;
-            {event.end ? (
-              <p className="text-red-500">Ended</p>
-            ) : (
-              <span
-                className={
-                  status === "Open" ? "text-blue-500 font-base" : "text-red-500 font-base"
-                }
-              >
+        {/* ITEM: Right Bar*/}
+        <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
+          <div className="py-10 px-8">
+            <h1 className="text-xl font-semibold flex items-center">
+              Status:&nbsp;
+              {event.end ? (
+                  <p className="text-red-500">Ended</p>
+              ) : (
+                  <span
+                      className={
+                        status === "Open" ? "text-blue-500 font-base" : "text-red-500 font-base"
+                      }
+                  >
                 {status}
               </span>
-            )}
-          </h1>
+              )}
+            </h1>
 
-          <div className="team-container">
-            <div className="team-card red-team">
-              <h3 className="team-title">Team Red</h3>
-              {event.participants.red.map((member, index) => (
-                  <p key={index} className="team-member">{member}</p>
-              ))}
-            </div>
-
-            <div className="team-card blue-team">
-              <h3 className="team-title">Team Blue</h3>
-              {event.participants.blue.map((member, index) => (
-                  <p key={index} className="team-member">{member}</p>
-              ))}
-            </div>
-          <p className="text-sm text-gray-600 pb-6">
-            Participants{" "}
-            <span>
+            <p className="text-sm text-gray-600 pb-6">
+              Participants{" "}
+              <span>
               {event.currentParticipants} / {event.maxParticipants}
             </span>
-          </p>
-          <button
-            onClick={handleJoinEvent}
-            className={
-              status === "Open"
-                ? `w-full ${
-                    isUserParticipant ? "bg-red-500" : "bg-green-500"
-                  } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
-                : isUserParticipant
-                ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-                : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-            }
-          >
-            {isUserParticipant ? "Leave Event" : "Join Event"}
-          {event.end ? (
-            <p className="w-full bg-gray-400 text-white font-semibold text-lg rounded-xl py-2 mb-4 text-center">
-              Event has Ended
             </p>
-          ) : (
-            <button
-              onClick={handleJoinEvent}
-              className={
-                status === "Open"
-                  ? `w-full ${
-                      isUserParticipant ? "bg-red-500" : "bg-green-500"
-                    } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
-                  : isUserParticipant
-                  ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-                  : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-              }
-            >
-              {isUserParticipant ? "Leave Event" : "Join Event"}
-            </button>
-          )}
 
-          <div>
-            <h2 className="pb-4 text-lg pt-2">Participants</h2>
-            <div className="flex flex-col gap-2">
-              {event.participants.map((participant, index) => (
-                <ParticipantCard key={index} username={participant} />
-              ))}
+            {event.end ? (
+                <p className="w-full bg-gray-400 text-white font-semibold text-lg rounded-xl py-2 mb-4 text-center">
+                  Event has Ended
+                </p>
+            ) : (
+                <button
+                    onClick={handleJoinEvent}
+                    className={
+                      status === "Open"
+                          ? `w-full ${
+                              isUserParticipant ? "bg-red-500" : "bg-green-500"
+                          } hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4`
+                          : isUserParticipant
+                              ? "w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+                              : "w-full bg-gray-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
+                    }
+                >
+                  {isUserParticipant ? "Leave Event" : "Join Event"}
+                </button>
+            )}
+
+            <div>
+              <h2 className="pb-4 text-lg pt-2">Participants</h2>
+              <div className="flex flex-col gap-2">
+                {event.participants.map((participant, index) => (
+                    <ParticipantCard key={index} username={participant} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
