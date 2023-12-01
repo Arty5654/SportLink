@@ -1105,21 +1105,11 @@ def create_team():
 
 
 def get_teams():
-    #curr_email = request.args.get('email')
+    curr_email = request.args.get('email')
 
-    #list_of_teams = get_users_teams(curr_email)
+    list_of_teams = get_users_teams(curr_email)
 
-    #return jsonify(list_of_teams), 200
-
-    all_teams = list(teams.find({}))
-
-    # Convert ObjectId to string
-    for team in all_teams:
-        team['_id'] = str(team['_id'])
-
-    #print("All teams:", all_teams)
-
-    return jsonify(all_teams), 200
+    return jsonify(list_of_teams), 200
 
 
 def leave_team():
@@ -1128,7 +1118,7 @@ def leave_team():
     user_leaving = req['user']
     new_leader = req['new_leader']
 
-    return leave_a_team(user_leaving, team_name, new_leader), 200
+    return leave_a_team(user_leaving, team_name, new_leader)
 
 
 def change_team_name():
