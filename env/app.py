@@ -147,6 +147,7 @@ def check_stats():
 
 def create():
     payload = request.json
+
     events.insert_one(payload)
     emails = payload['participants']
 
@@ -908,7 +909,10 @@ def join_event():
     users.update_one({"username": data.get('username')}, {
         "$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
 
-    return join(data.get("id"), data.get("username"), list(events.find()))
+    team_green = data.get("teamGreen")
+    team_blue = data.get("teamBlue")
+
+    return join(data.get("id"), data.get("username"), list(events.find()), team_green, team_blue)
 
 
 def leave_event():

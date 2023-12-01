@@ -19,7 +19,7 @@ history = db["eventHistory"]
 
 
 # Route to get event details 
-def join (eventID, username, event_data):
+def join (eventID, username, event_data, team_green, team_blue):
   for event in event_data:
     if eventID == str(event["_id"]):  # Compare as strings
       # Check if the event is open for joining
@@ -27,7 +27,11 @@ def join (eventID, username, event_data):
         # Add the username to the participants array
         event["participants"].append(username)
         event["currentParticipants"] += 1
-        events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
+
+        event["teamBlue"] = team_blue
+        event["teamGreen"] = team_green
+
+        events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"], "teamBlue": event["teamBlue"], "teamGreen": event["teamGreen"]}})
         return jsonify({"message": "Event joined successfully"}), 200
       else:
         return jsonify({"message": "The event is full. You cannot join at the moment."}), 400
@@ -62,7 +66,9 @@ def get_details(eventID, event_data):
         "participants": event["participants"],
         "eventOwner": event["eventOwner"],
         "town": event["town"],
-        "end": event["end"]
+        "end": event["end"],
+        "teamGreen": event["teamGreen"],
+        "teamBlue": event["teamBlue"]
       }
       break
 
