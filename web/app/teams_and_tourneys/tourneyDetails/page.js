@@ -80,7 +80,6 @@ const TournamentDetails = () => {
           const teams = response.data;
           // Assuming each team object has a 'leader' field with the leader's email
           setUserTeams(teams);
-          const leaderTeams = teams.filter(team => team.leader === currentUser.email);
           // If the user is a leader of at least one team, set the first one as selected by default
           if (leaderTeams.length > 0) {
             setSelectedTeamId(leaderTeams[0]._id);
@@ -97,6 +96,8 @@ const TournamentDetails = () => {
   
     fetchData();
   }, []);
+
+  const leaderTeams = userTeams.filter(team => team.leader === user.email);
   
 
   const handleCheckboxChange = (teamId) => {
@@ -245,8 +246,9 @@ const TournamentDetails = () => {
           {!isTournamentStarted() && (
             <LeaveTournamentButton
               tournamentId={tournament.objectID}
-              teamId={selectedTeamId}
-              isLeader={userTeams.some(team => team._id === selectedTeamId && team.leader === user.email)}
+              leaderTeams={leaderTeams}
+              //teamId={selectedTeamId}
+              //isLeader={userTeams.some(team => team._id === selectedTeamId && team.leader === user.email)}
             />
           )}
 
