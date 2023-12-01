@@ -1220,6 +1220,16 @@ def join_tournament():
     if updated_tournament.modified_count == 0:
         return jsonify({"message": "Failed to join the tournament"}), 500
 
+    # send emails to team members who are not the leader and who have email notifs on
+    curr_team = db.teams.find_one({'name': team['name']})
+
+    for member in curr_team['members']:
+        if users.find_one({'email': member, 'sendEmail': False}):
+            continue
+        msg = Message('Tournament Update!', recipients=[member])
+        msg.html = f'<p>Hello! A team you\'re on just got added to a tournament! Good Luck!</p>'
+        mail.send(msg)
+
     return jsonify({"message": "Joined the tournament successfully"}), 200
 
 def leave_tournament():
@@ -1258,15 +1268,16 @@ def leave_tournament():
             {'_id': obj_tournament_id},
             {'$pull': {'teams': team['name']}}
         )
-        team_members = db.users.find({'teams': team_id}, {'email': 1})
-        team_member_emails = [member['email'] for member in team_members]
 
-        subject = "Tournament Update"
-        body = f"Your team '{team['name']}' has left the tournament."
+        # send emails to team members who are not the leader and who have email notifs on
+        curr_team = db.teams.find_one({'name': team['name']})
 
-        msg = Message(subject, recipients=team_member_emails)
-        msg.html = body
-        mail.send(msg)
+        for member in curr_team['members']:
+            if users.find_one({'email': member, 'sendEmail': False}):
+                continue
+            msg = Message('Tournament Update!', recipients=[member])
+            msg.html = f'<p>Hello! A team you were a part of is no longer in a tournament, hope to see you back in action soon!</p>'
+            mail.send(msg)
 
         if result.modified_count == 0:
             return jsonify({"message": "Failed to leave the tournament"}), 500
