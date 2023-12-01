@@ -238,6 +238,7 @@ const EventDetails = () => {
       alert("Already a part of Team Blue")
       setIsMemberOfGreen(false)
       setIsMemberOfBlue(true)
+
       return;
     }
     if (event.teamGreen.includes(user.username)) {
@@ -245,6 +246,8 @@ const EventDetails = () => {
       alert("Already a part of Team Green")
       setIsMemberOfGreen(true)
       setIsMemberOfBlue(false)
+
+
       return;
 
     }
@@ -253,11 +256,19 @@ const EventDetails = () => {
       updatedEvent.teamBlue = updatedEvent.teamBlue.filter(email => email !== user.username);
       setIsMemberOfGreen(true);
       setIsMemberOfBlue(false);
+
+      if (!isUserParticipant) {
+        handleJoinEvent();
+      }
     } else if (team === 'blue') {
       updatedEvent.teamBlue.push(user.username);
       updatedEvent.teamGreen = updatedEvent.teamGreen.filter(email => email !== user.username);
       setIsMemberOfBlue(true);
       setIsMemberOfGreen(false);
+
+      if (!isUserParticipant) {
+        handleJoinEvent();
+      }
     }
     setEvent(updatedEvent);
     axios
