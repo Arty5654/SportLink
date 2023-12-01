@@ -20,7 +20,9 @@ const TournamentDetails = () => {
     matchDuration: "",
     teams: [],
     isFull: false,
-    startTime: ""
+    startTime: "",
+    skillLevel: "",
+    location: ""
   });
 
   const formatDateTime = (dateTimeString) => {
@@ -50,6 +52,8 @@ const TournamentDetails = () => {
             teamCount: detailsResponse.data.teamCount,
             tournamentDuration: detailsResponse.data.tournamentDuration,
             matchDuration: detailsResponse.data.matchDuration,
+            skillLevel: detailsResponse.data.skillLevel,
+            location: detailsResponse.data.location,
             teams: detailsResponse.data.teams || [],
             isFull: (detailsResponse.data.teams || []).length >= detailsResponse.data.teamCount,
             startTime: formatDateTime(detailsResponse.data.startTime),
@@ -165,15 +169,32 @@ const TournamentDetails = () => {
           Teams: {tournament.teamCount}
         </p>
 
-        <p className="pt-4">
-          Tournament Duration: {tournament.tournamentDuration} days
-        </p>
-        <p>
-          Match Duration: {tournament.matchDuration} minutes
-        </p>
-        <p>
-          Countdown: {tournament.startTime} minutes
-        </p>
+        <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <span style={{ fontSize: '20px' }}>⏳</span>
+      <span style={{ fontWeight: 'bold' }}>Tournament Duration:</span>
+      <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.tournamentDuration} days</span>
+    </div>
+    <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <span style={{ fontSize: '20px' }}>⌚</span>
+  <span style={{ fontWeight: 'bold' }}>Match Duration:</span>
+  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.matchDuration} minutes</span>
+</div>
+
+<div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <span style={{ fontSize: '20px' }}>🏆</span>
+  <span style={{ fontWeight: 'bold' }}>Skill Level:</span>
+  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.skillLevel}</span>
+</div>
+<div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <span style={{ fontSize: '20px' }}>📍</span>
+  <span style={{ fontWeight: 'bold' }}>Location:</span>
+  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.location}</span>
+</div>
+<div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <span style={{ fontSize: '20px' }}>⏲️</span>
+  <span style={{ fontWeight: 'bold' }}>Countdown till Tournament Close:</span>
+  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.startTime}</span>
+</div>
       </div>
 
       
