@@ -54,8 +54,13 @@ function Messages() {
         axios.post('http://localhost:5000/create_chat', requestData)
             .then(response => {
                 console.log('Chat created successfully:', response.data);
-                setCurrentGroupChats(prevGChats => [...prevGChats, ...response.data])
-                setCurrentGroupKeys(prevGKeys => [...prevGKeys, ...response.data.key])
+                if (currentGroupChats.length >0) {
+                    setCurrentGroupChats(prevGChats => [...prevGChats, response.data[0]])
+                    setCurrentGroupKeys(prevGKeys => [...prevGKeys, response.data[0].key])
+                } else {
+                    setCurrentGroupChats(response.data)
+                    setCurrentGroupKeys(response.data.key)
+                }
                 togglePopup();
             })
             .catch(error => {
@@ -246,7 +251,7 @@ function Messages() {
         const data = {
             user: temp_user,
             members: filteredMembers,
-            content: inputGroupMessage
+            content: temp_user + ": " + inputGroupMessage
         };
 
         socket.emit('group_message', data);
