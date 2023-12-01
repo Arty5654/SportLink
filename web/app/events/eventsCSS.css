@@ -11,9 +11,9 @@
     width: 45%;
 }
 
-.green-team {
-    background-color: lightgreen;
-    border-left: 5px solid darkgreen;
+.red-team {
+    background-color: #ffdddd;
+    border-left: 5px solid darkred;
 }
 
 .blue-team {
