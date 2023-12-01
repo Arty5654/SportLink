@@ -249,7 +249,7 @@ def login():
             optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city',
                                'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge',
                                'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked",
-                               "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
+                               "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer', 'tournaments']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -296,7 +296,7 @@ def google_signin():
             optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode',
                                'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation',
                                'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker",
-                               'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
+                               'numTennis', 'numBasketball', 'numWeights', 'numSoccer', 'tournaments']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
