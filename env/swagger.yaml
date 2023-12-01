@@ -254,6 +254,8 @@ paths:
                     type: integer
                   numSoccer:
                     type: integer
+                  tournaments:
+                    type: array
                 required:
                   - username
         "401":
@@ -351,6 +353,8 @@ paths:
                     type: integer
                   numSoccer:
                     type: integer
+                  tournaments:
+                    type: array
                 required:
                   - email
                   - username
@@ -1828,7 +1832,7 @@ paths:
                     publicity:
                       type: boolean
 
-  /create_tournament:
+   /create_tournament:
     post:
       operationId: app.create_tournament
       requestBody:
@@ -2074,6 +2078,38 @@ paths:
                       type: integer
                     publicity:
                       type: boolean
+
+  /get_user_tournaments:
+    get:
+      summary: Retrieve user's tournament list
+      description: Fetches the list of tournaments a user is participating in.
+      operationId: app.get_user_tournaments
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: The email of the user to retrieve tournaments for.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved the list of user's tournaments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found
 
   /get_email_from_username:
     post:
