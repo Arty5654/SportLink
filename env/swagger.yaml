@@ -1848,6 +1848,10 @@ paths:
                   type: string
                 startTime:
                   type: string
+                location:
+                  type: string
+                skillLevel:
+                  type: string
       responses:
         "200":
           description: "Tournament Created"
@@ -1882,6 +1886,10 @@ paths:
                     isFull:
                       type: boolean
                     startTime:
+                      type: string
+                    location:
+                      type: string
+                    skillLevel:
                       type: string
         "404":
           description: Tournament not found
@@ -1935,6 +1943,10 @@ paths:
                   matchDuration:
                     type: string
                   startTime:
+                    type: string
+                  location:
+                    type: string
+                  skillLevel:
                     type: string
         "404":
           description: Tournament not found
