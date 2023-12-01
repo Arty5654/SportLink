@@ -147,18 +147,8 @@ def check_stats():
 
 def create():
     payload = request.json
-    emails = payload['participants']
-
-    usernames = fetch_usernames(emails)
-    payload['participants'] = usernames
-
-    teamBlueU = fetch_usernames(payload['teamBlue'])
-    teamGreenU = fetch_usernames(payload['teamGreen'])
-
-    payload['teamBlue'] = teamBlueU
-    payload['teamGreen'] = teamGreenU
-
     events.insert_one(payload)
+    emails = payload['participants']
 
     curr = emails[0]
     msg = Message('Invite to SportLink', recipients=emails)
@@ -918,10 +908,7 @@ def join_event():
     users.update_one({"username": data.get('username')}, {
         "$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
 
-    team_green = data.get("teamGreen")
-    team_blue = data.get("teamBlue")
-
-    return join(data.get("id"), data.get("username"), list(events.find()), team_green, team_blue)
+    return join(data.get("id"), data.get("username"), list(events.find()))
 
 
 def leave_event():
@@ -1118,21 +1105,11 @@ def create_team():
 
 
 def get_teams():
-    #curr_email = request.args.get('email')
+    curr_email = request.args.get('email')
 
-    #list_of_teams = get_users_teams(curr_email)
+    list_of_teams = get_users_teams(curr_email)
 
-    #return jsonify(list_of_teams), 200
-
-    all_teams = list(teams.find({}))
-
-    # Convert ObjectId to string
-    for team in all_teams:
-        team['_id'] = str(team['_id'])
-
-    #print("All teams:", all_teams)
-
-    return jsonify(all_teams), 200
+    return jsonify(list_of_teams), 200
 
 
 def leave_team():
@@ -1141,7 +1118,7 @@ def leave_team():
     user_leaving = req['user']
     new_leader = req['new_leader']
 
-    return leave_a_team(user_leaving, team_name, new_leader), 200
+    return leave_a_team(user_leaving, team_name, new_leader)
 
 
 def change_team_name():
@@ -1168,7 +1145,8 @@ def create_tournament():
         'sport': data.get('sport', ''),
         'teamCount': data.get('teamCount', ''),
         'tournamentDuration': data.get('tournamentDuration', ''),
-        'matchDuration': data.get('matchDuration', '')
+        'matchDuration': data.get('matchDuration', ''),
+        'startTime': data.get('startTime', '')
     }
 
     tournaments.insert_one(tournament_data)
@@ -1280,6 +1258,15 @@ def leave_tournament():
             {'_id': obj_tournament_id},
             {'$pull': {'teams': team['name']}}
         )
+        team_members = db.users.find({'teams': team_id}, {'email': 1})
+        team_member_emails = [member['email'] for member in team_members]
+
+        subject = "Tournament Update"
+        body = f"Your team '{team['name']}' has left the tournament."
+
+        msg = Message(subject, recipients=team_member_emails)
+        msg.html = body
+        mail.send(msg)
 
         if result.modified_count == 0:
             return jsonify({"message": "Failed to leave the tournament"}), 500
@@ -1288,6 +1275,23 @@ def leave_tournament():
         return jsonify({"message": "Left the tournament successfully"}), 200
     else:
         return jsonify({"message": "Team not participating in this tournament"}), 400
+
+def get_teams2():
+    #curr_email = request.args.get('email')
+
+    #list_of_teams = get_users_teams(curr_email)
+
+    #return jsonify(list_of_teams), 200
+
+    all_teams = list(teams.find({}))
+
+    # Convert ObjectId to string
+    for team in all_teams:
+        team['_id'] = str(team['_id'])
+
+    #print("All teams:", all_teams)
+
+    return jsonify(all_teams), 200
 
 
 
@@ -1361,32 +1365,6 @@ def refresh_gmsg():
 
     chat = groups.find_one({"key": key})
     return jsonify({'key': key, 'messages': chat['messages']})
-
-def fetch_usernames(email_list):
-
-    emails = email_list
-
-    usernames = []
-    for email in emails:
-        username = users.find_one({"email": email})
-        usernames.append(username['username'])
-
-    print(usernames)
-    return usernames
-def update_lists():
-   payload = request.json
-
-   id = payload["id"]
-   teamBlue = payload["teamBlue"]
-   teamGreen = payload["teamGreen"]
-
-   event_data = list(events.find())
-
-   for event in event_data:
-       if str(id) == str(event["_id"]):
-           events.update_one({"_id": event["_id"]}, {"$set": {"teamBlue": teamBlue, "teamGreen": teamGreen}})
-           print("UPDATED")
-
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

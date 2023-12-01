@@ -39,14 +39,10 @@ function GoogleMapComponent({ center, zoom, handleNewCenter, sport, radius, type
   /* WHEN A FILTER CHANGES, UPDATE MARKERS */
   useEffect(() => {
     if (mapRef.current && sport !== "Select" && radius >= 5) {
-
       fetchPlaces(mapRef.current, sport, (radius * 1000));
-        
     } else if (sport === "all") {
-
       fetchPlaces(mapRef.current, sport, 0);
-
-    } else if ((sport === "Select" || radius === "Select") && type === 0) {
+    } else if ((sport === "Select" || radius < 5)) {
       setMarkers([]);
       setEventMarkers([]);
     }

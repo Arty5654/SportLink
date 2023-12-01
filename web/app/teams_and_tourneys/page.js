@@ -27,15 +27,19 @@ const teamsNtourneys = () => {
   const [teamCount, setTeamCount] = useState('');
   const [tournamentDuration, setTournamentDuration] = useState('');
   const [matchDuration, setMatchDuration] = useState('');
+  const [countdownTimer, setCountdownTimer] = useState(0);
 
   const handleTournamentSubmit = async (e) => {
     e.preventDefault();
+    const startTime = new Date();
+    startTime.setMinutes(startTime.getMinutes() + parseInt(countdownTimer));
     try {
         await axios.post('http://localhost:5000/create_tournament', {
             sport,
             teamCount,
             tournamentDuration,
-            matchDuration
+            matchDuration,
+            startTime
         });
         alert('Tournament created successfully!');
         setIsTournamentModalOpen(false);
@@ -393,6 +397,18 @@ const teamsNtourneys = () => {
                             value={matchDuration}
                             onChange={(e) => setMatchDuration(e.target.value)}
                         />
+                    </div>
+
+                    <div>
+                      
+                      <label htmlFor="countdownTimer" className="block text-lg font-semibold">Countdown Timer (minutes):</label>
+                    <input
+                      type="number"
+                      id="countdownTimer"
+                      className="w-full border p-2 rounded-md"
+                      value={countdownTimer}
+                      onChange={(e) => setCountdownTimer(e.target.value)}
+                    />
                     </div>
 
                     <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full">Create Tournament</button>
