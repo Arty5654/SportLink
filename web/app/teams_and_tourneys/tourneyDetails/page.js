@@ -75,7 +75,7 @@ const TournamentDetails = () => {
   
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/get_teams?email=${currentUser.email}`);
+        const response = await axios.get(`http://localhost:5000/get_teams2?email=${currentUser.email}`);
         if (response.data.length > 0) {
           const teams = response.data;
           // Assuming each team object has a 'leader' field with the leader's email
