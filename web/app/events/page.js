@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
 import SmallMap from "./SmallMap";
+import eventsCSS from "./eventsCSS.css"
 
 const ParticipantCard = ({ username }) => {
   const [user, setUser] = useState(new User());
@@ -95,6 +96,8 @@ const EventDetails = () => {
     eventOwner: "",
     town: "",
     end: false,
+    teamGreen: [],
+    teamBlue: [],
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -103,6 +106,8 @@ const EventDetails = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const eventID = searchParams.get("id");
+  const [isMemberOfGreen, setIsMemberOfGreen] = useState(false);
+  const [isMemberOfBlue, setIsMemberOfBlue] = useState(false);
 
   useEffect(() => {
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
@@ -114,6 +119,7 @@ const EventDetails = () => {
       try {
         axios.get(`http://localhost:5000/get_event_details?id=${eventID}`).then((response) => {
           const data = response.data;
+          console.log(data)
           setEvent({
             title: data.title,
             desc: data.desc,
@@ -190,6 +196,8 @@ const EventDetails = () => {
               numTennis: updatedUser.numTennis,
               numSoccer: updatedUser.numSoccer,
               numWeights: updatedUser.numWeights,
+              teamGreen: event.teamGreen,
+              teamBlue: event.teamBlue
             })
             .then((response) => {
               if (response.status === 200) {
@@ -230,6 +238,7 @@ const EventDetails = () => {
       alert("Already a part of Team Blue")
       setIsMemberOfGreen(false)
       setIsMemberOfBlue(true)
+
       return;
     }
     if (event.teamGreen.includes(user.username)) {
@@ -237,6 +246,8 @@ const EventDetails = () => {
       alert("Already a part of Team Green")
       setIsMemberOfGreen(true)
       setIsMemberOfBlue(false)
+
+
       return;
 
     }
@@ -245,11 +256,19 @@ const EventDetails = () => {
       updatedEvent.teamBlue = updatedEvent.teamBlue.filter(email => email !== user.username);
       setIsMemberOfGreen(true);
       setIsMemberOfBlue(false);
+
+      if (!isUserParticipant) {
+        handleJoinEvent();
+      }
     } else if (team === 'blue') {
       updatedEvent.teamBlue.push(user.username);
       updatedEvent.teamGreen = updatedEvent.teamGreen.filter(email => email !== user.username);
       setIsMemberOfBlue(true);
       setIsMemberOfGreen(false);
+
+      if (!isUserParticipant) {
+        handleJoinEvent();
+      }
     }
     setEvent(updatedEvent);
     axios
@@ -333,6 +352,31 @@ const EventDetails = () => {
                 zoom={15}
                 address={event.address}
             />
+          </div>
+          <div className="team-container">
+            <div className="team-card green-team">
+              <h3 className="team-title">Team Green</h3>
+              {event.teamGreen.map((member, index) => (
+                  <p key={index} className="team-member">{member}</p>
+              ))}
+              {isMemberOfGreen ? (
+                  <button onClick={() => handleLeaveTeam('green')}>Leave Team</button>
+              ) : (
+                  <button onClick={() => handleJoinTeam('green')} disabled={isMemberOfBlue}>Join Team</button>
+              )}
+            </div>
+
+            <div className="team-card blue-team">
+              <h3 className="team-title">Team Blue</h3>
+              {event.teamBlue.map((member, index) => (
+                  <p key={index} className="team-member">{member}</p>
+              ))}
+              {isMemberOfBlue ? (
+                  <button onClick={() => handleLeaveTeam('blue')}>Leave Team</button>
+              ) : (
+                  <button onClick={() => handleJoinTeam('blue')} disabled={isMemberOfGreen}>Join Team</button>
+              )}
+            </div>
           </div>
         </div>
 
