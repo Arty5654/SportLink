@@ -19,7 +19,8 @@ const TournamentDetails = () => {
     duration: 0,
     matchDuration: "",
     teams: [],
-    isFull: false
+    isFull: false,
+    startTime: ""
   });
 
   useEffect(() => {
@@ -32,21 +33,29 @@ const TournamentDetails = () => {
     // Manually parse the URL to get the tournament ID
     const urlParams = new URLSearchParams(window.location.search);
     const tournamentId = urlParams.get('id');
+    console.log("test");
 
     if (tournamentId) {
       const fetchTournamentDetails = async () => {
         try {
+          console.log("TEST2");
           const detailsResponse = await axios.get(`http://localhost:5000/get_tournament_details?id=${tournamentId}`);
-          setMaxTeamsAllowed(detailsResponse.data.teamCount);
-          setTournament({
+          
+          const tournamentData = ({
             objectID: detailsResponse.data._id,
             sport: detailsResponse.data.sport,
             teamCount: detailsResponse.data.teamCount,
             tournamentDuration: detailsResponse.data.tournamentDuration,
             matchDuration: detailsResponse.data.matchDuration,
-            teams: detailsResponse.data.teams,
-            isFull: detailsResponse.data.teams.length >= detailsResponse.data.teamCount
+            teams: detailsResponse.data.teams || [],
+            isFull: (detailsResponse.data.teams || []).length >= detailsResponse.data.teamCount,
+            startTime: detailsResponse.data.startTime,
           });
+
+          console.log("Processed Data:", tournamentData);
+          console.log("HERERER");
+          setMaxTeamsAllowed(detailsResponse.data.teamCount);
+          setTournament(tournamentData);
           
         } catch (error) {
           console.error('Error fetching tournament data:', error);
@@ -57,7 +66,7 @@ const TournamentDetails = () => {
     }
   }, []);
 
-  //console.log("TOURNY INFO", tournament.teams);
+  console.log("TOURNY INFO", tournament);
 
   useEffect(() => {
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
@@ -148,6 +157,9 @@ const TournamentDetails = () => {
         </p>
         <p>
           Match Duration: {tournament.matchDuration} minutes
+        </p>
+        <p>
+          Countdown: {tournament.startTime} minutes
         </p>
       </div>
 
