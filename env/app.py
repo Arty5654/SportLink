@@ -1155,7 +1155,8 @@ def create_tournament():
         'sport': data.get('sport', ''),
         'teamCount': data.get('teamCount', ''),
         'tournamentDuration': data.get('tournamentDuration', ''),
-        'matchDuration': data.get('matchDuration', '')
+        'matchDuration': data.get('matchDuration', ''),
+        'startTime': data.get('startTime', '')
     }
 
     tournaments.insert_one(tournament_data)
@@ -1275,6 +1276,23 @@ def leave_tournament():
         return jsonify({"message": "Left the tournament successfully"}), 200
     else:
         return jsonify({"message": "Team not participating in this tournament"}), 400
+
+def get_teams2():
+    #curr_email = request.args.get('email')
+
+    #list_of_teams = get_users_teams(curr_email)
+
+    #return jsonify(list_of_teams), 200
+
+    all_teams = list(teams.find({}))
+
+    # Convert ObjectId to string
+    for team in all_teams:
+        team['_id'] = str(team['_id'])
+
+    #print("All teams:", all_teams)
+
+    return jsonify(all_teams), 200
 
 
 
