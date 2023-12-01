@@ -1258,6 +1258,15 @@ def leave_tournament():
             {'_id': obj_tournament_id},
             {'$pull': {'teams': team['name']}}
         )
+        team_members = db.users.find({'teams': team_id}, {'email': 1})
+        team_member_emails = [member['email'] for member in team_members]
+
+        subject = "Tournament Update"
+        body = f"Your team '{team['name']}' has left the tournament."
+
+        msg = Message(subject, recipients=team_member_emails)
+        msg.html = body
+        mail.send(msg)
 
         if result.modified_count == 0:
             return jsonify({"message": "Failed to leave the tournament"}), 500
