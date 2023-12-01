@@ -1159,7 +1159,11 @@ def create_tournament():
         'teamCount': data.get('teamCount', ''),
         'tournamentDuration': data.get('tournamentDuration', ''),
         'matchDuration': data.get('matchDuration', ''),
-        'startTime': data.get('startTime', '')
+        'location': data.get('location', ''),
+        'skillLevel': data.get('skillLevel', ''),
+        'startTime': data.get('startTime', ''),
+        
+
     }
 
     tournaments.insert_one(tournament_data)
@@ -1301,21 +1305,26 @@ def leave_tournament():
         return jsonify({"message": "Team not participating in this tournament"}), 400
 
 def get_teams2():
-    #curr_email = request.args.get('email')
+    curr_email = request.args.get('email')
 
-    #list_of_teams = get_users_teams(curr_email)
-
-    #return jsonify(list_of_teams), 200
-
-    all_teams = list(teams.find({}))
+    # Find teams where the current user is either a leader or a member
+    query = {"$or": [{"leader": curr_email}, {"members": curr_email}]}
+    user_teams = list(teams.find(query))
 
     # Convert ObjectId to string
-    for team in all_teams:
+    for team in user_teams:
         team['_id'] = str(team['_id'])
 
-    #print("All teams:", all_teams)
+    return jsonify(user_teams), 200
 
-    return jsonify(all_teams), 200
+def get_tournaments_for_teams():
+    team_ids = request.args.getlist('team_ids')
+    # Convert team_ids to ObjectIds for MongoDB query
+    team_object_ids = [ObjectId(team_id) for team_id in team_ids]
+
+    tournaments = list(db.tournaments.find({'teams._id': {'$in': team_object_ids}}))
+    # Process and return the tournament data
+    return jsonify(tournaments)
 
 
 
