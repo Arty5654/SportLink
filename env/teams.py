@@ -75,8 +75,9 @@ def get_users_teams(curr_email):
     return team_list
 
 def leave_a_team(curr_email, team_name, new_leader):
-    # remove user from team
+    # remove user from team, decrement team size
     teams.update_one({'name': team_name}, {'$pull': {'members': curr_email}})
+    teams.update_one({'name': team_name}, {'$inc': {'size': -1}})
 
     # check if the user is the team leader
     if teams.find_one({'name': team_name})['leader'] == curr_email:
