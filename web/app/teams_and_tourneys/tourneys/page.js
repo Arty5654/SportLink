@@ -13,7 +13,7 @@ const TournamentCard = ({ tournament }) => {
     return (
         <div className="relative border border-gray-400 rounded-xl px-4 py-6 mb-4 h-64 shadow-lg">
             <h1 className="font-semibold cursor-pointer" onClick={handleTournamentClick}>
-                {tournament.sport}
+                {tournament.sport} - Skill Level: {tournament.skillLevel}
             </h1>
             <p className="text-sm text-gray-500 pb-4 cursor-pointer" onClick={handleTournamentClick}>
                 Number of Teams: {tournament.teamCount}
@@ -23,6 +23,9 @@ const TournamentCard = ({ tournament }) => {
             </p>
             <p className="text-sm pb-4 cursor-pointer" onClick={handleTournamentClick}>
                 Match Duration: {tournament.matchDuration} minutes
+            </p>
+            <p className="text-sm pb-4 cursor-pointer" onClick={handleTournamentClick}>
+                Location: {tournament.location}
             </p>
         </div>
     );
