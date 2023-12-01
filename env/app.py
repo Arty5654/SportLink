@@ -1236,7 +1236,21 @@ def join_tournament():
 
     if updated_tournament.modified_count == 0:
         return jsonify({"message": "Failed to join the tournament"}), 500
+    
+    team_participants = team.get('members', [])
+    if 'leader' in team:
+        team_participants.append(team['leader'])
+    
+    for participant in team_participants:
+        print("MEMBER", participant)
+        db.users.update_one(
+            {'email': participant},
+            {'$push': {'tournaments': {'name': tournament['sport'], 'id': str(tournament['_id'])}}},
+            upsert=False
 
+        )
+
+    
     # send emails to team members who are not the leader and who have email notifs on
     curr_team = db.teams.find_one({'name': team['name']})
 
@@ -1246,6 +1260,7 @@ def join_tournament():
         msg = Message('Tournament Update!', recipients=[member])
         msg.html = f'<p>Hello! A team you\'re on just got added to a tournament! Good Luck!</p>'
         mail.send(msg)
+    
 
     return jsonify({"message": "Joined the tournament successfully"}), 200
 
@@ -1285,7 +1300,21 @@ def leave_tournament():
             {'_id': obj_tournament_id},
             {'$pull': {'teams': team['name']}}
         )
+    
+    team_participants = team.get('members', [])
+    if 'leader' in team:
+        team_participants.append(team['leader'])
 
+    tournament_id_str = str(tournament['_id'])
+    for participant in team_participants:
+        db.users.update_one(
+            {'email': participant},
+            {'$pull': {'tournaments': {'id': tournament_id_str}}},
+            upsert=False
+
+        )
+
+        
         # send emails to team members who are not the leader and who have email notifs on
         curr_team = db.teams.find_one({'name': team['name']})
 
@@ -1295,6 +1324,7 @@ def leave_tournament():
             msg = Message('Tournament Update!', recipients=[member])
             msg.html = f'<p>Hello! A team you were a part of is no longer in a tournament, hope to see you back in action soon!</p>'
             mail.send(msg)
+        
 
         if result.modified_count == 0:
             return jsonify({"message": "Failed to leave the tournament"}), 500
@@ -1316,6 +1346,14 @@ def get_teams2():
         team['_id'] = str(team['_id'])
 
     return jsonify(user_teams), 200
+
+def get_user_tournaments():
+    email = request.args.get('email')
+    user = db.users.find_one({"email": email})
+    if user:
+        return jsonify(user.get('tournaments', [])), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
 
 def get_tournaments_for_teams():
     team_ids = request.args.getlist('team_ids')
