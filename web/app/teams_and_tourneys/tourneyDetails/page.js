@@ -23,6 +23,12 @@ const TournamentDetails = () => {
     startTime: ""
   });
 
+  const formatDateTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    return formattedDate;
+  };
+
   useEffect(() => {
     // Set the current user from session storage
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
@@ -33,14 +39,11 @@ const TournamentDetails = () => {
     // Manually parse the URL to get the tournament ID
     const urlParams = new URLSearchParams(window.location.search);
     const tournamentId = urlParams.get('id');
-    console.log("test");
 
     if (tournamentId) {
       const fetchTournamentDetails = async () => {
         try {
-          console.log("TEST2");
           const detailsResponse = await axios.get(`http://localhost:5000/get_tournament_details?id=${tournamentId}`);
-          
           const tournamentData = ({
             objectID: detailsResponse.data._id,
             sport: detailsResponse.data.sport,
@@ -49,11 +52,9 @@ const TournamentDetails = () => {
             matchDuration: detailsResponse.data.matchDuration,
             teams: detailsResponse.data.teams || [],
             isFull: (detailsResponse.data.teams || []).length >= detailsResponse.data.teamCount,
-            startTime: detailsResponse.data.startTime,
+            startTime: formatDateTime(detailsResponse.data.startTime),
           });
 
-          console.log("Processed Data:", tournamentData);
-          console.log("HERERER");
           setMaxTeamsAllowed(detailsResponse.data.teamCount);
           setTournament(tournamentData);
           
@@ -114,6 +115,11 @@ const TournamentDetails = () => {
 
     //console.log("teamID", team._id);
 
+    if (isTournamentStarted()) {
+      alert("The tournament has already started. You cannot join at this time.");
+      return;
+    }
+
     if (tournament.isFull) {
       alert("The tournament is full. You cannot join at this time.");
       return;
@@ -137,6 +143,12 @@ const TournamentDetails = () => {
     } catch (error) {
       console.error('Error creating new team:', error);
     }
+  };
+
+  const isTournamentStarted = () => {
+    const now = new Date();
+    const startTime = new Date(tournament.startTime);
+    return now >= startTime;
   };
   
 
@@ -168,6 +180,7 @@ const TournamentDetails = () => {
       {/* Actions Section */}
       <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">
+        {!isTournamentStarted() && !tournament.isFull && (
           <button
             onClick={handleJoinTournament}
             className="w-full bg-green-500 hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4"
@@ -175,6 +188,7 @@ const TournamentDetails = () => {
           >
             {tournament.isFull ? "Tournament Full" : "Join Tournament"}
           </button>
+        )}
           
           {isJoinTournamentModalOpen && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -228,11 +242,15 @@ const TournamentDetails = () => {
 
 
      
+          {!isTournamentStarted() && (
             <LeaveTournamentButton
               tournamentId={tournament.objectID}
               teamId={selectedTeamId}
               isLeader={userTeams.some(team => team._id === selectedTeamId && team.leader === user.email)}
             />
+          )}
+
+            {isTournamentStarted() && <p className="text-red-500">Tournament has already started.</p>}
           
 
           <h2 className="text-xl font-semibold mb-2">Teams in this Tournament:</h2>
