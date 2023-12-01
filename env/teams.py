@@ -6,6 +6,7 @@ import connexion # pip install connexion[swagger-ui]
 from flask_cors import CORS # pip install flas-cors
 import json
 import os
+from bson.objectid import ObjectId
 
 load_dotenv()
 
@@ -121,7 +122,8 @@ def get_pub_teams():
             'leader': team['leader'],
             'members': team['members'],
             'size': team['size'],
-            'maxSize': team['maxSize']
+            'maxSize': team['maxSize'],
+            '_id': str(team['_id'])
         })
 
     # change all emails to usernames
@@ -131,6 +133,19 @@ def get_pub_teams():
             team['members'][i] = users.find_one({'email': team['members'][i]})['username']
 
     return team_list
+
+def join_team(req):
+
+    team_id = req['_id']
+
+
+    teams.update_one(
+        {"_id": ObjectId(team_id)},
+        {"$addToSet": {"members": req['user']}}  # Use $addToSet to avoid duplicate entries
+    )
+    teams.update_one({"_id": ObjectId(team_id)}, {'$set': {'size': req['num']}})
+
+    print("Done!")
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

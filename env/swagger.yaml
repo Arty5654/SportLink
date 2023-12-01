@@ -1846,6 +1846,8 @@ paths:
                   type: string
                 matchDuration:
                   type: string
+                startTime:
+                  type: string
       responses:
         "200":
           description: "Tournament Created"
@@ -1879,6 +1881,8 @@ paths:
                       type: array
                     isFull:
                       type: boolean
+                    startTime:
+                      type: string
         "404":
           description: Tournament not found
 
@@ -1930,6 +1934,8 @@ paths:
                     type: string
                   matchDuration:
                     type: string
+                  startTime:
+                    type: string
         "404":
           description: Tournament not found
   
@@ -1971,17 +1977,12 @@ paths:
           description: Tournament or Team not found.
         '500':
           description: Failed to join the tournament due to a server error.
-  
 
-  
-  
-
-  
-  /join_tournament:
+  /leave_tournament:
     post:
-      summary: Join a tournament with a team
-      description: Endpoint to join a tournament with a specific team.
-      operationId: app.join_tournament
+      summary: Leave a tournament with a team
+      description: Endpoint to allow a team to leave a tournament.
+      operationId: app.leave_tournament
       requestBody:
         required: true
         content:
@@ -1991,16 +1992,20 @@ paths:
               properties:
                 tournamentId:
                   type: string
-                  description: The ID of the tournament to join.
+                  description: The ID of the tournament to leave.
                 teamId:
                   type: string
-                  description: The ID of the team joining the tournament.
+                  description: The ID of the team leaving the tournament.
+                userEmail:
+                  type: string
+                  description: The email of the user who is trying to make the team leave the tournament.
               required:
                 - tournamentId
                 - teamId
+                - userEmail
       responses:
         '200':
-          description: Successfully joined the tournament.
+          description: Successfully left the tournament.
           content:
             application/json:
               schema:
@@ -2008,12 +2013,59 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Joined the tournament successfully.
+                    example: Left the tournament successfully.
         '400':
-          description: Missing tournamentId or teamId in the request.
+          description: Missing tournamentId, teamId, or userEmail in the request.
+        '403':
+          description: Unauthorized action, only team leaders can make the team leave the tournament.
         '404':
           description: Tournament or Team not found.
+        '409':
+          description: Cannot leave the tournament as it has already started.
         '500':
-          description: Failed to join the tournament due to a server error.
+          description: Failed to leave the tournament due to a server error.
+
+  /get_teams2:
+    get:
+      operationId: app.get_teams2
+      parameters:
+        - name: email
+          in: query
+          description: The email of the user to retrieve teams.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Teams Retrieved"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    objectID:
+                      type: string
+                    name:
+                      type: string
+                    leader:
+                      type: string
+                    members:
+                      type: array
+                      default: []
+                      items:
+                        type: string
+                    size:
+                      type: integer
+                    maxSize:
+                      type: integer
+                    publicity:
+                      type: boolean
+
   
+
+  
+  
+
 

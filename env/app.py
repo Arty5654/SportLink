@@ -1,16 +1,16 @@
-from flask import Flask, jsonify, request # pip install flask
-from flask_mail import Mail, Message # pip install flask_mail
-from pymongo import MongoClient #pip install pymogo
-import connexion # pip install connexion[swagger-ui]
-import random # no install
-import bcrypt # pip install bcrypt
-from flask_cors import CORS # pip install flas-cors
-from dotenv import load_dotenv # pip install python-dotenv
-import os # no install
-from datetime import datetime, timedelta #pip install datetime
-import string # no install
-import json # no install
-import pdb # python debugger, pip install pypdb
+from flask import Flask, jsonify, request  # pip install flask
+from flask_mail import Mail, Message  # pip install flask_mail
+from pymongo import MongoClient  # pip install pymogo
+import connexion  # pip install connexion[swagger-ui]
+import random  # no install
+import bcrypt  # pip install bcrypt
+from flask_cors import CORS  # pip install flas-cors
+from dotenv import load_dotenv  # pip install python-dotenv
+import os  # no install
+from datetime import datetime, timedelta  # pip install datetime
+import string  # no install
+import json  # no install
+import pdb  # python debugger, pip install pypdb
 from flask_socketio import SocketIO, send, join_room, emit
 import base64
 from gridfs import GridFS
@@ -26,7 +26,7 @@ import re
 # import files
 from events import get_history, add_history, delete_history, join, get_details, get_all, leave, get_my, edit_event
 from friends import accept_request, deny_request, get_requests, get_my_friends, remove_one
-from teams import create_a_team, get_users_teams, leave_a_team, change_name, get_pub_teams
+from teams import create_a_team, get_users_teams, leave_a_team, change_name, get_pub_teams, join_team
 
 load_dotenv()
 
@@ -44,11 +44,13 @@ stats = db["stats"]
 fs = GridFS(db)
 history = db["eventHistory"]
 tournaments = db["tournaments"]
+groups = db["groups"]
 
 messages = db["messages"]
 
-#sendgridtemplates
+# sendgridtemplates
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
+
 
 def update_stats():
     data = request.json
@@ -59,7 +61,7 @@ def update_stats():
 
     # Find the document and update
     result = stats.update_one(
-        {'_id' : user},
+        {'_id': user},
         {'$set': {'wins': wins, 'losses': losses, 'elo': elo}},
         upsert=True  # This creates a new document if one doesn't exist
     )
@@ -69,8 +71,8 @@ def update_stats():
     else:
         return jsonify({'message': 'No matching document found'}), 400
 
-def refresh_msg():
 
+def refresh_msg():
     payload = request.json
     print(payload)
 
@@ -80,16 +82,13 @@ def refresh_msg():
     chat = messages.find_one({"_id": key})
     all_chats.append({chat["_id"]: chat["messages"]})
 
-
     return jsonify(all_chats)
 
-def init_messages():
 
+def init_messages():
     payload = request.json
 
     print(payload)
-
-
 
     user = payload['email']
     friends = payload['friends']
@@ -114,11 +113,14 @@ def init_messages():
 
     return jsonify({"chats": all_chats, "chat_keys": chat_keys})
 
+
 def generate_user_key(user1, user2):
     # Sort the user IDs to ensure consistency
     sorted_users = sorted([user1, user2])
     # Join the sorted user IDs with a delimiter to form a unique key
     return ':'.join(sorted_users)
+
+
 def check_stats():
     emails = request.json["friends"]
 
@@ -141,6 +143,8 @@ def check_stats():
             response_data.append(user_stats)
 
     return jsonify(response_data), 200
+
+
 def create():
     payload = request.json
     events.insert_one(payload)
@@ -151,6 +155,7 @@ def create():
     msg.html = f'<p>You have been invited by {curr} to play!</p>'
     mail.send(msg)
     return "Created"
+
 
 def fetch_friends():
     obj = request.json
@@ -177,19 +182,19 @@ def create_account():
     username = email.split('@')[0]
     tempUsername = username
 
-    #encrypt password
+    # encrypt password
     salt = bcrypt.gensalt()
     hashWord = bcrypt.hashpw(password, salt)
 
-    #generate a unique username for the user
-    #user['username] so the digits don't keep adding to end on multiple iterations
+    # generate a unique username for the user
+    # user['username] so the digits don't keep adding to end on multiple iterations
     while users.find_one({'username': username}):
         username = tempUsername + str(random.randint(100, 9999))
 
     # insert new user into the db
     userData = {
         'email': email,
-        'password': hashWord.decode('utf-8'), #store hashed pass as a string
+        'password': hashWord.decode('utf-8'),  # store hashed pass as a string
         'username': username,
         'friends': [],
         'numTennis': 0,
@@ -208,10 +213,11 @@ def create_account():
     # return complete username for frontend use and success
     return jsonify({'username': username}), 201
 
+
 def login():
     req_user = request.json
 
-    #request data
+    # request data
     req_email = req_user['email']
     req_password = req_user['password'].encode('utf-8')
 
@@ -225,13 +231,15 @@ def login():
 
             # add all fields which the frontend needs here
 
-
             userData = {
                 'email': user['email'],
                 'username': user['username']
             }
 
-            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city', 'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
+            optional_fields = ['firstName', 'lastName', 'phoneNumber', 'friends', 'age', 'birthday', 'gender', 'city',
+                               'state', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge',
+                               'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked",
+                               "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -266,7 +274,7 @@ def google_signin():
         userPass = user['password']
 
         if userPass == googleId:
-            #login to their google account
+            # login to their google account
             email = user['email']
             username = user['username']
 
@@ -275,7 +283,10 @@ def google_signin():
                 'friends': []
             }
 
-            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode', 'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation', 'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker", 'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
+            optional_fields = ['phoneNumber', 'friends', 'age', 'gender', 'city', 'state', 'birthday', 'zipCode',
+                               'country', 'address', 'accountPrivacy', 'displayAge', 'displayLocation',
+                               'displayPhoneNumber', 'profileImage', 'imageData', "blocked", "blocked_users", "blocker",
+                               'numTennis', 'numBasketball', 'numWeights', 'numSoccer']
             # THESE DO NOT EXIST IN EVERY PROFILE
             for field in optional_fields:
                 if field in user:
@@ -293,14 +304,14 @@ def google_signin():
         username = email.split('@')[0]
         tempUsername = username
 
-        #generate a unique username for the user
+        # generate a unique username for the user
         while users.find_one({'username': username}):
             username = tempUsername + str(random.randint(10, 9999))
 
         # insert new user into the db
         userData = {
             'email': email,
-            'password': googleId, #store google id as their password
+            'password': googleId,  # store google id as their password
             'username': username,
             'firstName': firstName,
             'lastName': lastName,
@@ -314,10 +325,10 @@ def google_signin():
         users.insert_one(userData)
         return jsonify({'username': username}), 201
 
+
 def get_token():
     req = request.json
     email = req['email']
-
 
     user = users.find_one({'email': email})
 
@@ -336,6 +347,7 @@ def get_token():
 
     else:
         return jsonify({'error': 'No account with this email!'}), 401
+
 
 def input_reset_token():
     req = request.json
@@ -359,8 +371,8 @@ def input_reset_token():
     else:
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
 
-def change_password():
 
+def change_password():
     req = request.json
     email = req['email']
     newPassword = req['password'].encode('utf-8')
@@ -372,21 +384,22 @@ def change_password():
         hashWord = bcrypt.hashpw(newPassword, salt)
 
         users.update_one(
-                        {'email': email}, {"$set": {"password": hashWord.decode('utf-8')},
-                                           "$unset": {"reset_code": '', "code_exipiration": ''}})
-
+            {'email': email}, {"$set": {"password": hashWord.decode('utf-8')},
+                               "$unset": {"reset_code": '', "code_exipiration": ''}})
 
         return 200
 
     else:
         return jsonify({'error': 'Email invalid or no code generated!'}), 401
 
+
 def update_user_profile():
     user = request.get_json()
     email = user.get('email')
 
     update_query = {}
-    for field in ['firstName', 'lastName', 'username', 'phoneNumber', 'address', 'state', 'country', 'zipCode', 'city', 'age', 'gender', 'birthday']:
+    for field in ['firstName', 'lastName', 'username', 'phoneNumber', 'address', 'state', 'country', 'zipCode', 'city',
+                  'age', 'gender', 'birthday']:
         if field in user:
             update_query[field] = user.get(field)
 
@@ -410,11 +423,11 @@ def update_user_profile():
             # Handle base64 decoding error
             return jsonify({'error': 'Base64 decoding error', 'message': str(e)}), 400
 
-
     users = db.users  # Assuming your collection name is 'users'
     users.update_one({"email": email}, {"$set": update_query})
 
     return jsonify({'message': 'Profile updated successfully'}), 200
+
 
 def update_user_privacy():
     user = request.json
@@ -439,6 +452,54 @@ def update_user_privacy():
     return jsonify({'message': 'Privacy settings updated successfully'}), 200
 
 
+def gamesUpdate():
+    # Extracting data from request
+    sport = request.json['sport']
+    maxPlayers = request.json['maxPlayers']
+    location = request.json['location']
+    skill = request.json['skill']
+    gameID = request.json['gameID']
+
+    if gameID == 0 or gameID == 2:
+        dbData = teams
+    else:
+        dbData = events
+
+    # Inserting into MongoDB
+    location_exists = dbData.find({'_id': location})
+
+    if location_exists:
+        # If location exists, append
+
+        # Create Team or Event
+        if gameID == 0 or gameID == 1:
+            dbData.update_one({'_id': location}, {'$push': {'data': {
+                'maxPlayers': maxPlayers,
+                'sport': sport,
+                'skill': skill,
+                'gameID': gameID
+            }}})
+        # Join Team/ Event
+        else:
+            return jsonify(dbData.find_one({'_id': location})), 200
+
+
+
+    else:
+
+        if gameID == 2 or gameID == 3:
+            return jsonify({"message": "No Games or Teams Found!"}), 400
+
+        # If location doesn't exist, create a new entry
+        dbData.insert_one({'_id': location, 'data': [{
+            'maxPlayers': maxPlayers,
+            'sport': sport,
+            'skill': skill,
+            'gameID': gameID
+        }]})
+
+        return jsonify({"message": "Team successfully created"}), 200
+
 
 def gamesUpdate():
     # Extracting data from request
@@ -488,53 +549,22 @@ def gamesUpdate():
 
         return jsonify({"message": "Team successfully created"}), 200
 
-def gamesUpdate():
-    # Extracting data from request
-    sport = request.json['sport']
-    maxPlayers = request.json['maxPlayers']
-    location = request.json['location']
-    skill = request.json['skill']
-    gameID = request.json['gameID']
+# Use the username to find the user email
+def get_email_from_username():
+    data = request.get_json()
+    username = data["friendUsername"]
+    user_data = list(users.find())
 
-    if gameID == 0 or gameID == 2:
-        dbData = teams
-    else:
-        dbData = events
+    request_data = {
+        "email": ""
+    }
 
-    # Inserting into MongoDB
-    location_exists = dbData.find({'_id': location})
+    for user in user_data:
+        if str(username) == user["username"]:
+            request_data["email"] = user["email"]
 
-    if location_exists:
-        # If location exists, append
+    return jsonify(request_data)
 
-        # Create Team or Event
-        if gameID == 0 or gameID == 1:
-            dbData.update_one({'_id': location}, {'$push': {'data': {
-                'maxPlayers': maxPlayers,
-                'sport': sport,
-                'skill': skill,
-                'gameID': gameID
-            }}})
-        # Join Team/ Event
-        else:
-            return jsonify(dbData.find_one({'_id': location})), 200
-
-
-
-    else:
-
-        if gameID == 2 or gameID == 3:
-            return jsonify({"message": "No Games or Teams Found!"}), 400
-
-        # If location doesn't exist, create a new entry
-        dbData.insert_one({'_id': location, 'data': [{
-            'maxPlayers': maxPlayers,
-            'sport': sport,
-            'skill': skill,
-            'gameID': gameID
-        }]})
-
-        return jsonify({"message": "Team successfully created"}), 200
 
 # Send a friend request to another user
 def send_friend_request():
@@ -543,7 +573,7 @@ def send_friend_request():
     email = req['email']
     friend_email = req['friend_email']
 
-        # check if friend exists
+    # check if friend exists
     if not users.find_one({'email': friend_email}):
         return jsonify({'message': 'Friend does not exist!'}), 404
 
@@ -581,6 +611,7 @@ def send_friend_request():
 
     return jsonify({"message": "Friend Request Sent"}), 200
 
+
 # Accept a friend request from another user
 def accept_friend_request():
     # Extracting data from request
@@ -589,6 +620,7 @@ def accept_friend_request():
     friend_email = req['friend_email']
 
     return accept_request(email, friend_email)
+
 
 # Deny a friend request from another user
 def deny_friend_request():
@@ -606,11 +638,13 @@ def get_friend_requests():
 
     return get_requests(curr_email)
 
+
 def get_friends():
     # xtracting data from request
     curr_email = request.args.get('email')
 
     return get_my_friends(curr_email)
+
 
 def remove_friend():
     # Extracting data from request
@@ -619,6 +653,7 @@ def remove_friend():
     friend_email = req['friend_email']
 
     return remove_one(email, friend_email)
+
 
 def get_reports():
     user_email = request.args.get('email')
@@ -631,6 +666,7 @@ def get_reports():
 
     return jsonify(user_reports_list), 200
 
+
 def get_blocked_users():
     email = request.args.get('email')  # Get the email from the request
     user = db.blocks.find_one({'email': email})  # Find the document with the provided email
@@ -639,7 +675,9 @@ def get_blocked_users():
         blocked_users = user.get('blocked_users', [])
         return jsonify(blocked_users), 200
     else:
-        return jsonify([]), 404  # Return an empty list with a 404 status if the user is not found or has no blocked users
+        return jsonify(
+            []), 404  # Return an empty list with a 404 status if the user is not found or has no blocked users
+
 
 def unblock_user():
     data = request.get_json()
@@ -665,9 +703,11 @@ def unblock_user():
 
     return jsonify({'message': 'User not found or unblock failed'}), 404
 
+
 def preprocess_phone_number(phone_number):
     # Remove non-digit characters from the phone number
     return re.sub(r'\D', '', phone_number)
+
 
 def get_image_from_gridfs(image_id):
     file_doc = fs.find_one({"filename": image_id})
@@ -697,30 +737,29 @@ def user_lookup():
             {"lastName": regex},
         ]
     }):
-        
         # Check if the searched user is blocked by the user performing the search
-        #is_blocked = searching_user_email in user.get("blocked_users", [])
-        
-    #if not is_blocked:
+        # is_blocked = searching_user_email in user.get("blocked_users", [])
+
+        # if not is_blocked:
         matching_users.append({
-                "id": str(user["_id"]),
-                "name": user.get("name"),
-                "username": user.get("username"),
-                "email": user.get("email"),
-                "phoneNumber": user.get("phoneNumber"),
-                "firstName": user.get("firstName"),
-                "lastName": user.get("lastName"),
-                "profileImage": user.get("profileImage"),
-                #"blocked": is_blocked,
-                "imageData": user.get("imageData")
-            })
+            "id": str(user["_id"]),
+            "name": user.get("name"),
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "phoneNumber": user.get("phoneNumber"),
+            "firstName": user.get("firstName"),
+            "lastName": user.get("lastName"),
+            "profileImage": user.get("profileImage"),
+            # "blocked": is_blocked,
+            "imageData": user.get("imageData")
+        })
 
     return jsonify(matching_users), 200
+
 
 def get_user_info():
     email = request.args.get('email')
     blocker_email = request.args.get('blocker_email')
-   
 
     # Query the database for the user based on email
     user = users.find_one({"email": email})
@@ -765,11 +804,11 @@ def get_user_info():
     else:
         # User not found
         return jsonify({'message': 'User not found'}), 404
-    
+
+
 def get_user_info2():
     username = request.args.get('username')
     blocker_email = request.args.get('blocker_email')
-   
 
     # Query the database for the user based on email
     user = users.find_one({"username": username})
@@ -817,7 +856,6 @@ def get_user_info2():
 
 
 def delete_account():
-
     req = request.data.decode("utf-8")
     parsed = json.loads(req)
     email = parsed.get('email', '')
@@ -825,6 +863,7 @@ def delete_account():
     print(email)
     users.delete_one({"email": email})
     return 200
+
 
 def get_events():
     event_data = list(events.find())
@@ -835,6 +874,7 @@ def get_events():
 
     # Return the modified event data as JSON
     return jsonify(event_data), 200
+
 
 def get_event_details():
     return get_details(request.args.get("id"), list(events.find()))
@@ -857,6 +897,7 @@ def delete_event_details():
 def get_all_events():
     return get_all(request.args.get('email'))
 
+
 def join_event():
     data = request.get_json()
 
@@ -864,24 +905,30 @@ def join_event():
     tennis = data.get("numTennis")
     soccer = data.get("numSoccer")
     weights = data.get("numWeights")
-    users.update_one({"username": data.get('username')}, {"$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
+    users.update_one({"username": data.get('username')}, {
+        "$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
 
     return join(data.get("id"), data.get("username"), list(events.find()))
+
 
 def leave_event():
     data = request.get_json()
     return leave(data.get("id"), data.get("username"), list(events.find()))
 
+
 def get_event_history():
     return get_history(request.args.get("username"), list(history.find()), list(events.find()))
+
 
 def add_event_history():
     data = request.get_json()
     return add_history(data.get("event"), data.get("user"))
 
+
 def delete_event_history():
     data = request.get_json()
     return delete_history(data.get("event"), data.get("user"))
+
 
 def get_my_events():
     return get_my(list(events.find()), request.args.get("username"))
@@ -949,6 +996,7 @@ def submit_report():
 
     return jsonify({'message': 'Report submitted successfully'}), 200
 
+
 def block_user():
     user = request.get_json()
     email = user.get('blocker')
@@ -963,6 +1011,7 @@ def block_user():
     )
 
     return jsonify({'message': 'User blocked successfully'}), 200
+
 
 def get_user_notifs_settings():
     curr_email = request.args.get('email')
@@ -1004,6 +1053,7 @@ def set_user_notifs_settings():
     users.update_one({"email": email}, {"$set": update_query})
     return jsonify({'message': 'Notification settings updated successfully'}), 200
 
+
 def clear_notifications():
     data = request.json
     user_email = data.get("email")
@@ -1041,6 +1091,7 @@ def clear_notifications():
 
     return jsonify({"message": "Notifications cleared"}), 200
 
+
 def create_team():
     req = request.get_json()
     team_name = req['name']
@@ -1051,6 +1102,7 @@ def create_team():
     privacy_settings = req['publicity']
 
     return create_a_team(team_name, team_leader, teammates, team_size, max_team_size, privacy_settings)
+
 
 def get_teams():
     #curr_email = request.args.get('email')
@@ -1069,6 +1121,7 @@ def get_teams():
 
     return jsonify(all_teams), 200
 
+
 def leave_team():
     req = request.get_json()
     team_name = req['name']
@@ -1084,8 +1137,16 @@ def change_team_name():
 
     return change_name(team_name), 200
 
+
 def get_public_teams():
     return get_pub_teams(), 200
+
+
+def joinTeam():
+    req = request.json
+
+    return join_team(req), 200
+
 
 def create_tournament():
     data = request.json
@@ -1094,12 +1155,15 @@ def create_tournament():
         'sport': data.get('sport', ''),
         'teamCount': data.get('teamCount', ''),
         'tournamentDuration': data.get('tournamentDuration', ''),
-        'matchDuration': data.get('matchDuration', '')
+        'matchDuration': data.get('matchDuration', ''),
+        'startTime': data.get('startTime', '')
+
     }
 
     tournaments.insert_one(tournament_data)
 
     return jsonify({'message': 'Tournament created successfully'}), 200
+
 
 def get_tournaments():
     all_tournaments = list(tournaments.find({}))
@@ -1108,7 +1172,7 @@ def get_tournaments():
     for tournament in all_tournaments:
         tournament['_id'] = str(tournament['_id'])
 
-    #print("All tournaments:", all_tournaments)
+    # print("All tournaments:", all_tournaments)
 
     return jsonify(json.loads(json.dumps(all_tournaments, default=str)))
 
@@ -1169,8 +1233,149 @@ def join_tournament():
 
     return jsonify({"message": "Joined the tournament successfully"}), 200
 
+def leave_tournament():
+    data = request.get_json()
+    tournament_id = data.get('tournamentId')
+    team_id = data.get('teamId')
+    user_email = data.get('userEmail')
+
+    # Validate inputs
+    if not tournament_id or not team_id or not user_email:
+        return jsonify({"message": "Missing tournamentId, teamId, or userEmail"}), 400
+
+    # Convert tournament ID to ObjectId
+    try:
+        obj_tournament_id = ObjectId(tournament_id)
+    except:
+        return jsonify({"message": "Invalid tournamentId"}), 400
+
+    # Check if tournament exists
+    tournament = db.tournaments.find_one({'_id': obj_tournament_id})
+    if not tournament:
+        return jsonify({"message": "Tournament not found"}), 404
+
+    # Check if the team exists and the user is the leader
+    team = db.teams.find_one({'_id': ObjectId(team_id), 'leader': user_email})
+    if not team:
+        return jsonify({"message": "Team not found or you are not the leader"}), 403
+
+    # Check if the tournament has started
+    if tournament.get('start_date') and tournament['start_date'] <= datetime.now():
+        return jsonify({"message": "Cannot leave the tournament after it has started"}), 403
+
+    # Remove the team name from the tournament
+    if team['name'] in tournament.get('teams', []):
+        result = db.tournaments.update_one(
+            {'_id': obj_tournament_id},
+            {'$pull': {'teams': team['name']}}
+        )
+        team_members = db.users.find({'teams': team_id}, {'email': 1})
+        team_member_emails = [member['email'] for member in team_members]
+
+        subject = "Tournament Update"
+        body = f"Your team '{team['name']}' has left the tournament."
+
+        msg = Message(subject, recipients=team_member_emails)
+        msg.html = body
+        mail.send(msg)
+
+        if result.modified_count == 0:
+            return jsonify({"message": "Failed to leave the tournament"}), 500
+
+        # Notify team members (Implement your notification logic here)
+        return jsonify({"message": "Left the tournament successfully"}), 200
+    else:
+        return jsonify({"message": "Team not participating in this tournament"}), 400
+
+def get_teams2():
+    #curr_email = request.args.get('email')
+
+    #list_of_teams = get_users_teams(curr_email)
+
+    #return jsonify(list_of_teams), 200
+
+    all_teams = list(teams.find({}))
+
+    # Convert ObjectId to string
+    for team in all_teams:
+        team['_id'] = str(team['_id'])
+
+    #print("All teams:", all_teams)
+
+    return jsonify(all_teams), 200
 
 
+
+
+
+def init_groups():
+    req = request.json
+    user = req['email']
+
+    # Find the user document in the collection
+    user_document = groups.find_one({"user": user})
+
+    group_keys = []
+    if user_document and "chat_keys" in user_document:
+        group_chats = []
+        for key in user_document["chat_keys"]:
+            # Fetch each group chat by its key
+            group_chat = groups.find_one({"key": key})
+            if group_chat:
+                # Append the chat key and its messages to the list
+                group_chats.append({
+                    "key": key,
+                    "messages": group_chat.get("messages", [])
+                })
+
+                group_keys.append(key)
+
+        return jsonify({"group_chats": group_chats, 'group_keys': group_keys})
+    else:
+        # Return an empty list if the user document does not exist or has no chat keys
+        return jsonify({"group_chats": [], 'group_keys': []})
+
+
+def generate_group_key(members, user):
+    # Include the user in the list of members
+    all_members = members + [user]
+    # Sort the user IDs to ensure consistency
+    sorted_users = sorted(all_members)
+    return ':'.join(sorted_users)
+
+
+def create_chat():
+    req = request.json
+    members = req['members']
+    user = req['user']
+
+    key = generate_group_key(members, user)
+
+    # Insert so each user can lookup their groupchat key
+    groups.update_one(
+        {"user": user},
+        {"$addToSet": {"chat_keys": key}},  # Use $addToSet to avoid duplicates
+        upsert=True  # Create a new document if the user does not exist
+    )
+
+    for member in members:
+        groups.update_one(
+            {"user": member},
+            {"$addToSet": {"chat_keys": key}},
+            upsert=True
+        )
+    groups.insert_one({"key": key, "messages": []})
+
+    return jsonify({'key': key, 'messages': []}, 200)
+
+def refresh_gmsg():
+    payload = request.json
+    print(payload)
+
+    key = payload['chat_key']
+
+    chat = groups.find_one({"key": key})
+    return jsonify({'key': key, 'messages': chat['messages']})
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
@@ -1180,10 +1385,9 @@ app.add_api('swagger.yaml')
 socketIo = SocketIO(app.app, cors_allowed_origins="*")
 flask_app = app.app
 
-#email sending information
+# email sending information
 key = os.getenv("SG_API_KEY")
 sender = os.getenv("MAIL_SENDER")
-
 
 flask_app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 flask_app.config['MAIL_PORT'] = 587
@@ -1198,19 +1402,22 @@ mail = Mail(flask_app)
 def handle_connect():
     print('Client connected')
 
+
 @socketIo.on('disconnect')
 def handle_disconnect():
     print('Client disconnected')
+
 
 @socketIo.on('join')
 def handle_join(obj):
     print("Client Joined")
     join_room(obj)
+    print(obj)
     send(f"{request.sid} has entered the room.", room=obj)
+
 
 @socketIo.on('new_message')
 def handle_new_message(data):
-
     print("Handling Messages")
     IP_TO = data['IP_TO']
     IP_FROM = data['IP_FROM']
@@ -1236,6 +1443,35 @@ def handle_new_message(data):
     print("Message Sent")
 
 
+@socketIo.on('group_message')
+def group_message(data):
+    print("Handling Group Message")
+    user = data['user']
+    members = data['members']
+    content = data['content']
+
+    key = generate_group_key(members, user)
+
+    chat = groups.find_one({"key": key})
+
+    print(chat)
+
+    if chat:
+        # Append the new message to the existing messages array
+        new_message = {"content": content}
+        print(new_message)
+        groups.update_one({"key": key}, {"$push": {"messages": new_message}})
+        print("Complete")
+    else:
+        # If chat doesn't exist, create it (assuming IP_FROM is the user initiating the chat)
+        groups.insert_one({"key": key, "messages": [{"content": content}]})
+
+    # Broadcast or emit the message as needed
+    for member in members:
+        emit('group_response', {'key': key, 'content': content}, room=member)
+        print("Sent to : " + member)
+
+    print("Messages Sent")
 
 
 if __name__ == '__main__':

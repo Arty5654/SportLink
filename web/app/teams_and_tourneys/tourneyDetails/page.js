@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
+import LeaveTournamentButton from "@components/LeaveTournamentButton";
+
 
 
 const TournamentDetails = () => {
@@ -9,6 +11,7 @@ const TournamentDetails = () => {
   const [selectedTeamId, setSelectedTeamId] = useState(null);
   const [isJoinTournamentModalOpen, setIsJoinTournamentModalOpen] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
+  const [maxTeamsAllowed, setMaxTeamsAllowed] = useState(0);
   const [userTeams, setUserTeams] = useState([])
   const [tournament, setTournament] = useState({
     sport: "",
@@ -16,8 +19,15 @@ const TournamentDetails = () => {
     duration: 0,
     matchDuration: "",
     teams: [],
-    isFull: false
+    isFull: false,
+    startTime: ""
   });
+
+  const formatDateTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const formattedDate = `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    return formattedDate;
+  };
 
   useEffect(() => {
     // Set the current user from session storage
@@ -34,14 +44,19 @@ const TournamentDetails = () => {
       const fetchTournamentDetails = async () => {
         try {
           const detailsResponse = await axios.get(`http://localhost:5000/get_tournament_details?id=${tournamentId}`);
-          setTournament({
+          const tournamentData = ({
             objectID: detailsResponse.data._id,
             sport: detailsResponse.data.sport,
             teamCount: detailsResponse.data.teamCount,
             tournamentDuration: detailsResponse.data.tournamentDuration,
             matchDuration: detailsResponse.data.matchDuration,
-            teams: detailsResponse.data.teams,
+            teams: detailsResponse.data.teams || [],
+            isFull: (detailsResponse.data.teams || []).length >= detailsResponse.data.teamCount,
+            startTime: formatDateTime(detailsResponse.data.startTime),
           });
+
+          setMaxTeamsAllowed(detailsResponse.data.teamCount);
+          setTournament(tournamentData);
           
         } catch (error) {
           console.error('Error fetching tournament data:', error);
@@ -52,18 +67,25 @@ const TournamentDetails = () => {
     }
   }, []);
 
-  //console.log("TOURNY INFO", tournament.teams);
+  console.log("TOURNY INFO", tournament);
 
   useEffect(() => {
-    const user1 = JSON.parse(sessionStorage.getItem("user"));
-    setUser(user1);
+    const currentUser = JSON.parse(sessionStorage.getItem("user"));
+    setUser(currentUser);
   
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/get_teams?email=${user1.email}`);
+        const response = await axios.get(`http://localhost:5000/get_teams?email=${currentUser.email}`);
         if (response.data.length > 0) {
-          setUserTeams(response.data);
-          console.log("Fetched teams:", response.data);
+          const teams = response.data;
+          // Assuming each team object has a 'leader' field with the leader's email
+          setUserTeams(teams);
+          // If the user is a leader of at least one team, set the first one as selected by default
+          if (leaderTeams.length > 0) {
+            setSelectedTeamId(leaderTeams[0]._id);
+          }
+          console.log("Fetched teams:", teams);
+          console.log("leader", leaderTeams);
         } else {
           console.log("No teams found");
         }
@@ -74,6 +96,9 @@ const TournamentDetails = () => {
   
     fetchData();
   }, []);
+
+  const leaderTeams = userTeams.filter(team => team.leader === user.email);
+  
 
   const handleCheckboxChange = (teamId) => {
      console.log("Selected team ID:", teamId); 
@@ -86,20 +111,21 @@ const TournamentDetails = () => {
     //alert("Join Tournament logic here");
   };
 
-  const handleLeaveTournament = () => {
-    alert("Leave Tournament logic here");
-  };
-
   const joinTournamentWithTeam = async () => {
     //if (!selectedTeamId) return;
 
     //console.log("teamID", team._id);
 
-    console.log("Selected Team ID:", selectedTeamId);
+    if (isTournamentStarted()) {
+      alert("The tournament has already started. You cannot join at this time.");
+      return;
+    }
 
-    console.log("Joining tournament with ID:", tournament.objectID, "and team ID:", selectedTeamId);
+    if (tournament.isFull) {
+      alert("The tournament is full. You cannot join at this time.");
+      return;
+    }
 
-  
     try {
       await axios.post('http://localhost:5000/join_tournament', { tournamentId: tournament.objectID, teamId: selectedTeamId });
       setIsJoinTournamentModalOpen(false);
@@ -118,6 +144,12 @@ const TournamentDetails = () => {
     } catch (error) {
       console.error('Error creating new team:', error);
     }
+  };
+
+  const isTournamentStarted = () => {
+    const now = new Date();
+    const startTime = new Date(tournament.startTime);
+    return now >= startTime;
   };
   
 
@@ -139,6 +171,9 @@ const TournamentDetails = () => {
         <p>
           Match Duration: {tournament.matchDuration} minutes
         </p>
+        <p>
+          Countdown: {tournament.startTime} minutes
+        </p>
       </div>
 
       
@@ -146,6 +181,7 @@ const TournamentDetails = () => {
       {/* Actions Section */}
       <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
         <div className="py-10 px-8">
+        {!isTournamentStarted() && !tournament.isFull && (
           <button
             onClick={handleJoinTournament}
             className="w-full bg-green-500 hover:ease-in duration-100 text-white font-semibold text-lg rounded-xl py-2 mb-4"
@@ -153,6 +189,7 @@ const TournamentDetails = () => {
           >
             {tournament.isFull ? "Tournament Full" : "Join Tournament"}
           </button>
+        )}
           
           {isJoinTournamentModalOpen && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -205,14 +242,21 @@ const TournamentDetails = () => {
 )}
 
 
-          <button
-            onClick={handleLeaveTournament}
-            className="w-full bg-red-500 text-white font-semibold text-lg rounded-xl py-2 mb-4"
-          >
-            Leave Tournament
-          </button>
+     
+          {!isTournamentStarted() && (
+            <LeaveTournamentButton
+              tournamentId={tournament.objectID}
+              leaderTeams={leaderTeams}
+              //teamId={selectedTeamId}
+              //isLeader={userTeams.some(team => team._id === selectedTeamId && team.leader === user.email)}
+            />
+          )}
+
+            {isTournamentStarted() && <p className="text-red-500">Tournament has already started.</p>}
+          
 
           <h2 className="text-xl font-semibold mb-2">Teams in this Tournament:</h2>
+          <p>Teams: {tournament.teams.length} / {maxTeamsAllowed}</p> 
         {tournament.teams && tournament.teams.length > 0
           ? tournament.teams.map((teamName, index) => (
            <p key={index}>{teamName}</p>
