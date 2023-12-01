@@ -2082,3 +2082,46 @@ paths:
           description: username converted succesfully
         "400":
           description: Bad request
+
+  /join_team:
+    post:
+      operationId: app.joinTeam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                _id:
+                  type: string
+                num:
+                  type: integer
+
+
+      responses:
+        "200":
+          description: "Team created sucessfully"
+
+  /update_lists:
+    post:
+      operationId: app.update_lists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type:
+                    string
+                teamGreen:
+                  type: array
+                teamBlue:
+                  type: array
+      responses:
+        "200":
+          description: "Application"

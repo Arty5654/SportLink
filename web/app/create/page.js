@@ -94,6 +94,15 @@ const CreatePage = () => {
             return;
         }
 
+        // Check that each participant is on a team
+        const allParticipantsOnTeam = participants.every(participant =>
+            teamGreen.includes(participant) || teamBlue.includes(participant));
+
+        if (!allParticipantsOnTeam) {
+            alert("Please ensure all participants are assigned to a team.");
+            return;
+        }
+
         axios.post('http://localhost:5000/create', {
             ...teamData,
             currentParticipants: teamRed.length + teamBlue.length,
