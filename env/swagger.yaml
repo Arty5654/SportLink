@@ -1832,7 +1832,7 @@ paths:
                     publicity:
                       type: boolean
 
-   /create_tournament:
+  /create_tournament:
     post:
       operationId: app.create_tournament
       requestBody:
