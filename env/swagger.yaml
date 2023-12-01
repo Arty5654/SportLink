@@ -2074,3 +2074,24 @@ paths:
       responses:
         "200":
           description: "Team created sucessfully"
+
+  /update_lists:
+    post:
+      operationId: app.update_lists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type:
+                    string
+                teamGreen:
+                  type: array
+                teamBlue:
+                  type: array
+      responses:
+        "200":
+          description: "Application"

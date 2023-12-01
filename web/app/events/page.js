@@ -138,7 +138,12 @@ const EventDetails = () => {
             teamBlue: data.teamBlue,
             teamGreen: data.teamGreen
           });
-          console.log(response.data);
+
+          if (event.teamBlue && event.teamBlue.includes(user.username)) {
+            setIsMemberOfBlue(true);
+          } else {
+            setIsMemberOfBlue(false);
+          }
         });
       } catch (error) {
         console.log("Error: ", error);
@@ -226,30 +231,69 @@ const EventDetails = () => {
 
   const handleJoinTeam = (team) => {
     const updatedEvent = { ...event };
+
+
+    if (event.teamBlue.includes(user.username)) {
+
+      alert("Already a part of Team Blue")
+      setIsMemberOfGreen(false)
+      setIsMemberOfBlue(true)
+      return;
+    }
+    if (event.teamGreen.includes(user.username)) {
+
+      alert("Already a part of Team Green")
+      setIsMemberOfGreen(true)
+      setIsMemberOfBlue(false)
+      return;
+
+    }
     if (team === 'green') {
-      updatedEvent.teamGreen.push(user.email);
-      updatedEvent.teamBlue = updatedEvent.teamBlue.filter(email => email !== user.email);
+      updatedEvent.teamGreen.push(user.username);
+      updatedEvent.teamBlue = updatedEvent.teamBlue.filter(email => email !== user.username);
       setIsMemberOfGreen(true);
       setIsMemberOfBlue(false);
     } else if (team === 'blue') {
-      updatedEvent.teamBlue.push(user.email);
-      updatedEvent.teamGreen = updatedEvent.teamGreen.filter(email => email !== user.email);
+      updatedEvent.teamBlue.push(user.username);
+      updatedEvent.teamGreen = updatedEvent.teamGreen.filter(email => email !== user.username);
       setIsMemberOfBlue(true);
       setIsMemberOfGreen(false);
     }
     setEvent(updatedEvent);
+    axios
+        .post("http://localhost:5000/update_lists", {
+          id: eventID,
+          teamGreen: event.teamGreen,
+          teamBlue: event.teamBlue
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            console.log("Added to Team");
+          }
+        });
   };
 
   const handleLeaveTeam = (team) => {
     const updatedEvent = { ...event };
     if (team === 'green') {
-      updatedEvent.teamGreen = updatedEvent.teamGreen.filter(email => email !== user.email);
+      updatedEvent.teamGreen = updatedEvent.teamGreen.filter(email => email !== user.username);
       setIsMemberOfGreen(false);
     } else if (team === 'blue') {
-      updatedEvent.teamBlue = updatedEvent.teamBlue.filter(email => email !== user.email);
+      updatedEvent.teamBlue = updatedEvent.teamBlue.filter(email => email !== user.username);
       setIsMemberOfBlue(false);
     }
     setEvent(updatedEvent);
+    axios
+        .post("http://localhost:5000/update_lists", {
+          id: eventID,
+          teamGreen: event.teamGreen,
+          teamBlue: event.teamBlue
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            console.log("Added to Team");
+          }
+        });
   };
 
 

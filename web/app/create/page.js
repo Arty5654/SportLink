@@ -129,6 +129,7 @@ const CreatePage = () => {
             alert("Please ensure all participants are assigned to a team.");
             return;
         }
+
         axios.post('http://localhost:5000/create', {
             title: teamData['title'],
             desc: teamData['desc'],

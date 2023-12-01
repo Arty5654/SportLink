@@ -147,9 +147,18 @@ def check_stats():
 
 def create():
     payload = request.json
+    emails = payload['participants']
+
+    usernames = fetch_usernames(emails)
+    payload['participants'] = usernames
+
+    teamBlueU = fetch_usernames(payload['teamBlue'])
+    teamGreenU = fetch_usernames(payload['teamGreen'])
+
+    payload['teamBlue'] = teamBlueU
+    payload['teamGreen'] = teamGreenU
 
     events.insert_one(payload)
-    emails = payload['participants']
 
     curr = emails[0]
     msg = Message('Invite to SportLink', recipients=emails)
@@ -1352,6 +1361,32 @@ def refresh_gmsg():
 
     chat = groups.find_one({"key": key})
     return jsonify({'key': key, 'messages': chat['messages']})
+
+def fetch_usernames(email_list):
+
+    emails = email_list
+
+    usernames = []
+    for email in emails:
+        username = users.find_one({"email": email})
+        usernames.append(username['username'])
+
+    print(usernames)
+    return usernames
+def update_lists():
+   payload = request.json
+
+   id = payload["id"]
+   teamBlue = payload["teamBlue"]
+   teamGreen = payload["teamGreen"]
+
+   event_data = list(events.find())
+
+   for event in event_data:
+       if str(id) == str(event["_id"]):
+           events.update_one({"_id": event["_id"]}, {"$set": {"teamBlue": teamBlue, "teamGreen": teamGreen}})
+           print("UPDATED")
+
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
