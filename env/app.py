@@ -891,7 +891,12 @@ def get_event_details():
 
 def edit_event_details():
     data = request.get_json()
-    return edit_event(data.get("eventID"), list(events.find()))
+    event_id = data.get("eventID")
+    event_data = list(events.find())
+
+    for event in event_data:
+        if str(event_id) == str(event["_id"]):
+            events.update_one({"_id": event["_id"]}, {"$set": data})
 
 def delete_event_details():
     event_data = list(events.find())
