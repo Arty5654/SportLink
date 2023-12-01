@@ -28,6 +28,9 @@ const teamsNtourneys = () => {
   const [tournamentDuration, setTournamentDuration] = useState('');
   const [matchDuration, setMatchDuration] = useState('');
   const [countdownTimer, setCountdownTimer] = useState(0);
+  const [skillLevel, setSkillLevel] = useState('');
+  const [location, setLocation] = useState('');
+
 
   const handleTournamentSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +42,9 @@ const teamsNtourneys = () => {
             teamCount,
             tournamentDuration,
             matchDuration,
-            startTime
+            startTime,
+            location,
+            skillLevel,
         });
         alert('Tournament created successfully!');
         setIsTournamentModalOpen(false);
@@ -398,6 +403,35 @@ const teamsNtourneys = () => {
                             onChange={(e) => setMatchDuration(e.target.value)}
                         />
                     </div>
+
+                    {/* Location field */}
+                    <div>
+                                <label htmlFor="location" className="block text-lg font-semibold">Location:</label>
+                                <input
+                                    type="text"
+                                    id="location"
+                                    className="w-full border p-2 rounded-md"
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                    placeholder="Enter location"
+                                />
+                            </div>
+
+                            {/* Skill level selection */}
+                            <div>
+                                <label htmlFor="skillLevel" className="block text-lg font-semibold">Skill Level:</label>
+                                <select
+                                    id="skillLevel"
+                                    className="w-full border p-2 rounded-md"
+                                    value={skillLevel}
+                                    onChange={(e) => setSkillLevel(e.target.value)}
+                                >
+                                    <option value="">Select Skill Level</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
 
                     <div>
                       
