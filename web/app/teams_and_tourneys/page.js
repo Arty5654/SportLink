@@ -30,6 +30,7 @@ const teamsNtourneys = () => {
   const [countdownTimer, setCountdownTimer] = useState(0);
   const [skillLevel, setSkillLevel] = useState('');
   const [location, setLocation] = useState('');
+  const [tournaments, setTournaments] = useState([]);
 
 
   const handleTournamentSubmit = async (e) => {
@@ -54,6 +55,32 @@ const teamsNtourneys = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchUserTournaments = async () => {
+        const response = await axios.get(`http://localhost:5000/get_user_tournaments?email=${user.email}`);
+        setTournaments(response.data); // Assuming this sets an array of tournament names
+    };
+
+    fetchUserTournaments();
+}, [user.email]);
+
+const tournamentsDisplay = tournaments.length > 0 
+    ? (
+        <ul>
+            {tournaments.map((tournament, index) => (
+                <li key={index}>
+                    {tournament.name ? (
+                        <Link href={`/teams_and_tourneys/tourneyDetails?id=${tournament.id}`}>
+                            {tournament.name}
+                        </Link>
+                    ) : (
+                        tournament // If it's just a string
+                    )}
+                </li>
+            ))}
+        </ul>
+      ) 
+    : <p>You are not a part of any tournaments!</p>;
 
   useEffect(() => {
     const user1 = JSON.parse(sessionStorage.getItem("user"));
@@ -333,8 +360,23 @@ const teamsNtourneys = () => {
             <div className="w-1/2">
               <h2 className="text-xl font-semibold mb-4">Tournaments</h2>
               <div className="flex flex-col px-2">
-                <p className="text-md text-gray-600 p-6 mb-2">You are not a part of any tournaments!</p>
-              </div>
+    {tournaments.length > 0 ? (
+        tournaments.map((tournament, index) => (
+            <div key={index} className="border border-gray-300 rounded-lg p-6 mb-4 cursor-pointer">
+                {tournament.name ? (
+                    <Link href={`/teams_and_tourneys/tourneyDetails?id=${tournament.id}`}>
+                        <h2 className="text-lg font-semibold mb-2">{tournament.name}</h2>
+                    </Link>
+                ) : (
+                    <h2 className="text-lg font-semibold mb-2">{tournament}</h2> // If it's just a string
+                )}
+            </div>
+        ))
+    ) : (
+        <p className="text-md text-gray-600 p-6 mb-2">You are not a part of any tournaments!</p>
+    )}
+</div>
+
               <div className="flex justify-center mb-4">
                 <button onClick={() => setIsTournamentModalOpen(true)} className="bg-blue-500 text-white py-2 rounded-lg w-11/12">
                   Create Tournament
