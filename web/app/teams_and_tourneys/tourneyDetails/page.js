@@ -134,6 +134,7 @@ const TournamentDetails = () => {
       await axios.post('http://localhost:5000/join_tournament', { tournamentId: tournament.objectID, teamId: selectedTeamId });
       setIsJoinTournamentModalOpen(false);
       setSelectedTeamId(null);
+      window.location.reload();
     } catch (error) {
       console.error('Error joining tournament:', error);
     }
@@ -143,8 +144,31 @@ const TournamentDetails = () => {
   const createAndJoinTeam = async () => {
     try {
       // API call to create a new team
-      const newTeam = await axios.post('http://localhost:5000/join_tournament', { name: newTeamName });
-      joinTournamentWithTeam(newTeam.data.id);
+      const response = axios.post('http://localhost:5000/create_team', {
+          'name': newTeamName,
+          'leader': user.email,
+          'members': [],
+          'size': 1,
+          'maxSize': 8,
+          'publicity': true,
+        });
+
+        response.then((response) => {
+            console.log("request responded");
+
+            if (response.status === 200) {
+                console.log("Team created!");
+                alert("Team created, now try joining the tournament with your newly created team!")
+                window.location.reload();
+            }
+        }).catch((error) => {
+          if (error.response) {
+            if (error.response.status === 401) {
+              console.log("Team name already exists");
+              alert("Sorry, this team name is already available. Please try again.");
+            }
+          }
+        });
     } catch (error) {
       console.error('Error creating new team:', error);
     }
@@ -155,7 +179,7 @@ const TournamentDetails = () => {
     const startTime = new Date(tournament.startTime);
     return now >= startTime;
   };
-  
+
 
   return (
     <div className="w-full flex gap-8">
@@ -256,7 +280,7 @@ const TournamentDetails = () => {
           value={newTeamName}
           onChange={(e) => setNewTeamName(e.target.value)}
         />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full mt-4" onClick={createAndJoinTeam}>Create and Join</button>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full mt-4" onClick={createAndJoinTeam}>Create Team</button>
       </div>
     </div>
   </div>

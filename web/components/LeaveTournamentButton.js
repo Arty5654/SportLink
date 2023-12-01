@@ -18,6 +18,7 @@ const LeaveTournamentButton = ({ tournamentId, leaderTeams }) => {
       const response = await axios.post('http://localhost:5000/leave_tournament', { tournamentId, teamId: selectedTeamId, userEmail });
       alert(response.data.message);
       setShowModal(false);
+      window.location.reload();
       // Additional logic to update UI after leaving
     } catch (error) {
       console.error('Error leaving tournament:', error);
