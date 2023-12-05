@@ -13,6 +13,7 @@ import axios from "axios";
 import ProfileImage from "@public/assets/default-profile.webp";
 import { UserContext } from "@app/UserContext";
 import User from "@app/User";
+import def_image from '../../badgeImages/def_image.png';
 
 const FriendsPage = () => {
   const [user, setUser] = useState(new User());
@@ -139,40 +140,41 @@ const FriendsPage = () => {
   return (
     <div className="w-full flex">
       {/* ITEM: Main Info*/}
-      <div className="w-3/4 mx-auto text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
+      <div className="w-3/4 mx-auto text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300" style={{ height: '700px' }}>
         {/* ITEM: General Info*/}
         <div className="pb-4 flex justify-between items-center">
           {" "}
           {/* Use flex to align "Your Friends" and "Add Friends" */}
           <h1 className="font-base text-3xl">Your Friends</h1>
-          <button className="bg-blue-500 text-white px-4 py-2 m-4 rounded-lg" onClick={handleAddFriendClick}>
-            Add Friends
-          </button>
+          {isAddingFriends ? (
+            <div className="my-4">
+              <input
+                type="text"
+                placeholder="Enter friend's email"
+                value={newFriendName}
+                onChange={(e) => setNewFriendName(e.target.value)}
+              />
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
+                onClick={sendFriendRequest}
+              >
+                Add
+              </button>
+            </div>
+          ) : (
+            <button className="bg-blue-500 text-white px-4 py-2 m-4 rounded-lg" onClick={handleAddFriendClick}>
+              Add Friends
+            </button>
+          )}
         </div>
-
-        {isAddingFriends && (
-        <div className="my-4">
-          <input
-            type="text"
-            placeholder="Enter friend's email"
-            value={newFriendName}
-            onChange={(e) => setNewFriendName(e.target.value)}
-          />
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
-            onClick={sendFriendRequest}
-          >
-            Add
-          </button>
-        </div>
-        )}
 
         {/* ITEM: Friends List Block*/}
-        <div
-          className="h-64 overflow-y-scroll"
-          ref={friendsListRef}
-          onScroll={handleScroll}
-        >
+          <div
+            className="h-64 overflow-y-scroll"
+            ref={friendsListRef}
+            onScroll={handleScroll}
+            style={{ height: '550px' }}
+          >
           {/* Check if friends list is empty or not*/}
           {friends && friends.length > 0 ? (
             friends.slice(0, friendsToShow).map((relationship) => (
@@ -180,11 +182,19 @@ const FriendsPage = () => {
               key={relationship.friend}
               className="bg-white rounded-lg shadow-md mb-4 flex items-center p-4"
             >
-              <img
-                src={ProfileImage}
-                alt="Profile"
-                className="w-16 h-16 rounded-full object-cover mr-4r"
+              {relationship.imageData === null ? (
+                <img
+                  src={def_image.src}
+                  alt="Profile Image"
+                  style={{ width: "100px", height: "100px", paddingRight: "10px" }}
+                />
+              ) : (
+                <img
+                src={`data:image/png;base64,${relationship.imageData}`}
+                alt="Profile Image"
+                style={{ width: "100px", height: "100px", paddingRight: "10px" }}
               />
+              )}
               <div className="flex-grow">
                 <h2 className="text-lg font-medium">{relationship.friend}</h2>
                 <p className="text-gray-500">@{relationship.friend}</p>

@@ -720,6 +720,8 @@ paths:
                       type: string
                     status:
                       type: string
+                    imageData:
+                      type: string
         "404":
           description: No friends found!
   /remove_friend:
