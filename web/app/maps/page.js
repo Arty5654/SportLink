@@ -3,6 +3,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import GoogleMapComponent from "./GoogleMapComponent";
+import { useRouter } from "next/navigation";
 
 const MapsPage = () => {
   
@@ -11,6 +12,18 @@ const MapsPage = () => {
   const [center, setCenter] = useState({lat: 40.4261983,lng: -86.9108354/*west laf default */});
   const [recenter, setRecenter] = useState(false);
   const [type, setType] = useState(0);
+  const router = useRouter();
+
+  useEffect(() => {
+    const currentUserStr = sessionStorage.getItem("user");
+    if (currentUserStr) {
+      const currentUser = JSON.parse(currentUserStr);
+      setUser(currentUser);
+    } else {
+      // Redirect to the sign-in page
+      router.push("/signin");
+    }
+  }, [router]);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
