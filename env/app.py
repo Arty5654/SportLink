@@ -1166,6 +1166,7 @@ def create_tournament():
         'matchDuration': data.get('matchDuration', ''),
         'location': data.get('location', ''),
         'skillLevel': data.get('skillLevel', ''),
+        'teamSize': data.get('teamSize', ''),
         'startTime': data.get('startTime', ''),
         
 
@@ -1265,6 +1266,7 @@ def join_tournament():
         msg = Message('Tournament Update!', recipients=[member])
         msg.html = f'<p>Hello! A team you\'re on just got added to a tournament! Good Luck!</p>'
         mail.send(msg)
+    
     
 
     return jsonify({"message": "Joined the tournament successfully"}), 200

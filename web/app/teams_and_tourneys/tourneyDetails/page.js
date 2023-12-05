@@ -12,6 +12,7 @@ const TournamentDetails = () => {
   const [isJoinTournamentModalOpen, setIsJoinTournamentModalOpen] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
   const [maxTeamsAllowed, setMaxTeamsAllowed] = useState(0);
+  const [maxTeamSize, setMaxTeamSize] = useState(0);
   const [userTeams, setUserTeams] = useState([])
   const [tournament, setTournament] = useState({
     sport: "",
@@ -22,7 +23,8 @@ const TournamentDetails = () => {
     isFull: false,
     startTime: "",
     skillLevel: "",
-    location: ""
+    location: "",
+    teamSize: ""
   });
 
   const formatDateTime = (dateTimeString) => {
@@ -55,12 +57,16 @@ const TournamentDetails = () => {
             skillLevel: detailsResponse.data.skillLevel,
             location: detailsResponse.data.location,
             teams: detailsResponse.data.teams || [],
+            teamSize: detailsResponse.data.teamSize,
             isFull: (detailsResponse.data.teams || []).length >= detailsResponse.data.teamCount,
             startTime: formatDateTime(detailsResponse.data.startTime),
           });
 
           setMaxTeamsAllowed(detailsResponse.data.teamCount);
           setTournament(tournamentData);
+
+          const maxTeamSizeForTournament = detailsResponse.data.teamSize;
+          setMaxTeamSize(maxTeamSizeForTournament);
           
         } catch (error) {
           console.error('Error fetching tournament data:', error);
@@ -130,6 +136,14 @@ const TournamentDetails = () => {
       return;
     }
 
+    const selectedTeam = userTeams.find(team => team._id === selectedTeamId);
+    if (selectedTeam.size > maxTeamSize) {
+      alert('This team exceeds the maximum size allowed for this tournament.');
+      return;
+    }
+
+
+
     try {
       await axios.post('http://localhost:5000/join_tournament', { tournamentId: tournament.objectID, teamId: selectedTeamId });
       setIsJoinTournamentModalOpen(false);
@@ -190,7 +204,7 @@ const TournamentDetails = () => {
         </div>
 
         <p className="text-gray-700 font-base border-b border-gray-300 pb-4">
-          Teams: {tournament.teamCount}
+          Teams: {tournament.teamCount} Team Size: {tournament.teamSize}
         </p>
 
         <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -253,9 +267,14 @@ const TournamentDetails = () => {
       value={team._id}
       checked={selectedTeamId === team._id}
       onChange={() => handleCheckboxChange(team._id)}
+      disabled={team.size > tournament.maxTeamSize}
     />
-    <label className="ml-2 cursor-pointer" onClick={() => handleCheckboxChange(team._id)}>
-      {team.name}
+    <label
+      className={`ml-2 cursor-pointer ${team.size > tournament.maxTeamSize ? 'text-gray-500' : ''}`}
+      onClick={() => team.size <= tournament.maxTeamSize && handleCheckboxChange(team._id)}
+      title={team.size > tournament.maxTeamSize ? "This team exceeds the maximum size allowed for this tournament." : ""}
+    >
+      {team.name} (Size: {team.size})
     </label>
   </div>
 ))}
