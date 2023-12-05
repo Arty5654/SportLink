@@ -30,6 +30,7 @@ const teamsNtourneys = () => {
   const [countdownTimer, setCountdownTimer] = useState(0);
   const [skillLevel, setSkillLevel] = useState('');
   const [location, setLocation] = useState('');
+  const [teamSize, setTeamSize] = useState('');
   const [tournaments, setTournaments] = useState([]);
 
 
@@ -46,6 +47,7 @@ const teamsNtourneys = () => {
             startTime,
             location,
             skillLevel,
+            teamSize
         });
         alert('Tournament created successfully!');
         setIsTournamentModalOpen(false);
@@ -421,6 +423,17 @@ const tournamentsDisplay = tournaments.length > 0
                             className="w-full border p-2 rounded-md"
                             value={teamCount}
                             onChange={(e) => setTeamCount(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="teamSize" className="block text-lg font-semibold">Size of Team:</label>
+                        <input
+                            type="number"
+                            id="teamSize"
+                            className="w-full border p-2 rounded-md"
+                            value={teamSize}
+                            onChange={(e) => setTeamSize(e.target.value)}
                         />
                     </div>
 
