@@ -6,9 +6,24 @@ import { useEffect, useState } from "react";
 import "@styles/global.css";
 import Link from "next/link";
 import Switch from "react-switch";
+import { useRouter } from "next/navigation";
 
 const teamsNtourneys = () => {
   const [user, setUser] = useState(new User());
+  const router = useRouter(); 
+
+  // Redirect to sign-in if no user is found in session storage
+  useEffect(() => {
+    const currentUserStr = sessionStorage.getItem("user");
+    if (currentUserStr) {
+      const currentUser = JSON.parse(currentUserStr);
+      setUser(currentUser);
+    } else {
+      // Redirect to the sign-in page
+      router.push("/signin");
+    }
+  }, [router]);
+
 
   // team stuff
   const [isModalOpen, setModalOpen] = useState(false);
@@ -58,13 +73,19 @@ const teamsNtourneys = () => {
   };
 
   useEffect(() => {
-    const fetchUserTournaments = async () => {
-        const response = await axios.get(`http://localhost:5000/get_user_tournaments?email=${user.email}`);
-        setTournaments(response.data); // Assuming this sets an array of tournament names
-    };
+    if (user?.email) { 
+      const fetchUserTournaments = async () => {
+        try {
+          const response = await axios.get(`http://localhost:5000/get_user_tournaments?email=${user.email}`);
+          setTournaments(response.data); // Assuming this sets an array of tournament names
+        } catch (error) {
+          console.error('Error fetching tournaments:', error);
+        }
+      };
 
-    fetchUserTournaments();
-}, [user.email]);
+      fetchUserTournaments();
+    }
+  }, [user?.email]);
 
 const tournamentsDisplay = tournaments.length > 0 
     ? (
