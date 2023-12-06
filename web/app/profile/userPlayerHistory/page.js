@@ -58,8 +58,15 @@ const HistoryPage = () => {
     const currentUserParticipant = participants.find(participant => 
       typeof participant === 'object' && participant.username === user.username
     );
-    return currentUserParticipant ? formatDate(currentUserParticipant.join_date) : "Unknown";
-  };
+
+    if (currentUserParticipant && currentUserParticipant.join_date) {
+        return formatDate(currentUserParticipant.join_date);
+    } else {
+        // Return a default message if join_date is undefined or null
+        return "This event has ended or you have left it";
+    }
+};
+
 
   const getEmailFromUsername = async (participant) => {
     let username = typeof participant === 'object' ? participant.username : participant;
