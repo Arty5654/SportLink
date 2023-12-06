@@ -1,5 +1,5 @@
 /*
-Author: Yash Mehta
+Author: Yash Mehta and Arteom Avetissian
 Created: 10/10/2023
 @ymehta10, Purdue University
 This component represents the friends page, an extension of the profile page.
@@ -93,8 +93,11 @@ const FriendsPage = () => {
           alert("Friend request sent!");
         }
       } catch (error) {
+        if (error.response && error.response.status === 403) {
+          alert("User has blocked you. Can not add them as a friend");
+        } else {
         console.error("Error sending friend request:", error);
-        // Handle other errors here (e.g., user does not exist, already friends, etc.)
+        }
       }
     }
     setIsAddingFriends(false);
