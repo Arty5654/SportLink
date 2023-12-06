@@ -161,12 +161,12 @@ def create():
     payload['teamGreen'] = teamGreenU
 
     events.insert_one(payload)
-    """
+    
     curr = emails[0]
     msg = Message('Invite to SportLink', recipients=emails)
     msg.html = f'<p>You have been invited by {curr} to play!</p>'
     mail.send(msg)
-    """
+    
     return "Created"
 
 
