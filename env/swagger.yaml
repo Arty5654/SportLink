@@ -1187,6 +1187,8 @@ paths:
                   type: integer
                 numWeights:
                   type: integer
+                join_date:
+                  type: string
       responses:
         "200":
           description: Event joined successfully

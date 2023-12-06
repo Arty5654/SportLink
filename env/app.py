@@ -150,7 +150,8 @@ def create():
     emails = payload['participants']
 
     usernames = fetch_usernames(emails)
-    payload['participants'] = usernames
+    join_timestamp = datetime.now()
+    payload['participants'] = [{'username': username, 'join_date': join_timestamp} for username in usernames]
 
     teamBlueU = fetch_usernames(payload['teamBlue'])
     teamGreenU = fetch_usernames(payload['teamGreen'])
@@ -159,11 +160,12 @@ def create():
     payload['teamGreen'] = teamGreenU
 
     events.insert_one(payload)
-
+    """
     curr = emails[0]
     msg = Message('Invite to SportLink', recipients=emails)
     msg.html = f'<p>You have been invited by {curr} to play!</p>'
     mail.send(msg)
+    """
     return "Created"
 
 
@@ -920,21 +922,44 @@ def join_event():
     username = data.get("username")
     join_timestamp = datetime.now()
 
+    # Update user stats
     bball = data.get("numBasketball")
     tennis = data.get("numTennis")
     soccer = data.get("numSoccer")
     weights = data.get("numWeights")
-    users.update_one({"username": data.get('username')}, {
-        "$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
+    users.update_one({"username": username}, {"$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
     
-    eventHistory.update_one({"event": event_id, "user": username}, {
-        "$set": {"join_date": join_timestamp}}, upsert=True)
+    # Update eventHistory
+    eventHistory.update_one({"event": event_id, "user": username}, {"$set": {"join_date": join_timestamp}}, upsert=True)
 
+    # Update events collection
+    event = events.find_one({"_id": ObjectId(event_id)})
+    if event:
+        participants = event.get("participants", [])
+        new_participant = {"username": username, "join_date": join_timestamp}
+        
+        # Check if the user is already in the participants as a string or object
+        is_user_in_participants = any(p == username or (isinstance(p, dict) and p.get("username") == username) for p in participants)
 
+        if not is_user_in_participants:
+            # Add new participant as an object
+            events.update_one({"_id": ObjectId(event_id)}, {"$push": {"participants": new_participant}})
+        else:
+            # Update existing participant (object) with new join_date
+            events.update_one(
+                {"_id": ObjectId(event_id), "participants.username": username},
+                {"$set": {"participants.$.join_date": join_timestamp}}
+            )
+
+    # Additional code for team assignments
     team_green = data.get("teamGreen")
     team_blue = data.get("teamBlue")
+    event["currentParticipants"] += 1
+    # Rest of your code for handling team assignments...
 
     return join(data.get("id"), data.get("username"), list(events.find()), team_green, team_blue)
+
+
 
 
 def leave_event():
@@ -987,17 +1012,34 @@ def end_event():
     return jsonify({"message": "Event ended successfully"}), 200
 
 def remove_participant():
-    event_data = list(events.find())
     data = request.get_json()
     eventID = data["eventID"]
     username = data["username"]
 
-    for event in event_data:
-        if str(eventID) == str(event["_id"]):
-            event["participants"].remove(username)
-            event["currentParticipants"] -= 1
-            events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
-            return jsonify({'message': 'Deleted User from event'}), 200
+    # Find the event by eventID
+    event = events.find_one({"_id": ObjectId(eventID)})
+
+    if event:
+        # Iterate through participants and find the matching username
+        for participant in event["participants"]:
+            if participant["username"] == username:
+                # Remove the participant from the list
+                event["participants"].remove(participant)
+                # Decrease the currentParticipants count
+                event["currentParticipants"] -= 1
+                # Update the event in the database
+                events.update_one(
+                    {"_id": ObjectId(eventID)},
+                    {
+                        "$set": {
+                            "participants": event["participants"],
+                            "currentParticipants": event["currentParticipants"],
+                        }
+                    },
+                )
+                return jsonify({"message": "Deleted User from event"}), 200
+
+    return jsonify({"message": "Event not found or user not in event"}), 404
 
 def submit_report():
     user = request.get_json()

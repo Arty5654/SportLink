@@ -126,7 +126,7 @@ const EventDetails = () => {
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
   const eventOwner = event.eventOwner === user.email;
-  const isUserParticipant = event.participants.includes(user?.username);
+  const isUserParticipant = event.participants.some(participant => participant.username === user?.username);
   const searchParams = useSearchParams();
   const eventID = searchParams.get("id");
   const [isMemberOfGreen, setIsMemberOfGreen] = useState(false);
@@ -458,14 +458,14 @@ const EventDetails = () => {
             </button>
           )}
 
-          <div>
-            <h2 className="pb-4 text-lg pt-2">Participants</h2>
-            <div className="flex flex-col gap-2">
-              {event.participants.map((participant, index) => (
-                <ParticipantCard key={index} username={participant} />
-              ))}
-            </div>
-          </div>
+<div>
+    <h2 className="pb-4 text-lg pt-2">Participants</h2>
+    <div className="flex flex-col gap-2">
+        {event.participants.map((participant, index) => (
+            <ParticipantCard key={index} username={participant.username} />
+        ))}
+    </div>
+</div>
         </div>
       </div>
     </div>

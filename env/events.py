@@ -25,7 +25,7 @@ def join(eventID, username, event_data, team_green, team_blue):
             # Check if the event is open for joining
             if event["currentParticipants"] < event["maxParticipants"]:
                 # Add the username to the participants array
-                event["participants"].append(username)
+                #event["participants"].append(username)
                 event["currentParticipants"] += 1
 
                 event["teamBlue"] = team_blue
@@ -45,32 +45,38 @@ def join(eventID, username, event_data, team_green, team_blue):
 def leave(eventID, username, event_data):
     for event in event_data:
         if eventID == str(event["_id"]):  # Compare as strings
-            # Remove from participants
-            if username in event["participants"]:
-                event["participants"].remove(username)
-                event["currentParticipants"] -= 1
+            # Remove participant object
+            event["participants"] = [participant for participant in event["participants"] if not (isinstance(participant, dict) and participant.get("username") == username)]
+            event["currentParticipants"] = len(event["participants"])
 
             # Remove from teamBlue if present
-            if username in event["teamBlue"]:
-              print("GREEN")
-              event["teamBlue"].remove(username)
+            if username in event.get("teamBlue", []):
+                event["teamBlue"].remove(username)
 
-            # Remove from teamRed if present
-            if username in event["teamGreen"]:
-              print("GREEN")
-              event["teamGreen"].remove(username)
+            # Remove from teamGreen if present
+            if username in event.get("teamGreen", []):
+                event["teamGreen"].remove(username)
 
             # Update the event in the database
             events.update_one({"_id": event["_id"]}, {
-                "$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"],
-                         "teamBlue": event["teamBlue"], "teamGreen": event["teamGreen"]}})
+                "$set": {
+                    "participants": event["participants"],
+                    "currentParticipants": event["currentParticipants"],
+                    "teamBlue": event["teamBlue"],
+                    "teamGreen": event["teamGreen"]
+                }
+            })
             return jsonify({'message': 'Deleted User from event'}), 200
+
 
 
 # Route to get all events associated with a user
 def get_details(eventID, event_data):
     for event in event_data:
         if str(eventID) == str(event["_id"]):
+            # Extract participants with username and join_date
+            participants = [{"username": p["username"], "join_date": p["join_date"]} if isinstance(p, dict) else p for p in event["participants"]]
+            
             event_info = {
                 "title": event["title"],
                 "desc": event["desc"],
@@ -82,7 +88,7 @@ def get_details(eventID, event_data):
                 "level": event["level"],
                 "currentParticipants": event["currentParticipants"],
                 "maxParticipants": event["maxParticipants"],
-                "participants": event["participants"],
+                "participants": participants,
                 "eventOwner": event["eventOwner"],
                 "town": event["town"],
                 "end": event["end"],
@@ -136,8 +142,11 @@ def get_my(event_data, username):
         event['_id'] = str(event['_id'])
 
     for event in event_data:
-        if username in event["participants"]:
-            user_events.append(event)
+        participants = event.get("participants", [])  # Ensure participants is a list
+        for participant in participants:
+            if isinstance(participant, dict) and participant.get("username") == username:
+                user_events.append(event)
+                break  # Break the inner loop once the user is found in this event
 
     # Return the modified event data as JSON
     return jsonify(user_events), 200
@@ -175,7 +184,7 @@ def add_history(event, user):
         "user": user,
         "event": event,
     }
-    history.insert_one(event_entry)
+    eventHistory.insert_one(event_entry)
 
     return jsonify({'message': 'Added to History'}), 200
 
@@ -186,6 +195,6 @@ def delete_history(event, user):
         "user": user,
         "event": event,
     }
-    history.delete_one(event_entry)
+    eventHistory.delete_one(event_entry)
 
     return jsonify({'message': 'Deleted History'}), 200
