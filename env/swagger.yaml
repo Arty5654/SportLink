@@ -43,7 +43,7 @@ paths:
             schema:
               type: object
               properties:
-                email:
+                friends:
                   type: array
       responses:
         "200":
@@ -1554,23 +1554,20 @@ paths:
         404:
           description: User not found or no event history available.
 
-  /update_stats:
+  /update_leaderboard:
     post:
       summary: "Update user's statistics"
-      operationId: app.update_stats
+      operationId: app.update_leaderboard
       requestBody:
         content:
           application/json:
             schema:
               properties:
-                user:
-                  type: string
-                wins:
-                  type: integer
-                losses:
-                  type: integer
-                elo:
-                  type: integer
+                winningTeamEmails:
+                  type: array
+                losingTeamEmails:
+                  type: array
+
       responses:
         "200":
           description: "Statistics updated successfully"

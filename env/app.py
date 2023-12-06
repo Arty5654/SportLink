@@ -53,24 +53,39 @@ messages = db["messages"]
 sg_account_creation = os.getenv('SG_ACCOUNT_CREATION')
 
 
-def update_stats():
+def update_leaderboard():
     data = request.json
-    user = data['user']
-    wins = data['wins']
-    losses = data['losses']
-    elo = data['elo']
+    print(data)
+    winning_team = data['winningTeamEmails']
+    losing_team = data['losingTeamEmails']
 
-    # Find the document and update
-    result = stats.update_one(
-        {'_id': user},
-        {'$set': {'wins': wins, 'losses': losses, 'elo': elo}},
-        upsert=True  # This creates a new document if one doesn't exist
-    )
+    # Update stats for winning team members
+    for user in winning_team:
+        stats.update_one(
+            {'_id': user},
+            {
+                '$inc': {
+                    'wins': 1,
+                    'elo': 20
+                }
+            },
+            upsert=True  # Creates a new document if one doesn't exist
+        )
 
-    if result.matched_count > 0 or result.upserted_id is not None:
-        return jsonify({'message': 'Statistics updated successfully'}), 200
-    else:
-        return jsonify({'message': 'No matching document found'}), 400
+    # Update stats for losing team members
+    for user in losing_team:
+        stats.update_one(
+            {'_id': user},
+            {
+                '$inc': {
+                    'losses': 1,
+                    'elo': -20
+                }
+            },
+            upsert=True  # Creates a new document if one doesn't exist
+        )
+
+    return jsonify({'message': 'Leaderboard updated successfully'}), 200
 
 
 def refresh_msg():
@@ -128,8 +143,10 @@ def check_stats():
     print(emails)
     response_data = []
 
+    user_email = ""
     for email in emails:
         friend = email['friend']
+        user_email = email['user']
         user_stats = stats.find_one({"_id": friend})
         if not user_stats:
             default_stats = {
@@ -142,6 +159,20 @@ def check_stats():
             response_data.append(default_stats)
         else:
             response_data.append(user_stats)
+
+    curr_user = stats.find_one({"_id": user_email})
+    print(curr_user)
+    if not curr_user:
+        default_stats = {
+            "_id": curr_user,
+            "wins": 0,
+            "losses": 0,
+            "elo": 0
+        }
+        stats.insert_one(default_stats)
+        response_data.append(default_stats)
+    else:
+        response_data.append(curr_user)
 
     return jsonify(response_data), 200
 

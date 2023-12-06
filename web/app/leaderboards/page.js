@@ -33,7 +33,7 @@ function App() {
         if (friends !== [] || friends !== undefined) {
             axios.post('http://localhost:5000/stats', {
 
-                friends: friends
+                friends: friends,
             })
                 .then(response => {
                     setScores(response.data);
