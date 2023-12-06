@@ -67,3 +67,23 @@
 .switch-buttons button.active, .switch-buttons button:hover {
     background-color: #ddd;
 }
+.switch-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.switch-button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: lightgray;
+    transition: background-color 0.3s;
+}
+
+.switch-button.active {
+    background-color: dodgerblue;
+    color: white;
+}

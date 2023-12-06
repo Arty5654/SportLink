@@ -1,37 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import axios from 'axios';
 
-const Leaderboard = ({ scores, mode, setMode, friends , setScores}) => {
-    const handleUpdateStats = (user, deltaWins, deltaLosses) => {
-        const updatedStats = {
-            user: user._id,
-            wins: user.wins + deltaWins,
-            losses: user.losses + deltaLosses,
-            elo: (user.elo) + (20 * deltaWins) - (20 * deltaLosses)
-        };
+const Leaderboard = ({ scores, mode, setMode, friends, setScores}) => {
 
-        axios.post('http://localhost:5000/update_stats', updatedStats)
-            .then(response => {
-                console.log(response.data);
+    const [sortedScores, setSortedScores] = useState([]);
 
-            })
-            .catch(error => {
-                console.error('Error making the API call:', error);
-            });
+    useEffect(() => {
+        fetchAndUpdateScores();
+    }, [friends]); // Only refetch when friends change
 
-        axios.post('http://localhost:5000/stats', {
-
-            friends: friends
-        })
+    const fetchAndUpdateScores = () => {
+        axios.post('http://localhost:5000/stats', { friends })
             .then(response => {
                 setScores(response.data);
-                console.log(scores)
-                console.log('Data received:', response.data);
             })
             .catch(error => {
                 console.error('Error making the API call:', error);
             });
     };
+
+    useEffect(() => {
+        const sorted = [...scores];
+        if (mode === 'ELO') {
+            sorted.sort((a, b) => b.elo - a.elo);
+        } else if (mode === 'Win Record') {
+            // Sort by wins in descending order
+            sorted.sort((a, b) => b.wins - a.wins);
+        }
+        setSortedScores(sorted);
+    }, [mode, scores]);
 
     return (
         <div className="leaderboard">
@@ -41,26 +38,12 @@ const Leaderboard = ({ scores, mode, setMode, friends , setScores}) => {
                 <button onClick={() => setMode('Win Record')} className={mode === 'Win Record' ? 'active' : ''}>Win Record</button>
             </div>
             <ul>
-                {mode === 'ELO'
-                    ? scores.sort((a, b) => b.elo - a.elo).map(player => (
-                        <li key={player}>
-                            <span className="name">{player._id}</span>
-                            <span className="elo">{player.elo}</span>
-                            <button onClick={() => handleUpdateStats(player, 1, 0)} style={{ backgroundColor: 'green' }}>+W</button>
-                            <button onClick={() => handleUpdateStats(player, 0, 1)} style={{ backgroundColor: 'red' }}>-L</button>
-
-                        </li>
-                    ))
-                    : scores.map(player => (
-                        <li key={player._id['friend']}>
-                            <span className="name">{player._id}</span>
-                            <span className="elo">{player.wins}W - {player.losses}L</span>
-                            <button onClick={() => handleUpdateStats(player, 1, 0)} style={{ backgroundColor: 'green' }}>+W</button>
-                            <button onClick={() => handleUpdateStats(player, 0, 1)} style={{ backgroundColor: 'red' }}>-L</button>
-
-                        </li>
-                    ))
-                }
+                {sortedScores.map(player => (
+                    <li key={player._id}>
+                        <span className="name">{player._id}</span>
+                        <span className="elo">{mode === 'ELO' ? player.elo : `${player.wins}W - ${player.losses}L`}</span>
+                    </li>
+                ))}
             </ul>
         </div>
     );

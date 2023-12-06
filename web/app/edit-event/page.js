@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import User from "@app/User";
+import editCSS from './editCSS.css'
 
-const ParticipantCard = ({ username }) => {
+const ParticipantCard = ({ username, onRemoveParticipant }) => {
   const searchParams = useSearchParams();
   const eventID = searchParams.get("id");
 
@@ -14,6 +15,8 @@ const ParticipantCard = ({ username }) => {
     e.preventDefault();
     try {
       await axios.post("http://localhost:5000/remove_participant", { eventID, username });
+
+      onRemoveParticipant(username, eventID);
       alert("You have successfully removed a participant");
       window.location.reload();
     } catch (error) {
@@ -50,6 +53,8 @@ const EditEvent = () => {
     eventOwner: "",
     town: "",
     end: false,
+    teamBlue: [],
+    teamGreen: []
   });
 
   const status = event.currentParticipants < event.maxParticipants ? "Open" : "Closed";
@@ -58,6 +63,18 @@ const EditEvent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const eventID = searchParams.get("id");
+  const [winningTeam, setWinningTeam] = useState(null);
+  const [losingTeam, setLosingTeam] = useState(null);
+
+  const handleTeamClick = (team) => {
+    if (team === 'green') {
+      setWinningTeam(event.teamGreen);
+      setLosingTeam(event.teamBlue);
+    } else {
+      setWinningTeam(event.teamBlue);
+      setLosingTeam(event.teamGreen);
+    }
+  };
 
   useEffect(() => {
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
@@ -83,6 +100,8 @@ const EditEvent = () => {
             participants: data.participants,
             eventOwner: data.eventOwner,
             town: data.town,
+            teamGreen: data.teamGreen,
+            teamBlue: data.teamBlue
           });
           console.log("Response Data: ", response.data);
         });
@@ -119,7 +138,13 @@ const EditEvent = () => {
   // Handle first end event click, set end state to true and switch to confirm state
   const handleEndEvent = async (e) => {
     e.preventDefault();
-    setEndState(true);
+    if (!winningTeam || !losingTeam) {
+      // Alert the user if no team is selected
+      alert("Please select a winning and a losing team before ending the event.");
+    } else {
+      // Set endState to true only if both teams are selected
+      setEndState(true);
+    }
   };
 
   // Handle typing in the summary box
@@ -131,8 +156,16 @@ const EditEvent = () => {
   const handleEndConfirm = async (e) => {
     e.preventDefault();
     try {
+      const winningTeamEmails = await convertUsernamesToEmails(winningTeam);
+      const losingTeamEmails = await convertUsernamesToEmails(losingTeam);
+
       const confirmEndData = { summary, eventID };
       await axios.post("http://localhost:5000/end_event", confirmEndData);
+
+      await axios.post("http://localhost:5000/update_leaderboard", {
+        winningTeamEmails,
+        losingTeamEmails
+      });
     } catch (error) {
       console.log("Error with ending the event");
     }
@@ -142,6 +175,43 @@ const EditEvent = () => {
   const handleCancelClick = async (e) => {
     e.preventDefault();
     router.push(`/events?id=${eventID}`);
+  };
+  const convertUsernamesToEmails = async (usernames) => {
+    return Promise.all(
+        usernames.map(async (username) => {
+          try {
+            const response = await axios.post('http://localhost:5000/get_email_from_username', { friendUsername: username });
+            return response.data.email; // Assuming the response contains an email field
+          } catch (error) {
+            console.error('Error fetching email from username:', error);
+            return null;
+          }
+        })
+    );
+  };
+  const removeParticipantFromEvent = (username, eventID) => {
+    const updatedTeamGreen = event.teamGreen.filter(member => member !== username);
+    const updatedTeamBlue = event.teamBlue.filter(member => member !== username);
+
+    console.log(updatedTeamBlue)
+    console.log(updatedTeamGreen)
+    setEvent({
+      ...event,
+      teamGreen: updatedTeamGreen,
+      teamBlue: updatedTeamBlue
+    });
+
+    axios
+        .post("http://localhost:5000/update_lists", {
+          id: eventID,
+          teamGreen: updatedTeamGreen,
+          teamBlue: updatedTeamBlue,
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            console.log("Added to Team");
+          }
+        });
   };
 
   return (
@@ -252,10 +322,36 @@ const EditEvent = () => {
     <h1 className="text-2xl font-semibold pb-8">Participants</h1>
     <div className="">
       {event.participants.map((participant, index) => (
-        <ParticipantCard key={index} username={participant.username} />
+        <ParticipantCard key={index} username={participant.username}  onRemoveParticipant={removeParticipantFromEvent}/>
       ))}
     </div>
   </div>
+            <div className="team-container">
+              <div
+                  className={`team-card green-team ${winningTeam === event.teamGreen ? 'winner' : ''}`}
+                  onClick={() => handleTeamClick('green')}
+              >
+                <h3 className="team-title">Green</h3>
+                {event.teamGreen.map((member, index) => (
+                    <p key={index} className="team-member">
+                      {member} {winningTeam === event.teamGreen ? 'W' : losingTeam === event.teamGreen ? 'L' : ''}
+                    </p>
+                ))}
+              </div>
+
+              <div
+                  className={`team-card blue-team ${winningTeam === event.teamBlue ? 'winner' : ''}`}
+                  onClick={() => handleTeamClick('blue')}
+              >
+                <h3 className="team-title">Blue</h3>
+                {event.teamBlue.map((member, index) => (
+                    <p key={index} className="team-member">
+                      {member} {winningTeam === event.teamBlue ? 'W' : losingTeam === event.teamBlue ? 'L' : ''}
+                    </p>
+                ))}
+              </div>
+            </div>
+
             <div className="absolute bottom-0 py-10 px-8 w-full">
               <button
                 className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2"
