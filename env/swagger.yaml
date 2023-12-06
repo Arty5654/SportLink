@@ -1542,6 +1542,8 @@ paths:
                       type: integer
                     maxParticipants:
                       type: integer
+                    join_date:
+                      type: string
                     participants:
                       type: array
                       default: []

@@ -42,7 +42,7 @@ events = db["events"]
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
-history = db["eventHistory"]
+eventHistory = db["eventHistory"]
 tournaments = db["tournaments"]
 groups = db["groups"]
 
@@ -916,12 +916,20 @@ def get_all_events():
 def join_event():
     data = request.get_json()
 
+    event_id = data.get("id")
+    username = data.get("username")
+    join_timestamp = datetime.now()
+
     bball = data.get("numBasketball")
     tennis = data.get("numTennis")
     soccer = data.get("numSoccer")
     weights = data.get("numWeights")
     users.update_one({"username": data.get('username')}, {
         "$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
+    
+    eventHistory.update_one({"event": event_id, "user": username}, {
+        "$set": {"join_date": join_timestamp}}, upsert=True)
+
 
     team_green = data.get("teamGreen")
     team_blue = data.get("teamBlue")
@@ -935,7 +943,7 @@ def leave_event():
 
 
 def get_event_history():
-    return get_history(request.args.get("username"), list(history.find()), list(events.find()))
+    return get_history(request.args.get("username"), list(eventHistory.find()), list(events.find()))
 
 
 def add_event_history():

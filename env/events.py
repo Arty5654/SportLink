@@ -15,7 +15,7 @@ teams = db["teams"]
 events = db["events"]
 friends = db["friends"]
 stats = db["stats"]
-history = db["eventHistory"]
+eventHistory = db["eventHistory"]
 
 
 # Route to get event details 
@@ -145,20 +145,28 @@ def get_my(event_data, username):
 
 # Route to get the event history of a user
 def get_history(username, event_history, event_data):
-    user_event_history = []
+    user_event_history = {}
     user_events = []
 
     for record in event_history:
         if record["user"] == username:
-            user_event_history.append(record["event"])
+            # Use .get() to safely access join_date
+            print("here")
+            user_event_history[record["event"]] = record.get("join_date")
 
     for event in event_data:
         event_dict = dict(event)
         event_dict['_id'] = str(event['_id'])
-        if str(event['_id']) in user_event_history:
+        event_id = str(event['_id'])
+        if event_id in user_event_history:
+            # Safely assign join_date if it exists
+            event_dict['join_date'] = user_event_history.get(event_id)
             user_events.append(event_dict)
 
     return jsonify(user_events), 200
+
+
+
 
 
 # Route to add an event to the user's history
