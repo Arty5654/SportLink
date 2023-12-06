@@ -197,6 +197,7 @@ const TournamentDetails = () => {
       await axios.post('http://localhost:5000/join_tournament', { tournamentId: tournament.objectID, teamId: selectedTeamId });
       setIsJoinTournamentModalOpen(false);
       setSelectedTeamId(null);
+      alert("You have successfully joined the tournament!")
       window.location.reload();
     } catch (error) {
       console.error('Error joining tournament:', error);

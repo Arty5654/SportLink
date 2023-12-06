@@ -1278,16 +1278,19 @@ def get_tournament_details():
         if 'teams' in tournament:
             # check if the tournament has a rounds array
             if 'rounds' not in tournament:
-                if tournament['teamCount'] == '4':
+                print("No rounds array found")
+                if tournament['teamCount'] == '2':
+                    tournament['rounds'] = [[]]
+                elif tournament['teamCount'] == '4':
                     tournament['rounds'] = [[], []]
                 elif tournament['teamCount'] == '8':
                     tournament['rounds'] = [[], [], []]
                 elif tournament['teamCount'] == '16':
                     tournament['rounds'] = [[], [], [], []]
-
-            # set round 1 if needed
-            if len(tournament['rounds'][0]) != len(tournament['teams']):
-                tournament['rounds'][0] = tournament['teams']
+            else:
+                # set round 1 if needed
+                if len(tournament['rounds'][0]) != len(tournament['teams']):
+                    tournament['rounds'][0] = tournament['teams']
 
             # # if the number of teams in round 0 is not equal to teamCount, add bye teams
             # if len(tournament['rounds'][0]) != int(tournament['teamCount']):
