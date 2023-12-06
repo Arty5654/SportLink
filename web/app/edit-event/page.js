@@ -248,14 +248,14 @@ const EditEvent = () => {
           </div>
         ) : (
           <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg relative">
-            <div className="py-10 px-8">
-              <h1 className="text-2xl font-semibold pb-8">Participants</h1>
-              <div classname="">
-                {event.participants.map((participant, index) => (
-                  <ParticipantCard key={index} username={participant} />
-                ))}
-              </div>
-            </div>
+  <div className="py-10 px-8">
+    <h1 className="text-2xl font-semibold pb-8">Participants</h1>
+    <div className="">
+      {event.participants.map((participant, index) => (
+        <ParticipantCard key={index} username={participant.username} />
+      ))}
+    </div>
+  </div>
             <div className="absolute bottom-0 py-10 px-8 w-full">
               <button
                 className="w-full border border-gray-300 rounded-lg text-black py-2 mb-2"

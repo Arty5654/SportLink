@@ -1187,6 +1187,8 @@ paths:
                   type: integer
                 numWeights:
                   type: integer
+                join_date:
+                  type: string
       responses:
         "200":
           description: Event joined successfully
@@ -1542,6 +1544,8 @@ paths:
                       type: integer
                     maxParticipants:
                       type: integer
+                    join_date:
+                      type: string
                     participants:
                       type: array
                       default: []
