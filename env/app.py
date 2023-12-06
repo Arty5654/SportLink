@@ -596,6 +596,10 @@ def send_friend_request():
     email = req['email']
     friend_email = req['friend_email']
 
+    potential_friend = db.blocks.find_one({'email': friend_email})
+    if potential_friend and email in potential_friend.get("blocked_users", []):
+        return jsonify({"message": "User has blocked you"}), 403
+
     # check if friend exists
     if not users.find_one({'email': friend_email}):
         return jsonify({'message': 'Friend does not exist!'}), 404
@@ -633,6 +637,7 @@ def send_friend_request():
     mail.send(msg)
 
     return jsonify({"message": "Friend Request Sent"}), 200
+
 
 
 # Accept a friend request from another user
