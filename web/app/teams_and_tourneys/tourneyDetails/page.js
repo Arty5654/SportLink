@@ -33,6 +33,53 @@ const TournamentDetails = () => {
     return formattedDate;
   };
 
+  const pickWinner = (team, team2) => {
+    // if one of the teams is a bye, then the other team automatically wins and if both are byes then just return
+    if (team.includes("BYE") && !team2.includes("BYE")) {
+      winner = team2;
+      loser = team;
+      return;
+    } else if (team2.includes("BYE") && !team.includes("BYE")) {
+      winner = team;
+      loser = team2;
+      return;
+    } else if (team.includes("BYE") && team2.includes("BYE")) {
+      console.log("Both teams are byes")
+      alert("Both teams are byes, auto updating to next round")
+      window.location.reload();
+      return;
+    }
+
+    var teams = team + ", " + team2;
+    var winner = prompt("Let us know who won: " + teams);
+    var loser = "";
+
+    if (winner == "") {
+      alert("Please pick from one of the teams");
+      pickWinner(team, team2);
+    } else if (winner != team && winner != team2) {
+      alert("Please make sure you enter the name correctly");
+      pickWinner(team, team2);
+    }
+
+    if (winner == team) {
+      loser = team2;
+    } else if (winner == team2) {
+      loser = team;
+    }
+
+    console.log("winner", winner);
+    console.log("loser", loser);
+    console.log("tournamentId", tournament.objectID)
+    var response = axios.post('http://localhost:5000/tourney_game_winner', {
+      'tournamentId': tournament.objectID,
+      'winner': winner,
+      'loser': loser
+    });
+
+    window.location.reload();
+  };
+
   useEffect(() => {
     // Set the current user from session storage
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
@@ -60,6 +107,8 @@ const TournamentDetails = () => {
             teamSize: detailsResponse.data.teamSize,
             isFull: (detailsResponse.data.teams || []).length >= detailsResponse.data.teamCount,
             startTime: formatDateTime(detailsResponse.data.startTime),
+            rounds: detailsResponse.data.rounds,
+            champion: detailsResponse.data.champion,
           });
 
           setMaxTeamsAllowed(detailsResponse.data.teamCount);
@@ -67,7 +116,7 @@ const TournamentDetails = () => {
 
           const maxTeamSizeForTournament = detailsResponse.data.teamSize;
           setMaxTeamSize(maxTeamSizeForTournament);
-          
+
         } catch (error) {
           console.error('Error fetching tournament data:', error);
         }
@@ -82,7 +131,7 @@ const TournamentDetails = () => {
   useEffect(() => {
     const currentUser = JSON.parse(sessionStorage.getItem("user"));
     setUser(currentUser);
-  
+
     const fetchData = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/get_teams2?email=${currentUser.email}`);
@@ -103,18 +152,18 @@ const TournamentDetails = () => {
         console.error('Error getting teams', error);
       }
     };
-  
+
     fetchData();
   }, []);
 
   const leaderTeams = userTeams.filter(team => team.leader === user.email);
-  
+
 
   const handleCheckboxChange = (teamId) => {
-     console.log("Selected team ID:", teamId); 
+     console.log("Selected team ID:", teamId);
     setSelectedTeamId(teamId);
-  };  
-  
+  };
+
 
   const handleJoinTournament = () => {
     setIsJoinTournamentModalOpen(true);
@@ -153,8 +202,7 @@ const TournamentDetails = () => {
       console.error('Error joining tournament:', error);
     }
   };
-  
-  
+
   const createAndJoinTeam = async () => {
     try {
       // API call to create a new team
@@ -196,7 +244,7 @@ const TournamentDetails = () => {
 
 
   return (
-    <div className="w-full flex gap-8">
+    <div className="w-full flex gap-8 mb-8">
       {/* Tournament Details Section */}
       <div className="w-4/5">
         <div className="flex items-end justify-between">
@@ -208,34 +256,83 @@ const TournamentDetails = () => {
         </p>
 
         <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <span style={{ fontSize: '20px' }}>⏳</span>
-      <span style={{ fontWeight: 'bold' }}>Tournament Duration:</span>
-      <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.tournamentDuration} days</span>
-    </div>
-    <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-  <span style={{ fontSize: '20px' }}>⌚</span>
-  <span style={{ fontWeight: 'bold' }}>Match Duration:</span>
-  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.matchDuration} minutes</span>
-</div>
+          <span style={{ fontSize: '20px' }}>⏳</span>
+          <span style={{ fontWeight: 'bold' }}>Tournament Duration:</span>
+          <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.tournamentDuration} days</span>
+        </div>
+        <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '20px' }}>⌚</span>
+          <span style={{ fontWeight: 'bold' }}>Match Duration:</span>
+          <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.matchDuration} minutes</span>
+        </div>
 
-<div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-  <span style={{ fontSize: '20px' }}>🏆</span>
-  <span style={{ fontWeight: 'bold' }}>Skill Level:</span>
-  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.skillLevel}</span>
-</div>
-<div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-  <span style={{ fontSize: '20px' }}>📍</span>
-  <span style={{ fontWeight: 'bold' }}>Location:</span>
-  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.location}</span>
-</div>
-<div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-  <span style={{ fontSize: '20px' }}>⏲️</span>
-  <span style={{ fontWeight: 'bold' }}>Countdown till Tournament Close:</span>
-  <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.startTime}</span>
-</div>
+        <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '20px' }}>🏆</span>
+          <span style={{ fontWeight: 'bold' }}>Skill Level:</span>
+          <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.skillLevel}</span>
+        </div>
+        <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '20px' }}>📍</span>
+          <span style={{ fontWeight: 'bold' }}>Location:</span>
+          <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.location}</span>
+        </div>
+        <div style={{ background: '#f9f9f9', padding: '10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '20px' }}>⏲️</span>
+          <span style={{ fontWeight: 'bold' }}>Countdown till Tournament Close:</span>
+          <span style={{ fontSize: '16px', marginLeft: 'auto' }}>{tournament.startTime}</span>
+        </div>
+
+      {/* bracket for the tournament */}
+      <br />
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold mb-2">Bracket:</h2>
+        {tournament.champion ? (
+          <p className="text-gray-700 font-base border-b border-gray-300 pb-4">Champion: {tournament.champion}</p>
+        ) : (
+          <p className="text-gray-700 font-base border-b border-gray-300 pb-4"></p>
+        )}
+      </div>
+      {
+        tournament.rounds && tournament.rounds.length > 0 && (
+          <div className="mt-4">
+            {tournament.rounds.map((round, roundIndex) => {
+              const teamPairs = [];
+              for (let i = 0; i < round.length; i += 2) {
+                teamPairs.push([round[i], round[i + 1]]);
+              }
+
+              return (
+                <div key={roundIndex} className="flex flex-col items-center space-y-6 my-4">
+                  <h3 className="text-lg font-semibold text-blue-700">Round {roundIndex + 1}</h3>
+                  {teamPairs.map((pair, pairIndex) => (
+                    <div key={pairIndex} className="flex items-center justify-center space-x-4 md:space-x-6">
+                      <div className={`bg-blue-100 p-3 rounded-md w-32 text-center ${pair[1] ? '' : 'col-span-2'}`}>{pair[0]}</div>
+                      {pair[1] ? (
+                        <>
+                          <div className="text-lg font-bold text-gray-600">vs</div>
+                          <div className="bg-blue-100 p-3 rounded-md w-32 text-center">{pair[1]}</div>
+                          <button
+                            className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-50"
+                            onClick={() => pickWinner(pair[0], pair[1])}
+                          >
+                            Pick Winner
+                          </button>
+                        </>
+                      ) : (
+                        <div className="bg-yellow-300 text-black px-4 py-2 rounded-lg">{pair[0]} advances</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        )
+      }
+
       </div>
 
-      
+
 
       {/* Actions Section */}
       <div className="w-1/3 border border-gray-300 rounded-xl h-128 shadow-lg">
@@ -249,7 +346,7 @@ const TournamentDetails = () => {
             {tournament.isFull ? "Tournament Full" : "Join Tournament"}
           </button>
         )}
-          
+
           {isJoinTournamentModalOpen && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
     <div className="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 p-6">
@@ -306,7 +403,7 @@ const TournamentDetails = () => {
 )}
 
 
-     
+
           {!isTournamentStarted() && (
             <LeaveTournamentButton
               tournamentId={tournament.objectID}
@@ -317,10 +414,10 @@ const TournamentDetails = () => {
           )}
 
             {isTournamentStarted() && <p className="text-red-500">Tournament has already started.</p>}
-          
+
 
           <h2 className="text-xl font-semibold mb-2">Teams in this Tournament:</h2>
-          <p>Teams: {tournament.teams.length} / {maxTeamsAllowed}</p> 
+          <p>Teams: {tournament.teams.length} / {maxTeamsAllowed}</p>
         {tournament.teams && tournament.teams.length > 0
           ? tournament.teams.map((teamName, index) => (
            <p key={index}>{teamName}</p>
