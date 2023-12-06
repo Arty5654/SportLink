@@ -152,6 +152,8 @@ def create():
 
     usernames = fetch_usernames(emails)
     join_timestamp = datetime.now()
+
+    # Create event payload with participants including join_date
     payload['participants'] = [{'username': username, 'join_date': join_timestamp} for username in usernames]
 
     teamBlueU = fetch_usernames(payload['teamBlue'])
@@ -160,12 +162,20 @@ def create():
     payload['teamBlue'] = teamBlueU
     payload['teamGreen'] = teamGreenU
 
-    events.insert_one(payload)
+    # Insert the event into the events collection
+    event_insert_result = events.insert_one(payload)
+    event_id = event_insert_result.inserted_id
+
+    # Add the created event to the event history of the user
+    creator_username = usernames[0]  # Assuming the first username is the creator
+    add_history(str(event_id), creator_username)
     
+    # Send invitation email
     curr = emails[0]
     msg = Message('Invite to SportLink', recipients=emails)
     msg.html = f'<p>You have been invited by {curr} to play!</p>'
     mail.send(msg)
+    
     
     return "Created"
 
