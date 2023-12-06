@@ -12,10 +12,12 @@ const TeamCard = ({ team, currUser }) => {
 
             alert("Already a part of this Team!")
         } else {
+
+            team.size = team.size + 1
             axios.post('http://localhost:5000/join_team', {
                 user: currUser.email,
                 _id: team._id,
-                num: team.size++
+                num: team.size
             })
                 .then(response => {
                     alert("Joined Team!");
