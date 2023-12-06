@@ -191,10 +191,11 @@ def add_history(event, user):
 
 # Route to delete an event from the user's history
 def delete_history(event, user):
-    event_entry = {
-        "user": user,
-        "event": event,
-    }
-    eventHistory.delete_one(event_entry)
-
-    return jsonify({'message': 'Deleted History'}), 200
+    try:
+        event_entry = {"user": user, "event": event}
+        result = eventHistory.delete_one(event_entry)
+        if result.deleted_count == 0:
+            return jsonify({'message': 'No matching history found'}), 404
+        return jsonify({'message': 'Deleted History'}), 200
+    except PyMongoError as e:
+        return jsonify({'error': str(e)}), 500
