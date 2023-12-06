@@ -2212,4 +2212,27 @@ paths:
       responses:
         "200":
           description: "Application"
-          
+        "404":
+          description: "Failed"
+
+  /tourney_game_winner:
+    post:
+      operationId: app.tourney_game_winner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type:
+                    string
+                winner:
+                  type: string
+                loser:
+                  type: string
+      responses:
+        "200":
+          description: "Application"
+

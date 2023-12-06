@@ -1,3 +1,4 @@
+import math
 from flask import Flask, jsonify, request  # pip install flask
 from flask_mail import Mail, Message  # pip install flask_mail
 from pymongo import MongoClient  # pip install pymogo
@@ -1208,6 +1209,28 @@ def get_tournament_details():
     tournament = tournaments.find_one({'_id': object_id})
     if tournament:
         tournament['_id'] = str(tournament['_id'])
+
+        # check if the tournament has a rounds array
+        if 'rounds' not in tournament:
+            if tournament['teamCount'] == '4':
+                tournament['rounds'] = [[], []]
+            elif tournament['teamCount'] == '8':
+                tournament['rounds'] = [[], [], []]
+            elif tournament['teamCount'] == '16':
+                tournament['rounds'] = [[], [], [], []]
+
+        # set round 1 if needed
+        if len(tournament['rounds'][0]) == 0:
+            tournament['rounds'][0] = tournament['teams']
+        
+        # if the number of teams in round 0 is not equal to teamCount, add bye teams
+        if len(tournament['rounds'][0]) != int(tournament['teamCount']):
+            bye_teams = int(tournament['teamCount']) - len(tournament['rounds'][0])
+            for i in range(bye_teams):
+                tournament['rounds'][0].append('BYE')
+
+        # update the tournament in the db
+        tournaments.update_one({'_id': object_id}, {'$set': {'rounds': tournament['rounds']}})
         return jsonify(json.loads(json.dumps(tournament, default=str)))
     else:
         return jsonify({'message': 'Tournament not found'}), 404
@@ -1469,6 +1492,38 @@ def update_lists():
            events.update_one({"_id": event["_id"]}, {"$set": {"teamBlue": teamBlue, "teamGreen": teamGreen}})
            print("UPDATED")
 
+def tourney_game_winner():
+    data = request.get_json()
+    tournament_id = data.get('tournamentId')
+    winner = data.get('winner')
+    loser = data.get('loser')
+
+    # find the tournament
+    tournament = tournaments.find_one({'_id': ObjectId(tournament_id)})
+
+    # check if the tournament exists
+    if not tournament:
+        return jsonify({'message': 'Tournament not found'}), 404
+
+    num_rounds = len(tournament['rounds'])
+    print(f"num_rounds: {num_rounds}\n")
+
+    # iterate over each round in reverse
+    for i in range(num_rounds - 1, -1, -1):
+        # check if the winner is in the current round
+        if winner in tournament['rounds'][i]:
+            # if this is the last round, the winner is the champion
+            if i == num_rounds - 1:
+                tournament['champion'] = winner
+            # otherwise, add the winner to the next round
+            else:
+                tournament['rounds'][i + 1].append(winner)
+            # break the loop as we've found the winner in the current round
+            break
+
+    # update the tournament in the database
+    tournaments.update_one({'_id': ObjectId(tournament_id)}, {'$set': tournament})
+    return jsonify({'message': 'Tournament updated successfully'}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)
