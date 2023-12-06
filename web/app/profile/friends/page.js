@@ -13,6 +13,7 @@ import axios from "axios";
 import ProfileImage from "@public/assets/default-profile.webp";
 import { UserContext } from "@app/UserContext";
 import User from "@app/User";
+import def_image from '../../badgeImages/def_image.png';
 
 const FriendsPage = () => {
   const [user, setUser] = useState(new User());
@@ -68,51 +69,38 @@ const FriendsPage = () => {
     setIsAddingFriends(true);
   }
 
-  const sendFriendRequest = () => {
-    // send a friend request, adding a request to the friends collection
+  const sendFriendRequest = async () => {
     if (newFriendName) {
       try {
-        console.log("sending friend request to " + newFriendName + ", using POST");
-        const r = axios.post("http://localhost:5000/send_friend_request", {
-          "email": user.email,
-          "friend_email": newFriendName,
+        // First, check if the user is blocked
+        const blockedResponse = await axios.get(`http://localhost:5000/get_blocked_users?email=${user.email}`);
+        const blockedUsers = blockedResponse.data;
+  
+        if (blockedUsers.includes(newFriendName)) {
+          alert("You cannot add a user you have blocked as a friend.");
+          return;
+        }
+  
+        // Proceed to send friend request if not blocked
+        console.log("Sending friend request to " + newFriendName);
+        const response = await axios.post("http://localhost:5000/send_friend_request", {
+          email: user.email,
+          friend_email: newFriendName,
         });
-
-        r.then((response) => {
-          console.log("request responded");
-
-          if (response.status === 200) {
-            console.log("Friend request sent");
-            alert("Friend request sent!")
-          }
-        }).catch((error) => {
-          //run this code always when status!==200
-          if (error.response) {
-            if (error.response.status === 404) {
-              // friend doesnt exist
-              console.log("This user does not exist!");
-              alert("This user does not exist! Tell them to sign up!");
-            } else if (error.response.status === 409) {
-              // pending request already exists or already friends
-              console.log("There might already be a request between you and this user, or you are already friends!");
-              alert("There might already be a request between you and this user, or you are already friends!\n\nClick the bell icon to see your pending requests, or wait till they accept your request");
-            }
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request);
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-          }
-        });
+  
+        if (response.status === 200) {
+          console.log("Friend request sent");
+          alert("Friend request sent!");
+        }
       } catch (error) {
-        console.log("Error adding friend");
-        console.log(error);
+        console.error("Error sending friend request:", error);
+        // Handle other errors here (e.g., user does not exist, already friends, etc.)
       }
     }
-    setIsAddingFriends(false); // Hide the input box
-    setNewFriendName(""); // Clear the input field
+    setIsAddingFriends(false);
+    setNewFriendName("");
   };
+  
 
   const handleRemoveFriend = (relationship) => {
     try {
@@ -139,40 +127,41 @@ const FriendsPage = () => {
   return (
     <div className="w-full flex">
       {/* ITEM: Main Info*/}
-      <div className="w-3/4 mx-auto text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300">
+      <div className="w-3/4 mx-auto text-left pl-16 border rounded-2xl px-8 py-10 border-gray-300" style={{ height: '700px' }}>
         {/* ITEM: General Info*/}
         <div className="pb-4 flex justify-between items-center">
           {" "}
           {/* Use flex to align "Your Friends" and "Add Friends" */}
           <h1 className="font-base text-3xl">Your Friends</h1>
-          <button className="bg-blue-500 text-white px-4 py-2 m-4 rounded-lg" onClick={handleAddFriendClick}>
-            Add Friends
-          </button>
+          {isAddingFriends ? (
+            <div className="my-4">
+              <input
+                type="text"
+                placeholder="Enter friend's email"
+                value={newFriendName}
+                onChange={(e) => setNewFriendName(e.target.value)}
+              />
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
+                onClick={sendFriendRequest}
+              >
+                Add
+              </button>
+            </div>
+          ) : (
+            <button className="bg-blue-500 text-white px-4 py-2 m-4 rounded-lg" onClick={handleAddFriendClick}>
+              Add Friends
+            </button>
+          )}
         </div>
-
-        {isAddingFriends && (
-        <div className="my-4">
-          <input
-            type="text"
-            placeholder="Enter friend's email"
-            value={newFriendName}
-            onChange={(e) => setNewFriendName(e.target.value)}
-          />
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
-            onClick={sendFriendRequest}
-          >
-            Add
-          </button>
-        </div>
-        )}
 
         {/* ITEM: Friends List Block*/}
-        <div
-          className="h-64 overflow-y-scroll"
-          ref={friendsListRef}
-          onScroll={handleScroll}
-        >
+          <div
+            className="h-64 overflow-y-scroll"
+            ref={friendsListRef}
+            onScroll={handleScroll}
+            style={{ height: '550px' }}
+          >
           {/* Check if friends list is empty or not*/}
           {friends && friends.length > 0 ? (
             friends.slice(0, friendsToShow).map((relationship) => (
@@ -180,11 +169,19 @@ const FriendsPage = () => {
               key={relationship.friend}
               className="bg-white rounded-lg shadow-md mb-4 flex items-center p-4"
             >
-              <img
-                src={ProfileImage}
-                alt="Profile"
-                className="w-16 h-16 rounded-full object-cover mr-4r"
+              {relationship.imageData === null ? (
+                <img
+                  src={def_image.src}
+                  alt="Profile Image"
+                  style={{ width: "100px", height: "100px", paddingRight: "10px" }}
+                />
+              ) : (
+                <img
+                src={`data:image/png;base64,${relationship.imageData}`}
+                alt="Profile Image"
+                style={{ width: "100px", height: "100px", paddingRight: "10px" }}
               />
+              )}
               <div className="flex-grow">
                 <h2 className="text-lg font-medium">{relationship.friend}</h2>
                 <p className="text-gray-500">@{relationship.friend}</p>

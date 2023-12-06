@@ -1,3 +1,4 @@
+import math
 from flask import Flask, jsonify, request  # pip install flask
 from flask_mail import Mail, Message  # pip install flask_mail
 from pymongo import MongoClient  # pip install pymogo
@@ -42,7 +43,7 @@ events = db["events"]
 friends = db["friends"]
 stats = db["stats"]
 fs = GridFS(db)
-history = db["eventHistory"]
+eventHistory = db["eventHistory"]
 tournaments = db["tournaments"]
 groups = db["groups"]
 
@@ -150,7 +151,10 @@ def create():
     emails = payload['participants']
 
     usernames = fetch_usernames(emails)
-    payload['participants'] = usernames
+    join_timestamp = datetime.now()
+
+    # Create event payload with participants including join_date
+    payload['participants'] = [{'username': username, 'join_date': join_timestamp} for username in usernames]
 
     teamBlueU = fetch_usernames(payload['teamBlue'])
     teamGreenU = fetch_usernames(payload['teamGreen'])
@@ -158,12 +162,21 @@ def create():
     payload['teamBlue'] = teamBlueU
     payload['teamGreen'] = teamGreenU
 
-    events.insert_one(payload)
+    # Insert the event into the events collection
+    event_insert_result = events.insert_one(payload)
+    event_id = event_insert_result.inserted_id
 
+    # Add the created event to the event history of the user
+    creator_username = usernames[0]  # Assuming the first username is the creator
+    add_history(str(event_id), creator_username)
+    
+    # Send invitation email
     curr = emails[0]
     msg = Message('Invite to SportLink', recipients=emails)
     msg.html = f'<p>You have been invited by {curr} to play!</p>'
     mail.send(msg)
+    
+    
     return "Created"
 
 
@@ -891,7 +904,12 @@ def get_event_details():
 
 def edit_event_details():
     data = request.get_json()
-    return edit_event(data.get("eventID"), list(events.find()))
+    event_id = data.get("eventID")
+    event_data = list(events.find())
+
+    for event in event_data:
+        if str(event_id) == str(event["_id"]):
+            events.update_one({"_id": event["_id"]}, {"$set": data})
 
 def delete_event_details():
     event_data = list(events.find())
@@ -911,17 +929,48 @@ def get_all_events():
 def join_event():
     data = request.get_json()
 
+    event_id = data.get("id")
+    username = data.get("username")
+    join_timestamp = datetime.now()
+
+    # Update user stats
     bball = data.get("numBasketball")
     tennis = data.get("numTennis")
     soccer = data.get("numSoccer")
     weights = data.get("numWeights")
-    users.update_one({"username": data.get('username')}, {
-        "$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
+    users.update_one({"username": username}, {"$set": {"numBasketball": bball, "numTennis": tennis, "numSoccer": soccer, "numWeights": weights}})
+    
+    # Update eventHistory
+    eventHistory.update_one({"event": event_id, "user": username}, {"$set": {"join_date": join_timestamp}}, upsert=True)
 
+    # Update events collection
+    event = events.find_one({"_id": ObjectId(event_id)})
+    if event:
+        participants = event.get("participants", [])
+        new_participant = {"username": username, "join_date": join_timestamp}
+        
+        # Check if the user is already in the participants as a string or object
+        is_user_in_participants = any(p == username or (isinstance(p, dict) and p.get("username") == username) for p in participants)
+
+        if not is_user_in_participants:
+            # Add new participant as an object
+            events.update_one({"_id": ObjectId(event_id)}, {"$push": {"participants": new_participant}})
+        else:
+            # Update existing participant (object) with new join_date
+            events.update_one(
+                {"_id": ObjectId(event_id), "participants.username": username},
+                {"$set": {"participants.$.join_date": join_timestamp}}
+            )
+
+    # Additional code for team assignments
     team_green = data.get("teamGreen")
     team_blue = data.get("teamBlue")
+    event["currentParticipants"] += 1
+    # Rest of your code for handling team assignments...
 
     return join(data.get("id"), data.get("username"), list(events.find()), team_green, team_blue)
+
+
 
 
 def leave_event():
@@ -930,7 +979,7 @@ def leave_event():
 
 
 def get_event_history():
-    return get_history(request.args.get("username"), list(history.find()), list(events.find()))
+    return get_history(request.args.get("username"), list(eventHistory.find()), list(events.find()))
 
 
 def add_event_history():
@@ -974,17 +1023,34 @@ def end_event():
     return jsonify({"message": "Event ended successfully"}), 200
 
 def remove_participant():
-    event_data = list(events.find())
     data = request.get_json()
     eventID = data["eventID"]
     username = data["username"]
 
-    for event in event_data:
-        if str(eventID) == str(event["_id"]):
-            event["participants"].remove(username)
-            event["currentParticipants"] -= 1
-            events.update_one({"_id": event["_id"]}, {"$set": {"participants": event["participants"], "currentParticipants": event["currentParticipants"]}})
-            return jsonify({'message': 'Deleted User from event'}), 200
+    # Find the event by eventID
+    event = events.find_one({"_id": ObjectId(eventID)})
+
+    if event:
+        # Iterate through participants and find the matching username
+        for participant in event["participants"]:
+            if participant["username"] == username:
+                # Remove the participant from the list
+                event["participants"].remove(participant)
+                # Decrease the currentParticipants count
+                event["currentParticipants"] -= 1
+                # Update the event in the database
+                events.update_one(
+                    {"_id": ObjectId(eventID)},
+                    {
+                        "$set": {
+                            "participants": event["participants"],
+                            "currentParticipants": event["currentParticipants"],
+                        }
+                    },
+                )
+                return jsonify({"message": "Deleted User from event"}), 200
+
+    return jsonify({"message": "Event not found or user not in event"}), 404
 
 def submit_report():
     user = request.get_json()
@@ -1161,6 +1227,7 @@ def create_tournament():
         'matchDuration': data.get('matchDuration', ''),
         'location': data.get('location', ''),
         'skillLevel': data.get('skillLevel', ''),
+        'teamSize': data.get('teamSize', ''),
         'startTime': data.get('startTime', ''),
         
 
@@ -1202,6 +1269,30 @@ def get_tournament_details():
     tournament = tournaments.find_one({'_id': object_id})
     if tournament:
         tournament['_id'] = str(tournament['_id'])
+
+        if 'teams' in tournament:
+            # check if the tournament has a rounds array
+            if 'rounds' not in tournament:
+                if tournament['teamCount'] == '4':
+                    tournament['rounds'] = [[], []]
+                elif tournament['teamCount'] == '8':
+                    tournament['rounds'] = [[], [], []]
+                elif tournament['teamCount'] == '16':
+                    tournament['rounds'] = [[], [], [], []]
+
+            # set round 1 if needed
+            if len(tournament['rounds'][0]) != len(tournament['teams']):
+                tournament['rounds'][0] = tournament['teams']
+
+            # # if the number of teams in round 0 is not equal to teamCount, add bye teams
+            # if len(tournament['rounds'][0]) != int(tournament['teamCount']):
+            #     bye_teams = int(tournament['teamCount']) - len(tournament['rounds'][0])
+            #     for i in range(bye_teams):
+            #         tournament['rounds'][0].append('BYE')
+
+            # update the tournament in the db
+            tournaments.update_one({'_id': object_id}, {'$set': {'rounds': tournament['rounds']}})
+
         return jsonify(json.loads(json.dumps(tournament, default=str)))
     else:
         return jsonify({'message': 'Tournament not found'}), 404
@@ -1260,6 +1351,7 @@ def join_tournament():
         msg = Message('Tournament Update!', recipients=[member])
         msg.html = f'<p>Hello! A team you\'re on just got added to a tournament! Good Luck!</p>'
         mail.send(msg)
+    
     
 
     return jsonify({"message": "Joined the tournament successfully"}), 200
@@ -1462,6 +1554,38 @@ def update_lists():
            events.update_one({"_id": event["_id"]}, {"$set": {"teamBlue": teamBlue, "teamGreen": teamGreen}})
            print("UPDATED")
 
+def tourney_game_winner():
+    data = request.get_json()
+    tournament_id = data.get('tournamentId')
+    winner = data.get('winner')
+    loser = data.get('loser')
+
+    # find the tournament
+    tournament = tournaments.find_one({'_id': ObjectId(tournament_id)})
+
+    # check if the tournament exists
+    if not tournament:
+        return jsonify({'message': 'Tournament not found'}), 404
+
+    num_rounds = len(tournament['rounds'])
+    print(f"num_rounds: {num_rounds}\n")
+
+    # iterate over each round in reverse
+    for i in range(num_rounds - 1, -1, -1):
+        # check if the winner is in the current round
+        if winner in tournament['rounds'][i]:
+            # if this is the last round, the winner is the champion
+            if i == num_rounds - 1:
+                tournament['champion'] = winner
+            # otherwise, add the winner to the next round
+            else:
+                tournament['rounds'][i + 1].append(winner)
+            # break the loop as we've found the winner in the current round
+            break
+
+    # update the tournament in the database
+    tournaments.update_one({'_id': ObjectId(tournament_id)}, {'$set': tournament})
+    return jsonify({'message': 'Tournament updated successfully'}), 200
 
 app = connexion.App(__name__, specification_dir='.')
 CORS(app.app)

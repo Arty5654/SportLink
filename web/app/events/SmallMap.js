@@ -20,7 +20,7 @@ import {
 // HELPERS
 const apiKey = "AIzaSyB3DAFbqW_2DHh4yBuvUeIbk5Xp_bQYnXc";
 const containerStyle = {
-  width: "52vw",
+  width: "38vw",
   height: "50vh",
 };
 const libs = ["places"];
@@ -93,7 +93,7 @@ export default function SmallMap({ center, zoom, address }) {
   };
 
   return (
-    <div className="rounded-xl">
+    <div className="rounded-xl flex justify-center p-5">
       {/* DISPLAY GOOGLE MAP COMPONENT */}
       <GoogleMap
         mapContainerStyle={containerStyle}

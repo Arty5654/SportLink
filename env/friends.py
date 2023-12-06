@@ -64,10 +64,15 @@ def get_my_friends(curr_email):
     curr_friends = []
 
     for relation in friends.find({'user': curr_email, 'status': 'friends'}):
+        # get profile image data
+        user = users.find_one({'email': relation['friend']})
+        imageData = user.get("imageData")
+
         curr_friends.append({
             'user': relation['user'],
             'friend': relation['friend'],
             'status': relation['status'],
+            'imageData': imageData,
         })
 
     return jsonify(curr_friends), 200

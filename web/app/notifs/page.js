@@ -12,11 +12,24 @@ import Link from "next/link";
 import axios from "axios";
 import { UserContext } from "@app/UserContext";
 import User from "@app/User";
+import { useRouter } from "next/navigation";
 
 const NotifsPage = () => {
     const [user, setUser] = useState(new User());
     const [friendRequests, setFriendRequests] = useState([]);
     const [reportNotifications, setReportNotifications] = useState([]);
+    const router = useRouter(); 
+
+    useEffect(() => {
+      const currentUserStr = sessionStorage.getItem("user");
+      if (currentUserStr) {
+        const currentUser = JSON.parse(currentUserStr);
+        setUser(currentUser);
+      } else {
+        // Redirect to the sign-in page
+        router.push("/signin");
+      }
+    }, [router]);
 
     useEffect(() => {
         const user1 = JSON.parse(sessionStorage.getItem("user"));
