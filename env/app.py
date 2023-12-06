@@ -1260,27 +1260,29 @@ def get_tournament_details():
     if tournament:
         tournament['_id'] = str(tournament['_id'])
 
-        # check if the tournament has a rounds array
-        if 'rounds' not in tournament:
-            if tournament['teamCount'] == '4':
-                tournament['rounds'] = [[], []]
-            elif tournament['teamCount'] == '8':
-                tournament['rounds'] = [[], [], []]
-            elif tournament['teamCount'] == '16':
-                tournament['rounds'] = [[], [], [], []]
+        if 'teams' in tournament:
+            # check if the tournament has a rounds array
+            if 'rounds' not in tournament:
+                if tournament['teamCount'] == '4':
+                    tournament['rounds'] = [[], []]
+                elif tournament['teamCount'] == '8':
+                    tournament['rounds'] = [[], [], []]
+                elif tournament['teamCount'] == '16':
+                    tournament['rounds'] = [[], [], [], []]
 
-        # set round 1 if needed
-        if len(tournament['rounds'][0]) == 0:
-            tournament['rounds'][0] = tournament['teams']
-        
-        # if the number of teams in round 0 is not equal to teamCount, add bye teams
-        if len(tournament['rounds'][0]) != int(tournament['teamCount']):
-            bye_teams = int(tournament['teamCount']) - len(tournament['rounds'][0])
-            for i in range(bye_teams):
-                tournament['rounds'][0].append('BYE')
+            # set round 1 if needed
+            if len(tournament['rounds'][0]) != len(tournament['teams']):
+                tournament['rounds'][0] = tournament['teams']
 
-        # update the tournament in the db
-        tournaments.update_one({'_id': object_id}, {'$set': {'rounds': tournament['rounds']}})
+            # # if the number of teams in round 0 is not equal to teamCount, add bye teams
+            # if len(tournament['rounds'][0]) != int(tournament['teamCount']):
+            #     bye_teams = int(tournament['teamCount']) - len(tournament['rounds'][0])
+            #     for i in range(bye_teams):
+            #         tournament['rounds'][0].append('BYE')
+
+            # update the tournament in the db
+            tournaments.update_one({'_id': object_id}, {'$set': {'rounds': tournament['rounds']}})
+
         return jsonify(json.loads(json.dumps(tournament, default=str)))
     else:
         return jsonify({'message': 'Tournament not found'}), 404

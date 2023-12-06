@@ -292,7 +292,7 @@ const TournamentDetails = () => {
           <p className="text-gray-700 font-base border-b border-gray-300 pb-4"></p>
         )}
       </div>
-      {
+      {isTournamentStarted() &&
         tournament.rounds && tournament.rounds.length > 0 && (
           <div className="mt-4">
             {tournament.rounds.map((round, roundIndex) => {
