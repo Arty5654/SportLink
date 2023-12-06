@@ -69,51 +69,38 @@ const FriendsPage = () => {
     setIsAddingFriends(true);
   }
 
-  const sendFriendRequest = () => {
-    // send a friend request, adding a request to the friends collection
+  const sendFriendRequest = async () => {
     if (newFriendName) {
       try {
-        console.log("sending friend request to " + newFriendName + ", using POST");
-        const r = axios.post("http://localhost:5000/send_friend_request", {
-          "email": user.email,
-          "friend_email": newFriendName,
+        // First, check if the user is blocked
+        const blockedResponse = await axios.get(`http://localhost:5000/get_blocked_users?email=${user.email}`);
+        const blockedUsers = blockedResponse.data;
+  
+        if (blockedUsers.includes(newFriendName)) {
+          alert("You cannot add a user you have blocked as a friend.");
+          return;
+        }
+  
+        // Proceed to send friend request if not blocked
+        console.log("Sending friend request to " + newFriendName);
+        const response = await axios.post("http://localhost:5000/send_friend_request", {
+          email: user.email,
+          friend_email: newFriendName,
         });
-
-        r.then((response) => {
-          console.log("request responded");
-
-          if (response.status === 200) {
-            console.log("Friend request sent");
-            alert("Friend request sent!")
-          }
-        }).catch((error) => {
-          //run this code always when status!==200
-          if (error.response) {
-            if (error.response.status === 404) {
-              // friend doesnt exist
-              console.log("This user does not exist!");
-              alert("This user does not exist! Tell them to sign up!");
-            } else if (error.response.status === 409) {
-              // pending request already exists or already friends
-              console.log("There might already be a request between you and this user, or you are already friends!");
-              alert("There might already be a request between you and this user, or you are already friends!\n\nClick the bell icon to see your pending requests, or wait till they accept your request");
-            }
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request);
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-          }
-        });
+  
+        if (response.status === 200) {
+          console.log("Friend request sent");
+          alert("Friend request sent!");
+        }
       } catch (error) {
-        console.log("Error adding friend");
-        console.log(error);
+        console.error("Error sending friend request:", error);
+        // Handle other errors here (e.g., user does not exist, already friends, etc.)
       }
     }
-    setIsAddingFriends(false); // Hide the input box
-    setNewFriendName(""); // Clear the input field
+    setIsAddingFriends(false);
+    setNewFriendName("");
   };
+  
 
   const handleRemoveFriend = (relationship) => {
     try {
