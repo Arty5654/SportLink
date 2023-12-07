@@ -854,6 +854,14 @@ paths:
                     type: string
                   blocked_users:
                     type: array
+                  numTennis:
+                    type: integer
+                  numBasketball:
+                    type: integer
+                  numSoccer:
+                    type: integer
+                  numWeights:
+                    type: integer
         "404":
           description: User not found
 

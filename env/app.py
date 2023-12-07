@@ -840,7 +840,11 @@ def get_user_info():
             "imageData": user.get("imageData"),
             "blocked_users": user.get("blocked_users"),
             "blocker": user.get("blocker"),
-            "blocked": user.get("blocked")
+            "blocked": user.get("blocked"),
+            "numTennis": user.get("numTennis"),
+            "numBasketball": user.get("numBasketball"),
+            "numWeights": user.get("numWeights"),
+            "numSoccer": user.get("numSoccer")
         }
 
         # Add fields conditionally based on privacy settings

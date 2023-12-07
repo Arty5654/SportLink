@@ -7,6 +7,7 @@ import User from "@app/User";
 import ProfileImage from "@public/assets/default-profile.webp";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
+import BadgeDisplay from "../BadgeDisplay";
 
 function UserProfilePage() {
   const [userProfile, setUserProfile] = useState({});
@@ -253,6 +254,15 @@ function UserProfilePage() {
               )}
             </div>
           </div>
+          <div>
+      
+          <BadgeDisplay 
+            numTennis={userProfile.numTennis} 
+            numBasketball={userProfile.numBasketball} 
+            numSoccer={userProfile.numSoccer} 
+            numWeights={userProfile.numWeights} 
+          />
+        </div>
         </div>
       )}
     </div>
