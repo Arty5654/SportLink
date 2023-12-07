@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ProfileImage from "@public/assets/default-profile.webp";
 import "@styles/global.css";
+import def_image from '../../badgeImages/def_image.png';
 
 export default function EditProfile() {
   const [user, setUser] = useState({
@@ -181,7 +182,7 @@ export default function EditProfile() {
               {/* ITEM: Profile Pic */}
               <div className="w-1/5 pr-16">
                 <img
-                  src={user.profileImage || ProfileImage}
+                  src={user.profileImage || def_image.src}
                   alt="Profile Image"
                   style={{ width: "100px", height: "100px" }}
                 />

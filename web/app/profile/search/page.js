@@ -7,6 +7,7 @@ import Image from "next/image";
 import ProfileImage from "@public/assets/default-profile.webp";
 import Link from 'next/link';
 import User from "@app/User";
+import def_image from '../../badgeImages/def_image.png';
 
 function UserLookupPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -84,11 +85,19 @@ function UserLookupPage() {
             searchResults.map((user) => (
               <div key={user.id} className="bg-white shadow rounded-lg p-4">
                 <Link href={`/profile/userProfilePage?email=${user.email}`} onClick={() => saveVisitedProfileToHistory(user)}>
-                  <img
-                    src={`data:image/png;base64,${user.imageData}`}
-                    alt="Profile Image"
-                    style={{ width: "100px", height: "100px" }}
-                    />
+                    {user.imageData === null ? (
+                      <img
+                        src={def_image.src}
+                        alt="Profile Image"
+                        style={{ width: "100px", height: "100px", paddingRight: "10px" }}
+                      />
+                    ) : (
+                      <img
+                      src={`data:image/png;base64,${user.imageData}`}
+                      alt="Profile Image"
+                      style={{ width: "100px", height: "100px", paddingRight: "10px" }}
+                      />
+                    )}
                   <div>
                     <p className="text-gray-600">Name: {`${user.firstName} ${user.lastName}`}</p>
                     <p className="text-gray-600">Username: {user.username}</p>

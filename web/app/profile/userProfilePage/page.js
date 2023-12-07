@@ -8,6 +8,7 @@ import ProfileImage from "@public/assets/default-profile.webp";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import BadgeDisplay from "../BadgeDisplay";
+import def_image from '../../badgeImages/def_image.png';
 
 function UserProfilePage() {
   const [userProfile, setUserProfile] = useState({});
@@ -159,11 +160,19 @@ function UserProfilePage() {
               {userProfile.firstName} {userProfile.lastName}
             </h1>
             <p className="text-gray-500 pb-8 text-1xl">Username: {userProfile.username}</p>
-            <img
-              src={`data:image/png;base64,${userProfile.imageData}`}
-              alt="Profile Image"
-              style={{ width: "100px", height: "100px" }} // Fix is here
-            />
+            {userProfile.imageData === null ? (
+              <img
+                src={def_image.src}
+                alt="Profile Image"
+                style={{ width: "100px", height: "100px", paddingRight: "10px" }}
+              />
+            ) : (
+              <img
+                src={`data:image/png;base64,${userProfile.imageData}`}
+                alt="Profile Image"
+                style={{ width: "100px", height: "100px", paddingRight: "10px" }}
+              />
+            )}
           </div>
           <div className="flex gap-8 pb-8">
             {/* You can add the Friends and Messages links here */}
